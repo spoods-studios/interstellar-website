@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "brain-obligations-surface \"$CLAUDE_PROJECT_DIR\" 2>/dev/null || true",
+            "timeout": 8
+          }
+        ]
+      }
+    ]
+  }
+}
