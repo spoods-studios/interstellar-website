@@ -104,7 +104,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Stack & Scaffolding | 2/2 | Complete   | 2026-07-14 |
+| 1. Stack & Scaffolding | 2/2 | Complete    | 2026-07-14 |
 | 2. Content Rendering & Templating | 0/TBD | Not started | - |
 | 3. RSS, OpenGraph & Discord Distribution | 0/TBD | Not started | - |
 | 4. Analytics, Launch Content & Deploy Hardening | 0/TBD | Not started | - |
