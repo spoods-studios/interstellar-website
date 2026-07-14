@@ -7,7 +7,7 @@ plus research-promoted table stakes. Target: live at engine M1.1 close.
 
 ### Site Platform
 
-- [ ] **SITE-01**: Site builds with Astro and deploys to GitHub Pages via GitHub Actions on every push to main
+- [x] **SITE-01**: Site builds with Astro and deploys to GitHub Pages via GitHub Actions on every push to main
 - [x] **SITE-02**: Site URL/base path is config-driven in one place, so attaching a custom domain later requires no content or template changes
 - [ ] **SITE-03**: Build fails loudly on schema/content errors (no silent skips); a post-deploy smoke check verifies the live site actually updated
 - [ ] **SITE-04**: Baseline polish present: mobile-responsive layout, custom 404 page, favicon, canonical URLs, sitemap.xml
@@ -51,7 +51,7 @@ plus research-promoted table stakes. Target: live at engine M1.1 close.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SITE-01 | Phase 1 | Pending |
+| SITE-01 | Phase 1 | Complete |
 | SITE-02 | Phase 1 | Complete |
 | CONT-01 | Phase 1 | Complete |
 | CONT-02 | Phase 2 | Pending |
