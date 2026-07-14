@@ -1,0 +1,51 @@
+---
+// Throwaway ingestion-proof list (D-07) — replaced wholesale by Phase 2 templating.
+import { getCollection } from 'astro:content';
+
+const FILENAME_RE = /^(\d{4}-\d{2}-\d{2})-(.+)\.md$/;
+const H1_RE = /^#\s+(.+)$/m;
+
+const base = import.meta.env.BASE_URL;
+const canonicalUrl = Astro.site ? new URL(base, Astro.site).toString() : base;
+
+const devlogEntries = await getCollection('devlog');
+
+// Pitfall 2: the glob loader fails silently (empty collection) on a
+// misconfigured `base` path — assert non-empty so D-10 holds for this case too.
+if (devlogEntries.length === 0) {
+  throw new Error(
+    'devlog collection resolved to zero entries — check the glob loader base path in src/content.config.ts'
+  );
+}
+
+const posts = devlogEntries
+  .map((entry) => {
+    const filename = entry.filePath?.split('/').pop() ?? '';
+    const filenameMatch = filename.match(FILENAME_RE);
+    const filenameDate = filenameMatch?.[1];
+
+    // D-01: title falls back to the manifesto's first H1 when frontmatter title is absent.
+    const title = entry.data.title ?? entry.body?.match(H1_RE)?.[1] ?? entry.id;
+    // Date falls back to the filename-derived date when frontmatter date is absent.
+    const date = entry.data.date
+      ? entry.data.date.toISOString().slice(0, 10)
+      : (filenameDate ?? 'unknown-date');
+
+    return { title, date };
+  })
+  .sort((a, b) => b.date.localeCompare(a.date));
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Interstellar Engine — Devblog</title>
+    <link rel="canonical" href={canonicalUrl} />
+  </head>
+  <body>
+    <h1>Devblog</h1>
+    <ul>
+      {posts.map((post) => <li set:html={`${post.title} — ${post.date}`} />)}
+    </ul>
+  </body>
+</html>
