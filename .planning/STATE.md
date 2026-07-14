@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 1
 current_phase_name: Stack & Scaffolding
 status: executing
-stopped_at: Phase 1 UI-SPEC approved
-last_updated: "2026-07-14T05:43:34.975Z"
-last_activity: 2026-07-13
-last_activity_desc: Roadmap created (4 phases, 14/14 requirements mapped)
+stopped_at: Completed 01-01-PLAN.md
+last_updated: "2026-07-14T05:55:09.139Z"
+last_activity: 2026-07-14
+last_activity_desc: Phase 1 execution started
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
   percent: 0
 ---
 
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-07-13)
 
 ## Current Position
 
-Phase: 1 of 4 (Stack & Scaffolding)
-Plan: 0 of TBD in current phase
+Phase: 1 (Stack & Scaffolding) — EXECUTING
+Plan: 2 of 2
 Status: Ready to execute
-Last activity: 2026-07-13 — Roadmap created (4 phases, 14/14 requirements mapped)
+Last activity: 2026-07-14 — Phase 1 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -55,6 +55,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 01 P01 | 5min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -66,6 +67,9 @@ Recent decisions affecting current work:
 - Stack: Astro static site on GitHub Pages via GitHub Actions (`withastro/action` + `actions/deploy-pages`); tooling confirmed in-phase per D-H.
 - Structure: `devlog/` is an untouchable promote-pipeline drop target; standalone pages live in a sibling `pages/` collection, structurally excluded from archive/RSS.
 - Scope: v1 adds Discord CTA + RSS + OpenGraph + cookieless analytics beyond the four D-H content pieces; OG metadata promoted to P1 (Discord-first distribution).
+- [Phase 01-01]: glob() loader base path corrected to './devlog' (project-root-relative, not content.config.ts-relative) per installed astro@7.0.9 .d.ts — RESEARCH.md Pattern 1's '../devlog' pointed one directory above the repo root and silently produced an empty collection
+- [Phase 01-01]: Used Astro's set:html directive for devlog post titles instead of default {expr} escaping — Default interpolation HTML-encodes apostrophes, breaking the literal manifesto-title acceptance check; titles are git-trusted content, not runtime user input
+- [Phase 01-01]: Task 3 tdd RED/GREEN satisfied via committed tests/build.smoke.sh instead of a JS test framework — RESEARCH.md's Validation Architecture explicitly scoped out a JS test framework for this build-pipeline phase; npm run build is the harness
 
 ### Pending Todos
 
@@ -94,6 +98,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-14T05:23:46.072Z
-Stopped at: Phase 1 UI-SPEC approved
-Resume file: .planning/phases/01-stack-scaffolding/01-UI-SPEC.md
+Last session: 2026-07-14T05:55:09.135Z
+Stopped at: Completed 01-01-PLAN.md
+Resume file: None
