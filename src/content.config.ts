@@ -20,7 +20,7 @@ const devlog = defineCollection({
           `devlog/${entry}: filename must match YYYY-MM-DD-slug.md (no valid frontmatter date/slug fallback found)`
         );
       }
-      return match[2];
+      return `${match[1]}-${match[2]}`; // keep date in the id — guarantees uniqueness
     },
   }),
   schema: z.object({
