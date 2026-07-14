@@ -341,7 +341,9 @@ export default defineConfig({
 
 **If this table is empty:** N/A — see rows above.
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+> Resolution note (2026-07-14, plan-checker pass): Question 1's residual risk (Zod schema-violation exit behavior for populated frontmatter) is SITE-03 territory — explicitly Phase 4 scope. Phase 1's D-10 negative test exercises only the custom `generateId` throw path (bad filename), which is independent of Astro's Zod error propagation, so Phase 1's claims are verified without settling this. Question 2 is dormant — `devlog/` has no non-post file to exclude yet; smoke-test the negation pattern when one first appears. Both carried as scope-boundary deferrals, not blockers.
 
 1. **Does `InvalidContentEntryDataError` reliably produce a non-zero exit code in CI (not just a dev-server warning)?**
    - What we know: Astro's error-reference docs describe the error and name the offending collection/file; general WebSearch consensus says schema violations "throw" and block builds.
