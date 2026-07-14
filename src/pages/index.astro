@@ -19,6 +19,9 @@ if (devlogEntries.length === 0) {
 }
 
 const posts = devlogEntries
+  // Missing status defaults to published (e.g. the frontmatter-less manifesto);
+  // only entries explicitly marked draft are excluded from the render.
+  .filter((entry) => entry.data.status !== 'draft')
   .map((entry) => {
     const filename = entry.filePath?.split('/').pop() ?? '';
     const filenameMatch = filename.match(FILENAME_RE);
