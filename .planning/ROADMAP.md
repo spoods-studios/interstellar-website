@@ -38,7 +38,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. A visitor can load the deployed site at its GitHub Pages URL
   3. The site's URL/base path lives in one config location; changing it updates all internal links with no template edits (no hardcoded `github.io` strings)
   4. A `devlog/*.md` file with no frontmatter is ingested with date and slug derived from its `YYYY-MM-DD-slug.md` filename, without failing the build
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 01-01-PLAN.md — Scaffold Astro at repo root + local ingest→build slice (config-driven URL, permissive devlog ingestion, loud-fail on malformed content)
+- [ ] 01-02-PLAN.md — Deploy to GitHub Pages via GitHub Actions on every push to main + live-deploy verification
 
 ### Phase 2: Content Rendering & Templating
 **Goal**: The full devblog archive and both standalone pages render as readable, mobile-friendly pages with baseline polish, VOICE.md prose untouched by the site layer.
@@ -84,7 +86,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Stack & Scaffolding | 0/TBD | Not started | - |
+| 1. Stack & Scaffolding | 0/2 | Not started | - |
 | 2. Content Rendering & Templating | 0/TBD | Not started | - |
 | 3. RSS, OpenGraph & Discord Distribution | 0/TBD | Not started | - |
 | 4. Analytics, Launch Content & Deploy Hardening | 0/TBD | Not started | - |
