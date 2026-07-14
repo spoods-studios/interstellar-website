@@ -49,7 +49,24 @@ plus research-promoted table stakes. Target: live at engine M1.1 close.
 
 ## Traceability
 
-(Filled by roadmap)
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| SITE-01 | Phase 1 | Pending |
+| SITE-02 | Phase 1 | Pending |
+| CONT-01 | Phase 1 | Pending |
+| CONT-02 | Phase 2 | Pending |
+| CONT-03 | Phase 2 | Pending |
+| CONT-04 | Phase 2 | Pending |
+| SITE-04 | Phase 2 | Pending |
+| DIST-01 | Phase 3 | Pending |
+| DIST-02 | Phase 3 | Pending |
+| DIST-03 | Phase 3 | Pending |
+| ANLT-01 | Phase 4 | Pending |
+| CONT-05 | Phase 4 | Pending |
+| CONT-06 | Phase 4 | Pending |
+| SITE-03 | Phase 4 | Pending |
+
+**Coverage:** 14/14 v1 requirements mapped — no orphans, no duplicates.
 
 ---
 *REQ-IDs stable once committed. Scope changes go through PROJECT.md Key Decisions.*
