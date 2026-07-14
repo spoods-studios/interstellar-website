@@ -17,6 +17,7 @@ echo "positive check OK"
 
 echo "== Negative check (D-10): malformed devlog file fails the build loudly =="
 MARKER="zzz-not-a-post.md"
+trap 'rm -f "devlog/$MARKER"' EXIT
 printf 'garbage body no h1\n' > "devlog/$MARKER"
 if npm run build > /tmp/gsd-d10.log 2>&1; then
   rm -f "devlog/$MARKER"
