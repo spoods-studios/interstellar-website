@@ -171,3 +171,7 @@ None - no external service configuration required.
 ---
 *Phase: 01-stack-scaffolding*
 *Completed: 2026-07-14*
+
+## Self-Check: PASSED
+
+All created files verified present on disk (package.json, package-lock.json, astro.config.mjs, tsconfig.json, .gitignore, src/content.config.ts, src/pages/index.astro, tests/build.smoke.sh, this SUMMARY.md). All commit hashes (c7d74c7, a4334d2, 083370c, 5f8e482) verified present in git log.
