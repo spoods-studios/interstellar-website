@@ -18,7 +18,10 @@ M1.1 close.
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Deployed on GitHub Pages (custom domain attachable later without
+      rework) — Validated in Phase 1: Stack & Scaffolding (push-to-main
+      Actions deploy live at spoods-studios.github.io/interstellar-website;
+      URL/base config-driven solely in `astro.config.mjs`)
 
 ### Active
 
@@ -32,7 +35,6 @@ M1.1 close.
 - [ ] Prominent Discord invite CTA (Discord-first audience building, D-F)
 - [ ] RSS feed for the devblog
 - [ ] Privacy-respecting analytics (no cookies — Plausible/GoatCounter class)
-- [ ] Deployed on GitHub Pages (custom domain attachable later without rework)
 
 ### Out of Scope
 
@@ -106,4 +108,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-13 after initialization (bootstrap-repo, org-milestone m1.x)*
+*Last updated: 2026-07-14 after Phase 1 completion (Stack & Scaffolding — Astro + Pages deploy pipeline live)*
