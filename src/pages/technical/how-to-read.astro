@@ -3,11 +3,16 @@
 // so it does not fit the dynamic [milestone]/[slug] route -- a dedicated
 // static route reads more clearly than special-casing that route for one
 // entry. Renders through the same PostLayout, one page.
-import { getEntry, render } from 'astro:content';
+import { getCollection, render } from 'astro:content';
+import { assertNonEmpty, isVisible } from '../../lib/content-guards';
 import { titleFromH1 } from '../../lib/title-from-h1';
 import PostLayout from '../../layouts/PostLayout.astro';
 
-const entry = await getEntry('technical', 'how-to-read');
+const technicalEntries = assertNonEmpty(await getCollection('technical'), 'technical').filter(isVisible);
+const entry = technicalEntries.find((e) => e.id === 'how-to-read');
+if (!entry) {
+  throw new Error("technical collection has no visible 'how-to-read' entry");
+}
 const { Content, headings } = await render(entry);
 const title = titleFromH1(entry.body, entry.id);
 
