@@ -948,9 +948,18 @@ D-56 writes to state outside this repo:*
 | A5 | `og:title` ~256 char / `og:description` ~350 char Discord truncation limits | Pattern 3 | Cosmetic only; D-52's ~160 chars is far inside any plausible limit |
 | A6 | The Container API remains stable across Astro 7 patch releases despite the `experimental_` prefix | Pattern 1 | A future `astro` upgrade could rename the export. The name is `experimental_AstroContainer` — pin the astro version and let a rename fail loudly at build. |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+> **All three resolved during discuss and planning, 2026-07-22.** Each item's resolution is
+> annotated inline below. Nothing here is still open; no downstream agent needs to re-litigate one.
 
 1. **What does "the RSS feed validates clean" concretely mean (success criterion 4)?**
+   - ✅ **RESOLVED by D-57** (developer-confirmed 2026-07-22): a split criterion. The automated leg
+     is `xmllint --noout dist/rss.xml` plus the structural greps, owned by Plan 03-05 Task 2; the
+     human leg is one W3C Feed Validation Service run against the deployed feed, owned by Plan 03-06
+     Task 3 check 5 and recorded as a backstop truth, never a build step. `<atom:link rel="self">`
+     is emitted from the start (Plan 03-02 Task 1) to pre-empt the one predictable recommendation.
+     The recommendation below was adopted verbatim.
    - **What we know:** `xmllint --noout` on the generated feed passes (verified this session).
      The feed is structurally RSS 2.0 with a `content` module namespace. The
      W3C Feed Validation Service (`validator.w3.org/feed`) is a **network** service and takes
@@ -978,7 +987,12 @@ D-56 writes to state outside this repo:*
        verified to serialize correctly this session).
 
 2. **Should the deep-dive `og:description` strip the boilerplate blockquote, or is skipping it enough?**
-   - **What we know:** all 55 deep-dives open with an identical `> Retroactive technical
+   - ✅ **RESOLVED at planning:** skipping is enough. The `^>` skip rule ships in
+     `src/lib/describe-entry.ts` (Plan 03-01 Task 4, with a dedicated unit assertion for the
+     blockquote case), and the recommended distinctness assertion is implemented as
+     `distinct og:description values > 60` in Plan 03-04 Task 1 and again as a permanent gate in
+     Plan 03-05 Task 1. If the skip rule ever stops working, all 55 deep-dives collapse onto one
+     sentence and that assertion fails — which is exactly the residual risk this question raised.
      devlog…` blockquote. The prototype's `^>` skip rule handles it and produces good
      descriptions (verified on 3 sampled files).
    - **What's unclear:** whether any deep-dive's *first non-blockquote* paragraph is also
@@ -988,8 +1002,17 @@ D-56 writes to state outside this repo:*
      all collapse to one boilerplate sentence).
 
 3. **Does `og:image` need to be the PNG or the WebP for the two hero posts?**
-   - Both are emitted. Recommendation is PNG (A2). If the planner wants certainty, this is a
-     one-paste human check during verification rather than more research.
+   - ✅ **RESOLVED by D-59:** the PNG. Plan 03-03 globs `assets/*.png` only and asserts neither hero
+     page's `og:image` value ends in `.webp`. The certainty check the recommendation asked for is
+     covered by Plan 03-06 Task 3 check 1, which pastes a hero post and confirms a large image
+     renders.
+
+4. **Is the exported default card typographically faithful to the live site?** *(implicit in the
+   `rsvg-convert` font-fallback finding, § Code Example 3)*
+   - ✅ **RESOLVED as an owned verification, not a research gap:** the executor inspects the exported
+     PNG before committing it (Plan 03-01 Task 2, with `identify` asserting 1200x630 / no alpha /
+     under 200 KB), and the human compares it against the live header in Plan 03-06 Task 3 check 6.
+     Two documented rasterizer fallbacks exist if the font resolves wrongly.
 
 ## Environment Availability
 
