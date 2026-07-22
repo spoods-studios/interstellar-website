@@ -195,3 +195,12 @@ Performed by the developer 2026-07-22:
 ---
 *Phase: 02-content-rendering-templating*
 *Completed: 2026-07-22*
+
+## Self-Check: PASSED
+
+- FOUND: `.planning/phases/02-content-rendering-templating/02-08-SUMMARY.md`
+- FOUND commit: `85802b6` (orchestrator-note diagnostic-route removal)
+- FOUND commit: `827526f` (Task 1)
+- FOUND commit: `2743e1b` (Task 2)
+- FOUND commit: `dc85e7a` (Task 3)
+- FOUND commit: `fe6a041` (Task 4 / plan close-out)

@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 2
 current_phase_name: Content Rendering & Templating
 status: verifying
-stopped_at: Completed 02-07-PLAN.md
-last_updated: "2026-07-22T18:00:52.317Z"
+stopped_at: Completed 02-08-PLAN.md -- Phase 2 complete
+last_updated: "2026-07-22T18:28:44.834Z"
 last_activity: 2026-07-22
 last_activity_desc: Phase 2 execution started
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 10
-  completed_plans: 9
-  percent: 25
+  completed_plans: 10
+  percent: 50
 ---
 
 # Project State
@@ -64,6 +64,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02 P05 | 15min | 2 tasks | 2 files |
 | Phase 02 P06 | 35min | 2 tasks | 6 files |
 | Phase 02 P07 | 45min | 2 tasks | 6 files |
+| Phase 02 P08 | 25min | 4 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,8 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 02-07]: Extended the placeholder marker regex to cover a plain unbolded 'Deep dive: [Phase N ]post(ed) in #technical-devlog[.]' wording variant scattered across M0.5-M0.8, not shown in the plan's sampled M0.3 file
 - [Phase ?]: [Phase 02-07]: M0.5-M0.8's generic intro-blockquote mention of #technical-devlog (not tied to any phase) is stripped rather than linked, since there's no single phase to point it at
 - [Phase ?]: [Phase 02-07]: resolvePhase's phase-to-id map lives directly in astro.config.mjs (cached per milestone), not a new src/lib file, mirroring the existing wikilink-resolver's shape
+- [Phase ?]: Live 404 under GitHub Pages base path recorded as PENDING (deploy-dependent), not PASS -- Phase 4 owns the follow-up check
+- [Phase ?]: Developer's post-build 'looks bare' observation captured as a deferred-items entry in 02-CONTEXT.md, not a defect -- D-21/D-22/D-23 working as designed, explicitly scoped out of this phase
 
 ### Pending Todos
 
@@ -125,6 +128,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-22T18:00:49.070Z
-Stopped at: Completed 02-07-PLAN.md
+Last session: 2026-07-22T18:28:44.829Z
+Stopped at: Completed 02-08-PLAN.md -- Phase 2 complete
 Resume file: None
