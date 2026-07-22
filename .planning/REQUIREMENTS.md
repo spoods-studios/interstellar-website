@@ -10,14 +10,14 @@ plus research-promoted table stakes. Target: live at engine M1.1 close.
 - [x] **SITE-01**: Site builds with Astro and deploys to GitHub Pages via GitHub Actions on every push to main
 - [x] **SITE-02**: Site URL/base path is config-driven in one place, so attaching a custom domain later requires no content or template changes
 - [ ] **SITE-03**: Build fails loudly on schema/content errors (no silent skips); a post-deploy smoke check verifies the live site actually updated
-- [x] **SITE-04**: Baseline polish present: mobile-responsive layout, custom 404 page, favicon, canonical URLs, sitemap.xml
+- [ ] **SITE-04**: Baseline polish present: mobile-responsive layout, custom 404 page, favicon, canonical URLs, sitemap.xml
 
 ### Content
 
 - [x] **CONT-01**: Devblog posts in `devlog/` render from Markdown via a permissive content schema — full frontmatter honored, missing frontmatter tolerated with date/slug derived from `YYYY-MM-DD-slug.md` filenames (manifesto has no frontmatter)
-- [x] **CONT-02**: Full archive live at launch: manifesto + M0.1–M0.8 posts (promoted from studio `vault/devlog/drafts/`), VOICE.md content untouched by the site layer
-- [x] **CONT-03**: "How It's Made" AI-transparency standalone page renders from `pages/` (structurally separate collection — never appears in archive/RSS), content per D-G honesty constraints
-- [x] **CONT-04**: Roadmap standalone page mirroring the Discord #roadmap pinned overview
+- [ ] **CONT-02**: Full archive live at launch: manifesto + M0.1–M0.8 posts (promoted from studio `vault/devlog/drafts/`), VOICE.md content untouched by the site layer
+- [ ] **CONT-03**: "How It's Made" AI-transparency standalone page renders from `pages/` (structurally separate collection — never appears in archive/RSS), content per D-G honesty constraints
+- [ ] **CONT-04**: Roadmap standalone page mirroring the Discord #roadmap pinned overview
 - [ ] **CONT-05**: M1.1 devblog post published as the launch post
 - [ ] **CONT-06**: Slug-immutability norm documented; redirect-stub mechanism exists for any future slug change (Discord links must not 404)
 
@@ -54,10 +54,10 @@ plus research-promoted table stakes. Target: live at engine M1.1 close.
 | SITE-01 | Phase 1 | Complete |
 | SITE-02 | Phase 1 | Complete |
 | CONT-01 | Phase 1 | Complete |
-| CONT-02 | Phase 2 | Complete |
-| CONT-03 | Phase 2 | Complete |
-| CONT-04 | Phase 2 | Complete |
-| SITE-04 | Phase 2 | Complete |
+| CONT-02 | Phase 2 | In Progress |
+| CONT-03 | Phase 2 | In Progress |
+| CONT-04 | Phase 2 | In Progress |
+| SITE-04 | Phase 2 | In Progress |
 | DIST-01 | Phase 3 | Pending |
 | DIST-02 | Phase 3 | Pending |
 | DIST-03 | Phase 3 | Pending |
