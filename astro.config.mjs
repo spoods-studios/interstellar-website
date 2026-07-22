@@ -47,10 +47,40 @@ function resolvePhase(milestone, phaseNumber) {
 }
 
 const ROADMAP_ROOT = fileURLToPath(new URL('./roadmap', import.meta.url));
+const DEVLOG_ROOT = fileURLToPath(new URL('./devlog', import.meta.url));
+const PAGES_ROOT = fileURLToPath(new URL('./pages', import.meta.url));
 const mdastPlugins = [
   createWikilinkPlugin({ resolve: wikilinkResolver.resolve }),
   createDeepDiveLinkPlugin({ resolvePhase }),
 ];
+
+// CR-01 fix (02-REVIEW.md): mdastPlugins above runs on all four content
+// trees (see content.config.ts's `collections` export), so the preflight
+// below must walk all four too -- this list is the single place that
+// determines preflight coverage. A fifth tree can only escape validation by
+// someone forgetting to add a line here, not by the preflight silently
+// scoping itself to whichever trees happened to exist when it was written
+// (which is exactly how devlog/ and pages/ were missed originally).
+const CONTENT_TREES = [
+  { root: TECHNICAL_ROOT, recursive: true }, // technical/<milestone>/phase-*.md
+  { root: ROADMAP_ROOT },
+  { root: DEVLOG_ROOT, exclude: ['_TEMPLATE.md'] },
+  { root: PAGES_ROOT },
+];
+
+function collectMarkdownFiles(root, { recursive = false, exclude = [] } = {}) {
+  const files = [];
+  for (const dirent of fs.readdirSync(root, { withFileTypes: true })) {
+    if (dirent.isFile() && dirent.name.endsWith('.md') && !exclude.includes(dirent.name)) {
+      files.push(nodePath.join(root, dirent.name));
+    } else if (recursive && dirent.isDirectory()) {
+      for (const file of fs.readdirSync(nodePath.join(root, dirent.name))) {
+        if (file.endsWith('.md')) files.push(nodePath.join(root, dirent.name, file));
+      }
+    }
+  }
+  return files;
+}
 
 // 02-08 Task 2 finding: Astro's own glob loader (astro@7.0.9's
 // content/loaders/glob.js) catches every render() error per-entry, logs it as
@@ -61,32 +91,19 @@ const mdastPlugins = [
 // passthrough" guarantee at the one layer (the real build) that actually
 // matters -- tests/lib.smoke.mjs's direct markdownToHtml() calls only prove
 // the plugins throw in isolation, not that the throw survives the real
-// pipeline. Fail loud and early instead: re-run every technical/ and
-// roadmap/ file through the exact same mdastPlugins pipeline at config-load
-// time, before Astro's own build/dev server starts, letting a thrown error
-// crash the process with a non-zero exit code the way a config-load failure
-// always does.
+// pipeline. Fail loud and early instead: re-run every file in every
+// CONTENT_TREES root through the exact same mdastPlugins pipeline at
+// config-load time, before Astro's own build/dev server starts, letting a
+// thrown error crash the process with a non-zero exit code the way a
+// config-load failure always does.
 function validateContentLoudFail() {
-  const technicalFiles = [];
-  for (const dirent of fs.readdirSync(TECHNICAL_ROOT, { withFileTypes: true })) {
-    if (dirent.isFile() && dirent.name.endsWith('.md')) {
-      technicalFiles.push(nodePath.join(TECHNICAL_ROOT, dirent.name));
-    } else if (dirent.isDirectory()) {
-      for (const file of fs.readdirSync(nodePath.join(TECHNICAL_ROOT, dirent.name))) {
-        if (file.endsWith('.md')) technicalFiles.push(nodePath.join(TECHNICAL_ROOT, dirent.name, file));
-      }
+  for (const { root, recursive, exclude } of CONTENT_TREES) {
+    for (const filePath of collectMarkdownFiles(root, { recursive, exclude })) {
+      const source = fs.readFileSync(filePath, 'utf8');
+      // Errors here propagate straight out of config evaluation -- unlike the
+      // glob loader's own try/catch, nothing downstream swallows this one.
+      markdownToHtml(source, { mdastPlugins, fileURL: pathToFileURL(filePath) });
     }
-  }
-  const roadmapFiles = fs
-    .readdirSync(ROADMAP_ROOT)
-    .filter((file) => file.endsWith('.md'))
-    .map((file) => nodePath.join(ROADMAP_ROOT, file));
-
-  for (const filePath of [...technicalFiles, ...roadmapFiles]) {
-    const source = fs.readFileSync(filePath, 'utf8');
-    // Errors here propagate straight out of config evaluation -- unlike the
-    // glob loader's own try/catch, nothing downstream swallows this one.
-    markdownToHtml(source, { mdastPlugins, fileURL: pathToFileURL(filePath) });
   }
 }
 
