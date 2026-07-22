@@ -6,6 +6,7 @@
 // implementation for both getStaticPaths' sort and the rendered page.
 import type { CollectionEntry } from 'astro:content';
 import { titleFromH1 } from './title-from-h1';
+import { compareNewestFirst } from './entry-order';
 
 const FILENAME_DATE_RE = /^(\d{4}-\d{2}-\d{2})/;
 
@@ -17,6 +18,20 @@ export function entryDate(entry: CollectionEntry<'devlog'>): Date {
 
 export function entryTitle(entry: CollectionEntry<'devlog'>): string {
   return entry.data.title ?? titleFromH1(entry.body, entry.id);
+}
+
+// The archive, the announcement route's prev/next chain and the feed must all
+// consume one ordering expression, so two entries sharing a date can never
+// order differently between them. Returns a new array; never mutates the input.
+export function sortEntriesNewestFirst(
+  entries: CollectionEntry<'devlog'>[]
+): CollectionEntry<'devlog'>[] {
+  return [...entries].sort((a, b) =>
+    compareNewestFirst(
+      { id: a.id, date: entryDate(a) },
+      { id: b.id, date: entryDate(b) }
+    )
+  );
 }
 
 export function formatDate(date: Date): string {

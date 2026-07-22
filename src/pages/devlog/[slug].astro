@@ -5,7 +5,8 @@
 // index (Plan 05) so prev/next and the homepage list can never disagree.
 import { getCollection, render } from 'astro:content';
 import { assertNonEmpty, isVisible } from '../../lib/content-guards';
-import { entryDate, entryTitle, formatDate } from '../../lib/devlog-meta';
+import { entryDate, entryTitle, formatDate, sortEntriesNewestFirst } from '../../lib/devlog-meta';
+import { describeBody } from '../../lib/describe-entry';
 import { titleFromH1 } from '../../lib/title-from-h1';
 import { sortByPhaseNumber } from '../../lib/phase-sort';
 import { normalizeMilestone } from '../../lib/milestone-key';
@@ -19,10 +20,9 @@ export async function getStaticPaths() {
   // T-02-03, a drafted deep-dive must not leak into this chrome list).
   const technicalEntries = assertNonEmpty(await getCollection('technical'), 'technical').filter(isVisible);
 
-  // Newest first -- same ordering the homepage archive (Plan 05) uses.
-  const sorted = [...visible].sort(
-    (a, b) => entryDate(b).getTime() - entryDate(a).getTime()
-  );
+  // Newest first -- the one shared ordering expression the archive, this
+  // route's prev/next chain and the feed all consume.
+  const sorted = sortEntriesNewestFirst(visible);
 
   return sorted.map((entry, index) => {
     const deepDives = entry.data.milestone
@@ -70,9 +70,23 @@ const prevNext = {
 };
 
 const backLink = { href: base, label: 'Back to devblog' };
+
+// D-51: the description comes from the entry's own body. Announcements carry
+// real dates, so article:published_time is legitimate here (deep-dives, which
+// have no date per D-33, must not get a fabricated one).
+const description = describeBody(entry.body, entry.id);
 ---
 
-<PostLayout title={title} meta={meta} headings={headings} prevNext={prevNext} backLink={backLink}>
+<PostLayout
+  title={title}
+  meta={meta}
+  headings={headings}
+  prevNext={prevNext}
+  backLink={backLink}
+  description={description}
+  ogType="article"
+  publishedTime={date.toISOString()}
+>
   <Content />
   {deepDives.length > 0 && (
     <>

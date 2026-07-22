@@ -19,12 +19,35 @@ export interface Props {
   breadcrumbs?: LinkRef[];
   prevNext?: { prev?: LinkRef; next?: LinkRef };
   backLink?: LinkRef;
+  description?: string;
+  ogType?: 'article' | 'website';
+  ogImage?: { src: string; width: number; height: number; alt: string };
+  publishedTime?: string;
 }
 
-const { title, meta, headings, breadcrumbs, prevNext, backLink } = Astro.props;
+// The four metadata props are a pure pass-through -- PostLayout adds no logic
+// of its own, it just lets every route rendering through it supply metadata.
+const {
+  title,
+  meta,
+  headings,
+  breadcrumbs,
+  prevNext,
+  backLink,
+  description,
+  ogType,
+  ogImage,
+  publishedTime,
+} = Astro.props;
 ---
 
-<BaseLayout title={title}>
+<BaseLayout
+  title={title}
+  description={description}
+  ogType={ogType}
+  ogImage={ogImage}
+  publishedTime={publishedTime}
+>
   {breadcrumbs && breadcrumbs.length > 0 && (
     <nav class="breadcrumbs">
       {breadcrumbs.map((b) => <a href={b.href}>{b.label}</a>)}
