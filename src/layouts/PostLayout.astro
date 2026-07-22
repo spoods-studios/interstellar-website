@@ -29,7 +29,7 @@ const { title, meta, headings, breadcrumbs, prevNext, backLink } = Astro.props;
       {breadcrumbs.map((b) => <a href={b.href}>{b.label}</a>)}
     </nav>
   )}
-  {meta && <p class="meta" set:html={meta} />}
+  {meta && <p class="meta">{meta}</p>}
   {headings && <TableOfContents headings={headings} />}
   <slot />
   {(prevNext?.prev || prevNext?.next || backLink) && (

@@ -1,0 +1,58 @@
+---
+// D-13's URL shape: one static page per visible devlog entry at
+// /devlog/<entry id>/ (the id already carries the date, from
+// content.config.ts's generateId). Sorted the same way as the archive
+// index (Plan 05) so prev/next and the homepage list can never disagree.
+import { getCollection, render } from 'astro:content';
+import { assertNonEmpty, isVisible } from '../../lib/content-guards';
+import { entryDate, entryTitle, formatDate } from '../../lib/devlog-meta';
+import PostLayout from '../../layouts/PostLayout.astro';
+
+export async function getStaticPaths() {
+  const allEntries = assertNonEmpty(await getCollection('devlog'), 'devlog');
+  const visible = allEntries.filter(isVisible);
+
+  // Newest first -- same ordering the homepage archive (Plan 05) uses.
+  const sorted = [...visible].sort(
+    (a, b) => entryDate(b).getTime() - entryDate(a).getTime()
+  );
+
+  return sorted.map((entry, index) => ({
+    params: { slug: entry.id },
+    props: {
+      entry,
+      olderEntry: sorted[index + 1],
+      newerEntry: sorted[index - 1],
+    },
+  }));
+}
+
+const { entry, olderEntry, newerEntry } = Astro.props;
+const { Content, headings } = await render(entry);
+
+const title = entryTitle(entry);
+const date = entryDate(entry);
+// D-11: milestone tag + date, middot-separated; the manifesto has no
+// milestone and renders the date alone -- never fabricate one.
+const meta = entry.data.milestone
+  ? `${entry.data.milestone} · ${formatDate(date)}`
+  : formatDate(date);
+
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+
+const prevNext = {
+  prev: olderEntry
+    ? { href: `${base}devlog/${olderEntry.id}/`, label: entryTitle(olderEntry) }
+    : undefined,
+  next: newerEntry
+    ? { href: `${base}devlog/${newerEntry.id}/`, label: entryTitle(newerEntry) }
+    : undefined,
+};
+
+const backLink = { href: base, label: 'Back to devblog' };
+---
+
+<PostLayout title={title} meta={meta} headings={headings} prevNext={prevNext} backLink={backLink}>
+  <Content />
+</PostLayout>
