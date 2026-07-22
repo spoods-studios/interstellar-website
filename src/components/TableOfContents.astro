@@ -1,0 +1,26 @@
+---
+// D-42, UI-SPEC "TOC placement and depth": one markup tree, presentation
+// switched by global.css's existing .toc rules -- sticky sidebar >=640px,
+// native <details>/<summary> disclosure below it. Zero client JS either way.
+import { buildToc, type MarkdownHeading } from '../lib/toc';
+
+export interface Props {
+  headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+const toc = buildToc(headings);
+---
+
+{toc && (
+  <details class="toc" open>
+    <summary>Contents</summary>
+    <ul>
+      {toc.map((h) => (
+        <li>
+          <a href={`#${h.slug}`} data-depth={h.depth}>{h.text}</a>
+        </li>
+      ))}
+    </ul>
+  </details>
+)}

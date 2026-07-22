@@ -1,0 +1,42 @@
+---
+// Shared reading layout for all four content trees (UI-SPEC "Layout
+// factoring") -- Plans 05-07 pass their own meta/breadcrumbs/TOC/prevNext
+// props to this same layout rather than re-deriving the shell.
+import BaseLayout from './BaseLayout.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+import type { MarkdownHeading } from '../lib/toc';
+
+export interface LinkRef {
+  href: string;
+  label: string;
+}
+
+export interface Props {
+  title: string;
+  meta?: string;
+  headings?: MarkdownHeading[];
+  breadcrumbs?: LinkRef[];
+  prevNext?: { prev?: LinkRef; next?: LinkRef };
+  backLink?: LinkRef;
+}
+
+const { title, meta, headings, breadcrumbs, prevNext, backLink } = Astro.props;
+---
+
+<BaseLayout title={title}>
+  {breadcrumbs && breadcrumbs.length > 0 && (
+    <nav class="breadcrumbs">
+      {breadcrumbs.map((b) => <a href={b.href}>{b.label}</a>)}
+    </nav>
+  )}
+  {meta && <p class="meta" set:html={meta} />}
+  {headings && <TableOfContents headings={headings} />}
+  <slot />
+  {(prevNext?.prev || prevNext?.next || backLink) && (
+    <nav class="post-nav">
+      {prevNext?.prev && <a href={prevNext.prev.href} set:html={`&larr; ${prevNext.prev.label}`} />}
+      {prevNext?.next && <a href={prevNext.next.href} set:html={`${prevNext.next.label} &rarr;`} />}
+      {backLink && <a href={backLink.href}>{backLink.label}</a>}
+    </nav>
+  )}
+</BaseLayout>
