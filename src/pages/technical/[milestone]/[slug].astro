@@ -1,0 +1,95 @@
+---
+// D-32: URL mirrors the vault path directly -- entry.id splits on its one
+// slash into milestone/slug route params, no mapping table. D-35 breadcrumbs
+// resolve both directions (announcement + roadmap) via normalizeMilestone,
+// isVisible-filtered per T-02-03 (a drafted target must not be linked).
+import { getCollection, render } from 'astro:content';
+import { assertNonEmpty, isVisible } from '../../../lib/content-guards';
+import { titleFromH1 } from '../../../lib/title-from-h1';
+import { sortByPhaseNumber, parsePhaseNumber } from '../../../lib/phase-sort';
+import { normalizeMilestone } from '../../../lib/milestone-key';
+import PostLayout from '../../../layouts/PostLayout.astro';
+
+export async function getStaticPaths() {
+  const allEntries = assertNonEmpty(await getCollection('technical'), 'technical');
+  // how-to-read's id has no slash -- it gets its own static route (Task 1).
+  const visible = allEntries.filter(isVisible).filter((e) => e.id.includes('/'));
+
+  const devlogEntries = assertNonEmpty(await getCollection('devlog'), 'devlog').filter(isVisible);
+  const roadmapEntries = assertNonEmpty(await getCollection('roadmap'), 'roadmap').filter(isVisible);
+
+  return visible.map((entry) => {
+    const [milestone] = entry.id.split('/');
+    const milestoneEntries = sortByPhaseNumber(
+      visible.filter((e) => e.id.startsWith(`${milestone}/`))
+    );
+    const index = milestoneEntries.findIndex((e) => e.id === entry.id);
+
+    return {
+      params: { milestone, slug: entry.id.slice(milestone.length + 1) },
+      props: {
+        entry,
+        milestone,
+        prevEntry: milestoneEntries[index - 1],
+        nextEntry: milestoneEntries[index + 1],
+        devlogEntries,
+        roadmapEntries,
+      },
+    };
+  });
+}
+
+const { entry, milestone, prevEntry, nextEntry, devlogEntries, roadmapEntries } = Astro.props;
+const { Content, headings } = await render(entry);
+
+const title = titleFromH1(entry.body, entry.id);
+const milestoneKey = normalizeMilestone(milestone);
+const milestoneDisplay = milestoneKey.toUpperCase();
+const phaseNumber = parsePhaseNumber(entry.id);
+// D-33: no date exists in this tree -- do not fabricate one.
+const meta = `${milestoneDisplay} · Phase ${phaseNumber}`;
+
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+
+// D-35, both directions: link to the milestone's announcement and its
+// roadmap detail page. Omit either breadcrumb (rather than a dead link) if
+// the milestone has no visible counterpart in that collection.
+const announcementEntry = devlogEntries.find(
+  (e) => e.data.milestone && normalizeMilestone(e.data.milestone) === milestoneKey
+);
+const roadmapEntry = roadmapEntries.find((e) => e.id === milestoneKey);
+
+const breadcrumbs = [
+  announcementEntry && {
+    href: `${base}devlog/${announcementEntry.id}/`,
+    label: `↑ ${milestoneDisplay} announcement`,
+  },
+  roadmapEntry && {
+    href: `${base}roadmap/${roadmapEntry.id}/`,
+    label: `↑ ${milestoneDisplay} roadmap`,
+  },
+].filter((b) => b !== undefined && b !== null && b !== false);
+
+const prevNext = {
+  prev: prevEntry
+    ? { href: `${base}technical/${prevEntry.id}/`, label: titleFromH1(prevEntry.body, prevEntry.id) }
+    : undefined,
+  next: nextEntry
+    ? { href: `${base}technical/${nextEntry.id}/`, label: titleFromH1(nextEntry.body, nextEntry.id) }
+    : undefined,
+};
+
+const backLink = { href: `${base}technical/${milestone}/`, label: `Back to ${milestoneDisplay} index` };
+---
+
+<PostLayout
+  title={title}
+  meta={meta}
+  headings={headings}
+  breadcrumbs={breadcrumbs}
+  prevNext={prevNext}
+  backLink={backLink}
+>
+  <Content />
+</PostLayout>

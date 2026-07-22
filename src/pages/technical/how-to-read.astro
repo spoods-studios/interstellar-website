@@ -1,0 +1,21 @@
+---
+// D-32: the legend's collection id ("how-to-read") has no milestone segment,
+// so it does not fit the dynamic [milestone]/[slug] route -- a dedicated
+// static route reads more clearly than special-casing that route for one
+// entry. Renders through the same PostLayout, one page.
+import { getEntry, render } from 'astro:content';
+import { titleFromH1 } from '../../lib/title-from-h1';
+import PostLayout from '../../layouts/PostLayout.astro';
+
+const entry = await getEntry('technical', 'how-to-read');
+const { Content, headings } = await render(entry);
+const title = titleFromH1(entry.body, entry.id);
+
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+const backLink = { href: `${base}technical/`, label: 'Back to the technical index' };
+---
+
+<PostLayout title={title} headings={headings} backLink={backLink}>
+  <Content />
+</PostLayout>
