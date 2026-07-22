@@ -103,7 +103,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Every page displays a prominent Discord invite CTA
   4. The RSS feed validates clean against a standard feed validator
 
-**Plans**: 1/6 plans executed
+**Plans**: 4/6 plans executed
 **UI hint**: yes
 
 **Wave 1**
@@ -112,9 +112,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 2** *(blocked on Wave 1)*
 
-- [ ] 03-02-PLAN.md — RSS feed endpoint via the Container API + feed discovery in head and footer
-- [ ] 03-03-PLAN.md — Per-post hero images: pure lookup with the D-48 loud-fail plus its Vite glob supplier
-- [ ] 03-04-PLAN.md — OpenGraph coverage across the remaining nine routes (55 deep-dives, roadmap tree, standalone pages, homepage, 404)
+- [x] 03-02-PLAN.md — RSS feed endpoint via the Container API + feed discovery in head and footer
+- [x] 03-03-PLAN.md — Per-post hero images: pure lookup with the D-48 loud-fail plus its Vite glob supplier
+- [x] 03-04-PLAN.md — OpenGraph coverage across the remaining nine routes (55 deep-dives, roadmap tree, standalone pages, homepage, 404)
 
 **Wave 3** *(blocked on Wave 2)*
 
@@ -148,5 +148,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Stack & Scaffolding | 2/2 | Complete    | 2026-07-14 |
 | 2. Content Rendering & Templating | 8/8 | Complete   | 2026-07-22 |
-| 3. RSS, OpenGraph & Discord Distribution | 1/6 | In Progress|  |
+| 3. RSS, OpenGraph & Discord Distribution | 4/6 | In Progress|  |
 | 4. Analytics, Launch Content & Deploy Hardening | 0/TBD | Not started | - |
