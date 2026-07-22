@@ -15,9 +15,9 @@ plus research-promoted table stakes. Target: live at engine M1.1 close.
 ### Content
 
 - [x] **CONT-01**: Devblog posts in `devlog/` render from Markdown via a permissive content schema — full frontmatter honored, missing frontmatter tolerated with date/slug derived from `YYYY-MM-DD-slug.md` filenames (manifesto has no frontmatter)
-- [ ] **CONT-02**: Full archive live at launch: manifesto + M0.1–M0.8 posts (promoted from studio `vault/devlog/drafts/`), VOICE.md content untouched by the site layer
-- [ ] **CONT-03**: "How It's Made" AI-transparency standalone page renders from `pages/` (structurally separate collection — never appears in archive/RSS), content per D-G honesty constraints
-- [ ] **CONT-04**: Roadmap standalone page mirroring the Discord #roadmap pinned overview
+- [x] **CONT-02**: Full archive live at launch: manifesto + M0.1–M0.8 posts (promoted from studio `vault/devlog/drafts/`), VOICE.md content untouched by the site layer
+- [x] **CONT-03**: "How It's Made" AI-transparency standalone page renders from `pages/` (structurally separate collection — never appears in archive/RSS), content per D-G honesty constraints
+- [x] **CONT-04**: Roadmap standalone page mirroring the Discord #roadmap pinned overview
 - [ ] **CONT-05**: M1.1 devblog post published as the launch post
 - [ ] **CONT-06**: Slug-immutability norm documented; redirect-stub mechanism exists for any future slug change (Discord links must not 404)
 
@@ -54,9 +54,9 @@ plus research-promoted table stakes. Target: live at engine M1.1 close.
 | SITE-01 | Phase 1 | Complete |
 | SITE-02 | Phase 1 | Complete |
 | CONT-01 | Phase 1 | Complete |
-| CONT-02 | Phase 2 | Pending |
-| CONT-03 | Phase 2 | Pending |
-| CONT-04 | Phase 2 | Pending |
+| CONT-02 | Phase 2 | Complete |
+| CONT-03 | Phase 2 | Complete |
+| CONT-04 | Phase 2 | Complete |
 | SITE-04 | Phase 2 | Pending |
 | DIST-01 | Phase 3 | Pending |
 | DIST-02 | Phase 3 | Pending |

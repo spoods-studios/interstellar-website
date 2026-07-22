@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 2
 current_phase_name: Content Rendering & Templating
 status: executing
-stopped_at: Phase 2 UI-SPEC approved
-last_updated: "2026-07-22T16:38:20.293Z"
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-07-22T16:46:11.287Z"
 last_activity: 2026-07-22
 last_activity_desc: Phase 2 execution started
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 10
-  completed_plans: 2
-  percent: 20
+  completed_plans: 3
+  percent: 25
 ---
 
 # Project State
@@ -29,8 +29,8 @@ See: .planning/PROJECT.md (updated 2026-07-13)
 ## Current Position
 
 Phase: 2 (Content Rendering & Templating) — EXECUTING
-Plan: 1 of 8
-Status: Executing Phase 2
+Plan: 2 of 8
+Status: Ready to execute
 Last activity: 2026-07-22 — Phase 2 execution started
 
 Progress: [░░░░░░░░░░] 0%
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 01 P01 | 5min | 3 tasks | 8 files |
 | Phase 01 P02 | 6min | 2 tasks | 1 files |
+| Phase 02 P01 | 20min | 3 tasks | 80 files |
 
 ## Accumulated Context
 
@@ -72,6 +73,8 @@ Recent decisions affecting current work:
 - [Phase 01-01]: Used Astro's set:html directive for devlog post titles instead of default {expr} escaping — Default interpolation HTML-encodes apostrophes, breaking the literal manifesto-title acceptance check; titles are git-trusted content, not runtime user input
 - [Phase 01-01]: Task 3 tdd RED/GREEN satisfied via committed tests/build.smoke.sh instead of a JS test framework — RESEARCH.md's Validation Architecture explicitly scoped out a JS test framework for this build-pipeline phase; npm run build is the harness
 - [Phase 01]: [Phase 01-02] 01-RESEARCH.md's deploy workflow code example was used verbatim per 01-PATTERNS.md's no-local-deviation assignment
+- [Phase 02-01]: grep -c counts matching lines not occurrences; used grep -o | wc -l in tests/build.smoke.sh to correctly assert the nine-announcement archive count against Astro's minified single-line build output
+- [Phase 02-01]: pages/how-its-made.md status line rewritten to bare 'status: published' (staging comment dropped) to satisfy exact-line-match publication criterion
 
 ### Pending Todos
 
@@ -100,6 +103,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-22T15:48:24.281Z
-Stopped at: Phase 2 UI-SPEC approved
-Resume file: .planning/phases/02-content-rendering-templating/02-UI-SPEC.md
+Last session: 2026-07-22T16:46:11.283Z
+Stopped at: Completed 02-01-PLAN.md
+Resume file: None

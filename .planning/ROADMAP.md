@@ -64,12 +64,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. A visitor can open the "How It's Made" and "Roadmap" standalone pages, neither of which appears in the archive listing
   4. The site is legible on mobile and desktop, serves a custom 404, shows a favicon, exposes `sitemap.xml`, and emits canonical URLs
 
-**Plans**: 8 plans
+**Plans**: 1/8 plans executed
 **UI hint**: yes
 
 **Wave 1**
 
-- [ ] 02-01-PLAN.md — Promote all four content trees for M0.1–M0.8 (9 announcements, 55 deep-dives + legend, 8 roadmap docs, 2 standalone pages)
+- [x] 02-01-PLAN.md — Promote all four content trees for M0.1–M0.8 (9 announcements, 55 deep-dives + legend, 8 roadmap docs, 2 standalone pages)
 - [ ] 02-02-PLAN.md — Site shell: hand-written CSS, BaseLayout header/nav/footer, favicon, custom 404
 
 **Wave 2** *(blocked on Wave 1)*
@@ -128,6 +128,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Stack & Scaffolding | 2/2 | Complete    | 2026-07-14 |
-| 2. Content Rendering & Templating | 0/8 | Planned | - |
+| 2. Content Rendering & Templating | 1/8 | In Progress|  |
 | 3. RSS, OpenGraph & Discord Distribution | 0/TBD | Not started | - |
 | 4. Analytics, Launch Content & Deploy Hardening | 0/TBD | Not started | - |

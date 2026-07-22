@@ -160,3 +160,7 @@ None - no external service configuration required.
 ---
 *Phase: 02-content-rendering-templating*
 *Completed: 2026-07-22*
+
+## Self-Check: PASSED
+
+All created files verified present on disk; all four task/summary commit hashes (89f725d, 47297b7, f58e154, bff19e5) verified in `git log`.
