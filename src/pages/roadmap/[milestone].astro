@@ -1,0 +1,54 @@
+---
+// D-36/D-38: one page per visible roadmap entry at /roadmap/<id>/ -- the id
+// is already the lowercase milestone key (content.config.ts's generateId).
+// Renders through PostLayout: title from the body H1, meta line showing the
+// milestone only (this tree has no dates, D-33-adjacent), the rendered
+// headings array for the TOC, and the body rendered untouched apart from the
+// deep-dive link resolution registered globally in astro.config.mjs.
+import { getCollection, render } from 'astro:content';
+import { assertNonEmpty, isVisible } from '../../lib/content-guards';
+import { titleFromH1 } from '../../lib/title-from-h1';
+import { normalizeMilestone } from '../../lib/milestone-key';
+import PostLayout from '../../layouts/PostLayout.astro';
+
+export async function getStaticPaths() {
+  const allEntries = assertNonEmpty(await getCollection('roadmap'), 'roadmap');
+  const visible = allEntries.filter(isVisible);
+  const devlogEntries = assertNonEmpty(await getCollection('devlog'), 'devlog').filter(isVisible);
+
+  return visible.map((entry) => ({
+    params: { milestone: entry.id },
+    props: { entry, devlogEntries },
+  }));
+}
+
+const { entry, devlogEntries } = Astro.props;
+const { Content, headings } = await render(entry);
+
+const title = titleFromH1(entry.body, entry.id);
+const milestoneKey = normalizeMilestone(entry.id);
+const milestoneDisplay = milestoneKey.toUpperCase();
+// Copywriting Contract: roadmap detail pages' meta line is the milestone
+// alone -- this tree has no dates, do not fabricate one.
+const meta = milestoneDisplay;
+
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+
+// D-35: breadcrumb to the milestone's announcement, resolved through
+// normalizeMilestone and isVisible-filtered (T-02-03) -- omitted rather than
+// a dead link if the milestone has no visible announcement.
+const announcementEntry = devlogEntries.find(
+  (e) => e.data.milestone && normalizeMilestone(e.data.milestone) === milestoneKey
+);
+
+const breadcrumbs = announcementEntry
+  ? [{ href: `${base}devlog/${announcementEntry.id}/`, label: `↑ ${milestoneDisplay} announcement` }]
+  : [];
+
+const backLink = { href: `${base}roadmap/`, label: 'Back to roadmap' };
+---
+
+<PostLayout title={title} meta={meta} headings={headings} breadcrumbs={breadcrumbs} backLink={backLink}>
+  <Content />
+</PostLayout>
