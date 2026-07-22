@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 2
 current_phase_name: Content Rendering & Templating
 status: executing
-stopped_at: Completed 02-04-PLAN.md
-last_updated: "2026-07-22T17:33:26.454Z"
+stopped_at: Completed 02-06-PLAN.md
+last_updated: "2026-07-22T17:45:17.687Z"
 last_activity: 2026-07-22
 last_activity_desc: Phase 2 execution started
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 10
-  completed_plans: 7
+  completed_plans: 8
   percent: 25
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-13)
 ## Current Position
 
 Phase: 2 (Content Rendering & Templating) — EXECUTING
-Plan: 6 of 8
+Plan: 7 of 8
 Status: Ready to execute
 Last activity: 2026-07-22 — Phase 2 execution started
 
@@ -62,6 +62,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02 P03 | 30min | 3 tasks | 13 files |
 | Phase 02 P04 | 20min | 2 tasks | 5 files |
 | Phase 02 P05 | 15min | 2 tasks | 2 files |
+| Phase 02 P06 | 35min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,9 @@ Recent decisions affecting current work:
 - [Phase 02-04]: Prev/next link text is the neighbouring post's actual title (arrow plus title), matching UI-SPEC's worked example, not a literal 'Previous' string
 - [Phase 02-04]: Astro only hoists the exported getStaticPaths() function to true module scope -- helper functions it calls must live in an imported src/lib module, not as sibling frontmatter declarations, or the build fails at prerender time
 - [Phase 02-05]: D-16 homepage one-liner approved verbatim by developer 2026-07-22: 'A space engine built from scratch on real n-body physics.' (replaces all three plan candidates)
+- [Phase 02-06]: how-to-read routed via a dedicated static file (src/pages/technical/how-to-read.astro) rather than special-casing the dynamic [milestone]/[slug] route -- its collection id has no slash
+- [Phase 02-06]: Milestone display name and era read from each roadmap entry's H1 (Roadmap Detail prefix stripped) and Era line, not a hand-written map -- future era/milestone renames move in the vault, not the template
+- [Phase 02-06]: Era grouping is data-driven even though all 8 roadmap entries currently share one era value -- observed mismatch with plan's read_first expectation, no code change needed since implementation already reads the line dynamically
 
 ### Pending Todos
 
@@ -117,6 +121,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-22T17:32:41.250Z
-Stopped at: Completed 02-04-PLAN.md
+Last session: 2026-07-22T17:45:17.682Z
+Stopped at: Completed 02-06-PLAN.md
 Resume file: None
