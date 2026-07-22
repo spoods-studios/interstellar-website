@@ -24,8 +24,8 @@ plus research-promoted table stakes. Target: live at engine M1.1 close.
 ### Distribution
 
 - [ ] **DIST-01**: RSS feed generated from the same content-collection query as the archive page (cannot drift), validates clean
-- [ ] **DIST-02**: Every post and page emits OpenGraph + Twitter Card metadata; a live post URL renders a rich embed when pasted in Discord *(research-promoted: Discord-first distribution makes this load-bearing)*
-- [ ] **DIST-03**: Prominent Discord invite CTA on every page (Discord-first audience building, D-F)
+- [x] **DIST-02**: Every post and page emits OpenGraph + Twitter Card metadata; a live post URL renders a rich embed when pasted in Discord *(research-promoted: Discord-first distribution makes this load-bearing)*
+- [x] **DIST-03**: Prominent Discord invite CTA on every page (Discord-first audience building, D-F)
 
 ### Analytics
 
@@ -59,8 +59,8 @@ plus research-promoted table stakes. Target: live at engine M1.1 close.
 | CONT-04 | Phase 2 | Complete |
 | SITE-04 | Phase 2 | Complete |
 | DIST-01 | Phase 3 | Pending |
-| DIST-02 | Phase 3 | Pending |
-| DIST-03 | Phase 3 | Pending |
+| DIST-02 | Phase 3 | Complete |
+| DIST-03 | Phase 3 | Complete |
 | ANLT-01 | Phase 4 | Pending |
 | CONT-05 | Phase 4 | Pending |
 | CONT-06 | Phase 4 | Pending |
