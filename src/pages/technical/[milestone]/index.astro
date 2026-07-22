@@ -1,7 +1,7 @@
 ---
 // D-32/D-40: one index per milestone directory present in the technical
 // collection, phase-order list, link back to the full index.
-import { getCollection, getEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 import { assertNonEmpty, isVisible } from '../../../lib/content-guards';
 import { titleFromH1 } from '../../../lib/title-from-h1';
 import { sortByPhaseNumber, parsePhaseNumber } from '../../../lib/phase-sort';
@@ -29,7 +29,13 @@ const rawBase = import.meta.env.BASE_URL;
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
 const milestoneKey = normalizeMilestone(milestone);
-const roadmapEntry = await getEntry('roadmap', milestoneKey);
+// WR-02 (02-REVIEW.md): mirror technical/[milestone]/[slug].astro's
+// isVisible-filtered roadmap lookup so a future drafted roadmap entry can't
+// leak its title into this heading (currently inert -- roadmap's schema
+// rejects `status` -- but the fetch pattern should still match every other
+// roadmap read site-wide).
+const roadmapEntries = assertNonEmpty(await getCollection('roadmap'), 'roadmap').filter(isVisible);
+const roadmapEntry = roadmapEntries.find((e) => e.id === milestoneKey);
 const milestoneDisplay = roadmapEntry
   ? titleFromH1(roadmapEntry.body, roadmapEntry.id).replace(/^Roadmap Detail\s*[—-]\s*/, '')
   : milestoneKey.toUpperCase();
