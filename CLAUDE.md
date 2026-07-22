@@ -14,9 +14,9 @@ repos). Activated 2026-07-13 under org-milestone m1.x.
 Decision Log instead.
 
 ## Content
-`devlog/` is the drop target for studio's `draft-devblog` → promote pipeline —
-never move, rename, or restyle its `.md` files; the site layer renders them
-as-is (VOICE.md is locked, studio-side).
+`devlog/`, `technical/`, `roadmap/`, and `pages/` are drop targets for studio's
+`draft-devblog` → promote pipeline — never move, rename, or restyle their
+`.md` files; the site layer renders them as-is (VOICE.md is locked, studio-side).
 
 ## Gate Tier
 t3 — standard review/checklist; see `studio/vault/project/gate-tiers.md` for
