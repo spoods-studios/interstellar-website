@@ -121,21 +121,23 @@ Numbering continues from Phase 2 (which ended at D-44).
   (bad technical filename), and D-39 (unresolvable wikilink). A CTA that
   silently doesn't render, or renders pointing at a dead link, is exactly the
   failure mode this project has repeatedly designed against.
-  **Consequence the planner must handle:** with the constant unset,
-  `astro build` fails, so Phase 3 cannot execute to green until a real URL
-  exists. See D-55.
-- **D-55:** The permanent invite is **created in-session by driving the headed
-  Playwright browser against the user's own Discord server** (never expires,
-  unlimited uses), and the resulting URL is baked in as the locked value.
-  **Status at context-write time: BLOCKED — Discord is not logged in on the
-  Playwright browser** (`https://discord.com/login`), which is a user-only
-  interactive step. The URL is the one open slot in this context.
-  **Planner fallback:** if the URL is still absent when planning runs,
-  front-load a `checkpoint:decision` task that obtains it before any task
-  that depends on it, rather than letting a mid-phase build failure surface
-  it. — **Reversibility:** one-way — a published invite URL that later
-  changes leaves every shared link and vault reference pointing at a dead
-  invite; the permanent/unlimited settings must be right the first time.
+  **Consequence:** with the constant unset, `astro build` fails, so Phase 3
+  cannot execute to green until a real URL exists. That URL now exists — see
+  D-55 — so the loud-fail is a permanent guard against regression rather than
+  a live blocker.
+- **D-55:** **RESOLVED 2026-07-22.** The permanent invite is
+  **`https://discord.gg/yeyyh6ycfw`** — this is the locked value for D-54's
+  config constant. Created in-session by driving the headed Playwright browser
+  against the developer's own Discord server (guild `Spoods Studios`,
+  `1490855396678701107`) with **Expire After: Never**, **Max Number of Uses:
+  No limit**, no role grant, no temporary membership; Discord confirmed "Your
+  invite link will never expire." Recipients land in `#rules`, the server's
+  first channel.
+  No planner checkpoint is needed for this — the value is known and the build
+  can go green. — **Reversibility:** one-way — this URL will be published in
+  page markup, in the studio vault, and in every Discord embed; changing it
+  later leaves shared links and vault references pointing at a dead invite.
+  Do not regenerate it.
 - **D-56:** The same pass **writes the invite link back into the studio
   vault**: `../studio/vault/community/Discord Architecture.md:9`
   (`**Invite link:** (add when created)`) and
@@ -285,9 +287,10 @@ Numbering continues from Phase 2 (which ended at D-44).
 - Discord embeds are the highest-leverage surface in the phase: per [D-N] the
   #technical-devlog forum is where deep-dive links get pasted, which is why
   D-50 covers all ~75 pages rather than just the announcements.
-- The invite link is genuinely blocking, not paperwork — DIST-03's success
+- The invite link was genuinely blocking, not paperwork — DIST-03's success
   criterion cannot be verified without a working link, and D-54 makes the
-  build enforce that rather than letting it slip to launch day.
+  build enforce that rather than letting it slip to launch day. It was
+  obtained during discuss (D-55), so the phase enters planning unblocked.
 
 </specifics>
 
