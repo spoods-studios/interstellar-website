@@ -1,0 +1,41 @@
+---
+import '../styles/global.css';
+
+export interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site).toString();
+const base = import.meta.env.BASE_URL;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
+  </head>
+  <body>
+    <header>
+      <a class="wordmark" href={base}>Interstellar Engine</a>
+      <nav>
+        <a href={base}>Devblog</a>
+        <a href={`${base}technical/`}>Technical</a>
+        <a href={`${base}how-its-made/`}>How It's Made</a>
+        <a href={`${base}roadmap/`}>Roadmap</a>
+      </nav>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer>
+      <p>© 2026 Spoods Studios</p>
+    </footer>
+  </body>
+</html>
