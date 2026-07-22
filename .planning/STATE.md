@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 2
 current_phase_name: Content Rendering & Templating
 status: executing
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-07-22T16:53:54.811Z"
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-07-22T17:12:08.483Z"
 last_activity: 2026-07-22
 last_activity_desc: Phase 2 execution started
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 10
-  completed_plans: 4
+  completed_plans: 5
   percent: 25
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-13)
 ## Current Position
 
 Phase: 2 (Content Rendering & Templating) — EXECUTING
-Plan: 3 of 8
+Plan: 4 of 8
 Status: Ready to execute
 Last activity: 2026-07-22 — Phase 2 execution started
 
@@ -59,6 +59,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P02 | 6min | 2 tasks | 1 files |
 | Phase 02 P01 | 20min | 3 tasks | 80 files |
 | Phase 02 P02 | 15min | 2 tasks | 5 files |
+| Phase 02 P03 | 30min | 3 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,10 @@ Recent decisions affecting current work:
 - [Phase 02-01]: pages/how-its-made.md status line rewritten to bare 'status: published' (staging comment dropped) to satisfy exact-line-match publication criterion
 - [Phase ?]: [Phase 02-02]: Normalized import.meta.env.BASE_URL to always carry a trailing slash before appending route segments in BaseLayout.astro/404.astro -- astro.config.mjs's base has no trailing slash, so naive concatenation produced malformed nav/favicon URLs
 - [Phase ?]: [Phase 02-02]: tests/shell.smoke.sh checks dist/404.html's own chrome directly rather than diffing against dist/index.html, since index.astro has not adopted BaseLayout yet (out of this plan's scope)
+- [Phase 02-03]: package.json "type" flipped commonjs->module so plain .ts helpers under src/lib/ resolve as ESM under Node 24's native type-stripping
+- [Phase 02-03]: milestoneSortKey compares major/minor as separate parsed integers, not parseFloat on the whole string -- parseFloat('0.10') collapses to 0.1, sorting before parseFloat('0.9')=0.9
+- [Phase 02-03]: Wikilink resolver's known-ids set built by walking technical/ directly with node:fs, mirroring content.config.ts's generateId logic, independent of Astro's internal collection state
+- [Phase 02-03]: No real page template renders technical/roadmap/pages bodies yet -- collection-counts.json.ts and markdown-render-check.astro are small build-time-only routes proving collection counts and the wikilink/Shiki pipeline until Plans 04-07 land real routes
 
 ### Pending Todos
 
@@ -106,6 +111,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-22T16:53:22.116Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-07-22T17:12:08.476Z
+Stopped at: Completed 02-03-PLAN.md
 Resume file: None
