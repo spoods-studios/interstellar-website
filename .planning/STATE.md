@@ -136,8 +136,35 @@ Items acknowledged and carried forward from previous milestone close:
 | Distribution | DIST-04 custom domain attachment (SITE-02 keeps it a non-event) | v2 | 2026-07-13 |
 | Content | CONT-08 search / tag taxonomy (no payoff at ~9 posts) | v2 | 2026-07-13 |
 
+## Deferred Verification
+
+| Phase | State | Resume |
+|-------|-------|--------|
+| 3 | verification_deferred_human | /gsd-verify-work 3 |
+
+**Why deferred (2026-07-22):** GitHub Actions entered `degraded_performance` and Pages deploy run
+`29959774598` sat queued for 15+ minutes (this repo's deploys normally finish in ~40s). Phase 3's
+three remaining checks are deploy-dependent and were deliberately designed to have no build-time
+proxy, so they cannot be certified against the stale Phase 1 build currently being served.
+
+**All code work is complete and pushed** — `main` is at `79f1374`, 88 commits pushed
+(`36b6558..79f1374`), `npm test` ends `ALL CHECKS PASSED`, clean build produces 86 pages.
+
+**Pending on resume — do NOT re-execute Plans 03-01…03-05, and do NOT redo 03-06 Task 1:**
+
+| Item | Owner | Note |
+|------|-------|------|
+| Live deploy freshness probe | 03-06 Task 2 | Poll the Pages run to `success` first, then probe the deployed URLs |
+| Discord embed renders on 4 pasted URLs | 03-06 Task 3 | Use **fresh** URLs — Discord caches by URL. Cover an M0.7/M0.8 hero post, a deep-dive, a roadmap page, and the longest deep-dive title |
+| W3C feed validation (D-57 human leg) | 03-06 Task 3 | Submit the deployed `/rss.xml` to validator.w3.org/feed; `<atom:link rel="self">` is already emitted to pre-empt the predictable warning |
+
+**03-06 is partially complete.** Task 1 (D-56 studio-vault write-back) is DONE and committed in the
+studio repo as `92d9015` — three files updated by literal-string match, studio repo intentionally
+left unpushed. `03-06-SUMMARY.md` is deliberately absent because the plan has not finished. A resume
+must skip Task 1 rather than repeating the vault edit.
+
 ## Session Continuity
 
 Last session: 2026-07-22T21:30:14.764Z
-Stopped at: Completed 03-05-PLAN.md
-Resume file: None
+Stopped at: Phase 3 — 03-06 Task 1 complete, Tasks 2-3 deferred (GitHub Actions degraded)
+Resume file: .planning/phases/03-rss-opengraph-discord-distribution/03-06-PLAN.md
