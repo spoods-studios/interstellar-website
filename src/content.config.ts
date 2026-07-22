@@ -36,4 +36,61 @@ const devlog = defineCollection({
   }),
 });
 
-export const collections = { devlog };
+const TECHNICAL_RE = /^(m\d+(?:\.\d+)?)\/phase-(\d+(?:\.\d+)?)-(.+)\.md$/;
+
+const technical = defineCollection({
+  loader: glob({
+    pattern: ['**/*.md'],
+    // NOTE: project-root-relative, same landmine as the devlog loader above.
+    base: './technical',
+    generateId: ({ entry }) => {
+      if (entry === '_how-to-read.md') return 'how-to-read'; // D-32
+      const match = entry.match(TECHNICAL_RE);
+      if (!match) {
+        // D-33: loud failure naming the offending file — this tree has no
+        // frontmatter to fall back on.
+        throw new Error(
+          `technical/${entry}: filename must match m0.X/phase-NN[.N]-slug.md (D-33 — no frontmatter fallback exists for this tree)`
+        );
+      }
+      const [, milestone, phaseNum, slug] = match;
+      return `${milestone}/phase-${phaseNum}-${slug}`; // preserves D-32's URL shape directly
+    },
+  }),
+  // D-33: no frontmatter fields at all — schema only rejects unexpected keys loudly.
+  schema: z.object({}).strict(),
+});
+
+const ROADMAP_RE = /^M(\d+(?:\.\d+)?)\.md$/i;
+
+const roadmap = defineCollection({
+  loader: glob({
+    pattern: ['M*.md'],
+    base: './roadmap',
+    generateId: ({ entry }) => {
+      const match = entry.match(ROADMAP_RE);
+      if (!match) {
+        throw new Error(`roadmap/${entry}: filename must match M{milestone}.md (D-38)`);
+      }
+      return `m${match[1]}`; // normalize to lowercase — joins directly against technical/'s m0.X dirs
+    },
+  }),
+  schema: z.object({}).strict(),
+});
+
+const pages = defineCollection({
+  loader: glob({
+    pattern: ['*.md'],
+    base: './pages',
+  }),
+  // Mirrors devlog's permissive all-optional shape (D-20: standalone pages'
+  // meta line reads from `updated`).
+  schema: z.object({
+    title: z.string().optional(),
+    status: z.enum(['draft', 'published', 'final']).optional(),
+    audience: z.string().optional(),
+    updated: z.coerce.date().optional(),
+  }),
+});
+
+export const collections = { devlog, technical, roadmap, pages };
