@@ -1,0 +1,17 @@
+---
+// Build-time proof that the full Astro render pipeline (Sätteri wikilink
+// plugin + Shiki light theme) behaves correctly end to end, not just via the
+// direct markdownToHtml() calls in tests/lib.smoke.mjs. No real page in this
+// phase renders a technical/ or devlog/ Markdown body yet (Plans 04-07 own
+// those routes) -- this is the "small build-time check" tests/markdown.smoke.sh
+// asserts against until a real detail route makes it redundant.
+import { getEntry, render } from 'astro:content';
+
+const entry = await getEntry('technical', 'm0.3/phase-14.5-swapchain-acquire-fix');
+const { Content } = await render(entry);
+---
+<html lang="en">
+  <body>
+    <Content />
+  </body>
+</html>

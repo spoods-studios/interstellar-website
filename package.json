@@ -22,7 +22,9 @@
   },
   "homepage": "https://github.com/spoods-studios/interstellar-website#readme",
   "dependencies": {
-    "astro": "^7.0.9"
+    "@astrojs/sitemap": "^3.7.3",
+    "astro": "^7.0.9",
+    "satteri": "^0.9.5"
   },
   "devDependencies": {
     "typescript": "^7.0.2"
