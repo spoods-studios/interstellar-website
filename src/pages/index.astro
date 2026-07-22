@@ -1,54 +1,52 @@
 ---
-// Throwaway ingestion-proof list (D-07) — replaced wholesale by Phase 2 templating.
+// D-13: the site root IS the announcement archive -- flat reverse-chronological
+// list of every visible devlog entry. Querying only the `devlog` collection is
+// the whole of CONT-03's structural exclusion (T-02-03/D-26/D-31): the two
+// standalone pages live in the separate `pages` collection, so no filter is
+// needed (or written) to keep them out.
 import { getCollection } from 'astro:content';
+import { assertNonEmpty, isVisible } from '../lib/content-guards';
+import { titleFromH1 } from '../lib/title-from-h1';
+import { entryDate, formatDate } from '../lib/devlog-meta';
+import BaseLayout from '../layouts/BaseLayout.astro';
 
-const FILENAME_RE = /^(\d{4}-\d{2}-\d{2})-(.+)\.md$/;
-const H1_RE = /^#\s+(.+)$/m;
+const allEntries = assertNonEmpty(await getCollection('devlog'), 'devlog');
+const visible = allEntries.filter(isVisible);
 
-const base = import.meta.env.BASE_URL;
-const canonicalUrl = Astro.site ? new URL(base, Astro.site).toString() : base;
+// Same ordering as src/pages/devlog/[slug].astro's prev/next chain -- the
+// archive and the post route must never disagree on order.
+const sorted = [...visible].sort(
+  (a, b) => entryDate(b).getTime() - entryDate(a).getTime()
+);
 
-const devlogEntries = await getCollection('devlog');
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
-// Pitfall 2: the glob loader fails silently (empty collection) on a
-// misconfigured `base` path — assert non-empty so D-10 holds for this case too.
-if (devlogEntries.length === 0) {
-  throw new Error(
-    'devlog collection resolved to zero entries — check the glob loader base path in src/content.config.ts'
-  );
-}
+const posts = sorted.map((entry) => {
+  // D-01: title falls back to the manifesto's first H1 when frontmatter title is absent.
+  const title = entry.data.title ?? titleFromH1(entry.body, entry.id);
+  const date = entryDate(entry);
+  // D-11: milestone tag + date; the manifesto has no milestone and renders the date alone.
+  const meta = entry.data.milestone
+    ? `${entry.data.milestone} · ${formatDate(date)}`
+    : formatDate(date);
 
-const posts = devlogEntries
-  // Missing status defaults to published (e.g. the frontmatter-less manifesto);
-  // only entries explicitly marked draft are excluded from the render.
-  .filter((entry) => entry.data.status !== 'draft')
-  .map((entry) => {
-    const filename = entry.filePath?.split('/').pop() ?? '';
-    const filenameMatch = filename.match(FILENAME_RE);
-    const filenameDate = filenameMatch?.[1];
+  return { href: `${base}devlog/${entry.id}/`, title, meta };
+});
 
-    // D-01: title falls back to the manifesto's first H1 when frontmatter title is absent.
-    const title = entry.data.title ?? entry.body?.match(H1_RE)?.[1] ?? entry.id;
-    // Date falls back to the filename-derived date when frontmatter date is absent.
-    const date = entry.data.date
-      ? entry.data.date.toISOString().slice(0, 10)
-      : (filenameDate ?? 'unknown-date');
-
-    return { title, date };
-  })
-  .sort((a, b) => b.date.localeCompare(a.date));
+// D-16: developer-approved verbatim, 2026-07-22 -- plain interpolation since
+// this is developer-authored copy, not content-derived HTML.
+const oneLiner = 'A space engine built from scratch on real n-body physics.';
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Interstellar Engine — Devblog</title>
-    <link rel="canonical" href={canonicalUrl} />
-  </head>
-  <body>
-    <h1>Devblog</h1>
-    <ul>
-      {posts.map((post) => <li set:html={`${post.title} — ${post.date}`} />)}
-    </ul>
-  </body>
-</html>
+<BaseLayout title="Interstellar Engine — Devblog">
+  <p>{oneLiner}</p>
+  <ul>
+    {posts.map((post) => (
+      <li>
+        <a href={post.href} set:html={post.title} />
+        <p class="meta">{post.meta}</p>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>
