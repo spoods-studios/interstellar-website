@@ -42,4 +42,37 @@ grep -q 'devlog/2026-04-13-before-the-galaxy-a-triangle' dist/roadmap/m0.1/index
 echo "== Zero client JS on roadmap detail pages =="
 test "$(grep -c '<script' dist/roadmap/m0.1/index.html)" -eq 0
 
+echo "== Roadmap overview and How It's Made standalone pages both build =="
+test -f dist/roadmap/index.html
+test -f dist/how-its-made/index.html
+
+echo "== Overview carries exactly 8 generated milestone links, zero M1.1 detail link =="
+OVERVIEW="dist/roadmap/index.html"
+test "$(grep -o 'href="[^"]*roadmap/m0\.[0-9]*/"' "$OVERVIEW" | sort -u | wc -l)" -eq 8
+if grep -q 'roadmap/m1\.1' "$OVERVIEW"; then
+  echo "FAIL: overview links to a nonexistent M1.1 roadmap detail page"
+  exit 1
+fi
+
+echo "== Overview carries the authored era-arc prose and mentions M1.1 as in progress =="
+grep -q 'Era 0' "$OVERVIEW"
+grep -q 'Era 1' "$OVERVIEW"
+grep -q 'M1.1' "$OVERVIEW"
+
+echo "== How It's Made page carries its title and a last-updated meta line =="
+HIM="dist/how-its-made/index.html"
+grep -q 'How It' "$HIM"
+grep -oE 'class="meta">Last updated: [0-9]{4}-[0-9]{2}-[0-9]{2}' "$HIM"
+
+echo "== Neither standalone page's slug appears in the archive's post list (nav chrome is exempt -- scope to <main>) =="
+ARCHIVE_MAIN=$(grep -o '<main>.*</main>' dist/index.html)
+if echo "$ARCHIVE_MAIN" | grep -q 'how-its-made\|/roadmap/'; then
+  echo "FAIL: a standalone page slug leaked into the archive's post list"
+  exit 1
+fi
+
+echo "== Zero client JS on the overview and How It's Made pages =="
+test "$(grep -c '<script' "$OVERVIEW")" -eq 0
+test "$(grep -c '<script' "$HIM")" -eq 0
+
 echo "ALL CHECKS PASSED"

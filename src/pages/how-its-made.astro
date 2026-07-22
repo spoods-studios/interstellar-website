@@ -1,0 +1,26 @@
+---
+// The How It's Made policy page: a standalone page, not part of a sequence
+// (no breadcrumbs, no prev/next), rendered through the same PostLayout as
+// every other content tree with a last-updated meta line (D-20) and TOC.
+import { getCollection, render } from 'astro:content';
+import { assertNonEmpty, isVisible } from '../lib/content-guards';
+import { titleFromH1 } from '../lib/title-from-h1';
+import PostLayout from '../layouts/PostLayout.astro';
+
+const pagesEntries = assertNonEmpty(await getCollection('pages'), 'pages').filter(isVisible);
+const entry = pagesEntries.find((e) => e.id === 'how-its-made');
+if (!entry) {
+  throw new Error("pages collection has no visible 'how-its-made' entry");
+}
+const { Content, headings } = await render(entry);
+
+const title = entry.data.title ?? titleFromH1(entry.body, entry.id);
+// D-20: standalone pages' meta line reads the `updated` frontmatter date.
+const meta = entry.data.updated
+  ? `Last updated: ${entry.data.updated.toISOString().slice(0, 10)}`
+  : undefined;
+---
+
+<PostLayout title={title} meta={meta} headings={headings}>
+  <Content />
+</PostLayout>

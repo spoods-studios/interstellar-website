@@ -1,0 +1,53 @@
+---
+// D-37: the roadmap overview is the `pages/roadmap.md` prose rendered
+// untouched through PostLayout (D-14), plus a generated list of the closed
+// milestones' detail links appended as site chrome below the body (D-35 --
+// "generated, never hand-maintained" -- so it lives outside the Markdown
+// body, not as part of it).
+import { getCollection, render } from 'astro:content';
+import { assertNonEmpty, isVisible } from '../../lib/content-guards';
+import { titleFromH1 } from '../../lib/title-from-h1';
+import { normalizeMilestone, milestoneSortKey } from '../../lib/milestone-key';
+import PostLayout from '../../layouts/PostLayout.astro';
+
+const pagesEntries = assertNonEmpty(await getCollection('pages'), 'pages').filter(isVisible);
+const entry = pagesEntries.find((e) => e.id === 'roadmap');
+if (!entry) {
+  throw new Error("pages collection has no visible 'roadmap' entry");
+}
+const { Content, headings } = await render(entry);
+
+const title = entry.data.title ?? titleFromH1(entry.body, entry.id);
+// D-20: standalone pages' meta line reads the `updated` frontmatter date.
+const meta = entry.data.updated
+  ? `Last updated: ${entry.data.updated.toISOString().slice(0, 10)}`
+  : undefined;
+
+// D-35/D-37: one link per visible roadmap collection entry, ordered by
+// milestoneSortKey, never hand-listed in the prose above. M1.1 has no
+// roadmap entry until Phase 4 (D-44) -- it correctly produces no link here.
+const roadmapEntries = assertNonEmpty(await getCollection('roadmap'), 'roadmap').filter(isVisible);
+const sortedRoadmapEntries = [...roadmapEntries].sort(
+  (a, b) => milestoneSortKey(a.id) - milestoneSortKey(b.id)
+);
+
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+
+const milestoneLinks = sortedRoadmapEntries.map((r) => {
+  const milestoneKey = normalizeMilestone(r.id);
+  const h1 = titleFromH1(r.body, r.id);
+  const display = h1.replace(/^Roadmap Detail\s*[—-]\s*/, '');
+  return { href: `${base}roadmap/${r.id}/`, label: display || milestoneKey.toUpperCase() };
+});
+---
+
+<PostLayout title={title} meta={meta} headings={headings}>
+  <Content />
+  <h2>Milestone detail pages</h2>
+  <ul>
+    {milestoneLinks.map((link) => (
+      <li><a href={link.href}>{link.label}</a></li>
+    ))}
+  </ul>
+</PostLayout>
