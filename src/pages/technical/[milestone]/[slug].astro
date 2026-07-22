@@ -5,6 +5,7 @@
 // isVisible-filtered per T-02-03 (a drafted target must not be linked).
 import { getCollection, render } from 'astro:content';
 import { assertNonEmpty, isVisible } from '../../../lib/content-guards';
+import { describeBody } from '../../../lib/describe-entry';
 import { titleFromH1 } from '../../../lib/title-from-h1';
 import { sortByPhaseNumber, parsePhaseNumber } from '../../../lib/phase-sort';
 import { normalizeMilestone } from '../../../lib/milestone-key';
@@ -81,6 +82,12 @@ const prevNext = {
 };
 
 const backLink = { href: `${base}technical/${milestone}/`, label: `Back to ${milestoneDisplay} index` };
+
+// D-51: the description comes from the entry's own body, so the identical
+// boilerplate blockquote opening all 55 deep-dives is skipped rather than
+// collapsing every embed onto one sentence. No publishedTime: D-33, this tree
+// carries no date and one must not be fabricated.
+const description = describeBody(entry.body, entry.id);
 ---
 
 <PostLayout
@@ -90,6 +97,8 @@ const backLink = { href: `${base}technical/${milestone}/`, label: `Back to ${mil
   breadcrumbs={breadcrumbs}
   prevNext={prevNext}
   backLink={backLink}
+  description={description}
+  ogType="article"
 >
   <Content />
 </PostLayout>
