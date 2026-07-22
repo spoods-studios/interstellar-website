@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import { DISCORD_INVITE_URL, SITE_NAME, SITE_TAGLINE, OG_DEFAULT } from '../lib/site.mjs';
+import { DISCORD_INVITE_URL, SITE_NAME, SITE_TAGLINE, OG_DEFAULT, FEED_TITLE } from '../lib/site.mjs';
 
 export interface Props {
   title: string;
@@ -59,6 +59,9 @@ const ogImageUrl = new URL(card.src, Astro.site).toString();
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#1d5fae" />
     <link rel="canonical" href={canonicalUrl} />
+    {/* D-47: autodiscovery lives in the shared layout, not per-route, so every
+        built page tells a reader app where the feed is. */}
+    <link rel="alternate" type="application/rss+xml" title={FEED_TITLE} href={`${base}rss.xml`} />
     <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
   </head>
   <body>
@@ -76,9 +79,11 @@ const ogImageUrl = new URL(card.src, Astro.site).toString();
       <slot />
     </main>
     <footer>
-      {/* Plan 03-02 inserts `<a …>RSS</a> · ` before the Discord link -- the
-          separator structure is shaped so that stays a pure insertion. */}
-      <p>© 2026 Spoods Studios · <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer">Join the Discord</a></p>
+      {/* D-47/D-53: the feed link stays same-tab -- readers intercept it and a
+          raw XML tab is one back-button away; only the Discord links leave the
+          site. Separators are literal middots in the text flow, not a flex gap,
+          so the line wraps naturally at any width. */}
+      <p>© 2026 Spoods Studios · <a href={`${base}rss.xml`}>RSS</a> · <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer">Join the Discord</a></p>
     </footer>
   </body>
 </html>
