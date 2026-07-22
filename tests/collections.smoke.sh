@@ -6,13 +6,25 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 echo "== Positive check: all four collections resolve at their exact expected counts =="
+# Repointed off the removed collection-counts.json.ts diagnostic route (02-08
+# orchestrator note) onto the real index/route output. This still catches
+# RESEARCH Pitfall 1 (glob()'s silent-empty-collection landmine): a
+# misconfigured loader base produces zero getCollection() results, so
+# getStaticPaths generates zero pages regardless of how many source files
+# exist on disk -- counting built dist/ routes is exactly as sensitive to that
+# regression as the old getCollection()-backed JSON endpoint was.
 npm run build
-COUNTS="$(cat dist/collection-counts.json)"
-echo "$COUNTS"
-echo "$COUNTS" | grep -q '"devlog":9'
-echo "$COUNTS" | grep -q '"technical":56'
-echo "$COUNTS" | grep -q '"roadmap":8'
-echo "$COUNTS" | grep -q '"pages":2'
+DEVLOG_COUNT=$(find dist/devlog -name index.html | wc -l)
+TECHNICAL_COUNT=$(( $(find dist/technical -path 'dist/technical/m0.*/phase-*' -name index.html | wc -l) + 1 )) # +1 for how-to-read
+ROADMAP_COUNT=$(find dist/roadmap -mindepth 2 -maxdepth 2 -name index.html | wc -l)
+PAGES_COUNT=0
+test -f dist/how-its-made/index.html && PAGES_COUNT=$((PAGES_COUNT + 1))
+test -f dist/roadmap/index.html && PAGES_COUNT=$((PAGES_COUNT + 1))
+echo "devlog:$DEVLOG_COUNT technical:$TECHNICAL_COUNT roadmap:$ROADMAP_COUNT pages:$PAGES_COUNT"
+test "$DEVLOG_COUNT" -eq 9
+test "$TECHNICAL_COUNT" -eq 56
+test "$ROADMAP_COUNT" -eq 8
+test "$PAGES_COUNT" -eq 2
 echo "counts OK (devlog 9 / technical 56 / roadmap 8 / pages 2)"
 
 echo "== Negative check (D-33): malformed technical/ filename fails the build loudly =="

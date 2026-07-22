@@ -14,7 +14,14 @@ grep -q "interstellar-website/" dist/sitemap-index.xml
 echo "sitemap OK"
 
 echo "== Wikilink resolves to a real internal anchor, Shiki ships light-theme inline styles, zero client JS =="
-RENDERED="dist/markdown-render-check/index.html"
+# Repointed off the removed markdown-render-check.astro diagnostic route
+# (02-08 orchestrator note) onto the real rendered deep-dive page for the same
+# entry (m0.3/phase-14.5-swapchain-acquire-fix) -- Plan 06's real
+# [milestone]/[slug] route makes the diagnostic route redundant, but this
+# assertion set (end-to-end proof the Satteri plugin runs in the real
+# pipeline, not just via direct markdownToHtml() calls in tests/lib.smoke.mjs)
+# must survive the move unweakened.
+RENDERED="dist/technical/m0.3/phase-14.5-swapchain-acquire-fix/index.html"
 test -f "$RENDERED"
 grep -q '<a href="/interstellar-website/technical/m0.1/phase-03-rendering-pipeline/"' "$RENDERED"
 grep -q 'background-color:#fff' "$RENDERED"
