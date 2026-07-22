@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 2
 current_phase_name: Content Rendering & Templating
 status: executing
-stopped_at: Completed 02-03-PLAN.md
-last_updated: "2026-07-22T17:12:08.483Z"
+stopped_at: Completed 02-04-PLAN.md
+last_updated: "2026-07-22T17:22:14.508Z"
 last_activity: 2026-07-22
 last_activity_desc: Phase 2 execution started
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 10
-  completed_plans: 5
+  completed_plans: 6
   percent: 25
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-13)
 ## Current Position
 
 Phase: 2 (Content Rendering & Templating) — EXECUTING
-Plan: 4 of 8
+Plan: 5 of 8
 Status: Ready to execute
 Last activity: 2026-07-22 — Phase 2 execution started
 
@@ -60,6 +60,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02 P01 | 20min | 3 tasks | 80 files |
 | Phase 02 P02 | 15min | 2 tasks | 5 files |
 | Phase 02 P03 | 30min | 3 tasks | 13 files |
+| Phase 02 P04 | 20min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,9 @@ Recent decisions affecting current work:
 - [Phase 02-03]: milestoneSortKey compares major/minor as separate parsed integers, not parseFloat on the whole string -- parseFloat('0.10') collapses to 0.1, sorting before parseFloat('0.9')=0.9
 - [Phase 02-03]: Wikilink resolver's known-ids set built by walking technical/ directly with node:fs, mirroring content.config.ts's generateId logic, independent of Astro's internal collection state
 - [Phase 02-03]: No real page template renders technical/roadmap/pages bodies yet -- collection-counts.json.ts and markdown-render-check.astro are small build-time-only routes proving collection counts and the wikilink/Shiki pipeline until Plans 04-07 land real routes
+- [Phase 02-04]: Meta-line renders above the slot (above the body's own H1), not below it, since D-14 forbids splitting the rendered body
+- [Phase 02-04]: Prev/next link text is the neighbouring post's actual title (arrow plus title), matching UI-SPEC's worked example, not a literal 'Previous' string
+- [Phase 02-04]: Astro only hoists the exported getStaticPaths() function to true module scope -- helper functions it calls must live in an imported src/lib module, not as sibling frontmatter declarations, or the build fails at prerender time
 
 ### Pending Todos
 
@@ -111,6 +115,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-22T17:12:08.476Z
-Stopped at: Completed 02-03-PLAN.md
+Last session: 2026-07-22T17:22:14.502Z
+Stopped at: Completed 02-04-PLAN.md
 Resume file: None
