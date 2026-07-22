@@ -57,4 +57,43 @@ echo "$BREADCRUMBS" | grep -q 'roadmap/m0.3'
 echo "== No hardcoded host/base string under src/ (T-02-07) =="
 ! grep -rIn -e 'github\.io' -e '/interstellar-website' src/
 
+echo "== D-40: full index links all 55 deep-dives, links the legend, and carries a data-driven era heading =="
+test -f dist/technical/index.html
+test "$(grep -o 'href="[^"]*technical/m0\.[0-9]*\(\.[0-9]*\)\?/phase-[^"]*"' dist/technical/index.html | wc -l)" -eq 55
+grep -q 'technical/how-to-read/' dist/technical/index.html
+grep -q 'Era 0 (engine foundations)' dist/technical/index.html
+
+echo "== Eight per-milestone index pages exist =="
+for m in m0.1 m0.2 m0.3 m0.4 m0.5 m0.6 m0.7 m0.8; do
+  test -f "dist/technical/$m/index.html"
+done
+
+echo "== D-34: decimal phase numbers sort between their integer neighbours, not lexically =="
+M03_IDX="dist/technical/m0.3/index.html"
+OFF14=$(grep -boF 'phase-14-threading-coordinate-integration' "$M03_IDX" | head -1 | cut -d: -f1)
+OFF145=$(grep -boF 'phase-14.5-swapchain-acquire-fix' "$M03_IDX" | head -1 | cut -d: -f1)
+OFF15=$(grep -boF 'phase-15-validation' "$M03_IDX" | head -1 | cut -d: -f1)
+test "$OFF14" -lt "$OFF145"
+test "$OFF145" -lt "$OFF15"
+
+M08_IDX="dist/technical/m0.8/index.html"
+OFF46=$(grep -boF 'phase-46-perturbation' "$M08_IDX" | head -1 | cut -d: -f1)
+OFF461=$(grep -boF 'phase-46.1-all-planet' "$M08_IDX" | head -1 | cut -d: -f1)
+OFF47=$(grep -boF 'phase-47-findings' "$M08_IDX" | head -1 | cut -d: -f1)
+test "$OFF46" -lt "$OFF461"
+test "$OFF461" -lt "$OFF47"
+
+echo "== D-35: an announcement page lists its milestone's deep-dives, isVisible-filtered =="
+M03_POST="dist/devlog/2026-06-05-a-moon-that-actually-orbits/index.html"
+test "$(grep -o 'href="[^"]*technical/m0\.3/[^"]*"' "$M03_POST" | wc -l)" -eq 8
+
+echo "== The manifesto (no milestone) carries no deep-dive list =="
+if grep -q 'Technical deep-dives for this milestone' dist/devlog/2026-04-07-why-im-building-a-hyperrealistic-space-sim/index.html; then
+  echo "FAIL: manifesto page carries a deep-dive list despite having no milestone"
+  exit 1
+fi
+
+echo "== Zero client JS on the full index =="
+test "$(grep -c '<script' dist/technical/index.html)" -eq 0
+
 echo "ALL CHECKS PASSED"

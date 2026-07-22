@@ -1,0 +1,87 @@
+---
+// D-40: full technical index grouped era -> milestone -> phase. Era and
+// milestone display name are read from each roadmap entry's own body (the
+// **Era:** line and the H1), not a hand-written era map -- a future era
+// boundary moves in the vault, not in this template. A milestone with no
+// roadmap entry groups under an explicit "Unmapped era" heading rather than
+// being dropped silently.
+import { getCollection } from 'astro:content';
+import { assertNonEmpty, isVisible } from '../../lib/content-guards';
+import { titleFromH1 } from '../../lib/title-from-h1';
+import { sortByPhaseNumber, parsePhaseNumber } from '../../lib/phase-sort';
+import { normalizeMilestone, milestoneSortKey } from '../../lib/milestone-key';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const technicalEntries = assertNonEmpty(await getCollection('technical'), 'technical').filter(isVisible);
+const roadmapEntries = assertNonEmpty(await getCollection('roadmap'), 'roadmap').filter(isVisible);
+
+// how-to-read has no milestone/phase -- it gets a prominent link, not a row.
+const deepDives = technicalEntries.filter((e) => e.id !== 'how-to-read');
+
+const milestoneMeta = new Map();
+for (const r of roadmapEntries) {
+  const key = normalizeMilestone(r.id);
+  const h1 = titleFromH1(r.body, r.id);
+  const display = h1.replace(/^Roadmap Detail\s*[—-]\s*/, '');
+  const eraMatch = r.body?.match(/^\*\*Era:\*\*\s*(.+)$/m);
+  milestoneMeta.set(key, {
+    display,
+    era: eraMatch ? eraMatch[1].trim() : 'Unmapped era',
+  });
+}
+
+const byMilestone = new Map();
+for (const entry of deepDives) {
+  const key = normalizeMilestone(entry.id.split('/')[0]);
+  if (!byMilestone.has(key)) byMilestone.set(key, []);
+  byMilestone.get(key).push(entry);
+}
+for (const [key, entries] of byMilestone) {
+  byMilestone.set(key, sortByPhaseNumber(entries));
+}
+
+const byEra = new Map();
+for (const key of byMilestone.keys()) {
+  const meta = milestoneMeta.get(key) ?? { display: key.toUpperCase(), era: 'Unmapped era' };
+  if (!byEra.has(meta.era)) byEra.set(meta.era, []);
+  byEra.get(meta.era).push(key);
+}
+
+// Eras ordered by their first milestone's numeric key; milestones within an
+// era by milestoneSortKey (D-34-adjacent: decimal-aware, not lexical).
+const eras = [...byEra.entries()]
+  .map(([era, keys]) => ({
+    era,
+    keys: [...keys].sort((a, b) => milestoneSortKey(a) - milestoneSortKey(b)),
+  }))
+  .sort((a, b) => milestoneSortKey(a.keys[0]) - milestoneSortKey(b.keys[0]));
+
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+---
+
+<BaseLayout title="Technical Deep-Dives — Interstellar Engine">
+  <p><a href={`${base}technical/how-to-read/`}>How to read these entries</a></p>
+  {eras.map(({ era, keys }) => (
+    <section>
+      <h2>{era}</h2>
+      {keys.map((key) => {
+        const meta = milestoneMeta.get(key) ?? { display: key.toUpperCase() };
+        const entries = byMilestone.get(key) ?? [];
+        return (
+          <div>
+            <h3><a href={`${base}technical/${key}/`}>{meta.display}</a></h3>
+            <ul>
+              {entries.map((entry) => (
+                <li>
+                  Phase {parsePhaseNumber(entry.id)}:{' '}
+                  <a href={`${base}technical/${entry.id}/`}>{titleFromH1(entry.body, entry.id)}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+    </section>
+  ))}
+</BaseLayout>

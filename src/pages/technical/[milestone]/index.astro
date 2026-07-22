@@ -1,0 +1,49 @@
+---
+// D-32/D-40: one index per milestone directory present in the technical
+// collection, phase-order list, link back to the full index.
+import { getCollection, getEntry } from 'astro:content';
+import { assertNonEmpty, isVisible } from '../../../lib/content-guards';
+import { titleFromH1 } from '../../../lib/title-from-h1';
+import { sortByPhaseNumber, parsePhaseNumber } from '../../../lib/phase-sort';
+import { normalizeMilestone } from '../../../lib/milestone-key';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const allEntries = assertNonEmpty(await getCollection('technical'), 'technical');
+  const visible = allEntries.filter(isVisible).filter((e) => e.id.includes('/'));
+
+  const milestoneDirs = [...new Set(visible.map((e) => e.id.split('/')[0]))];
+
+  return milestoneDirs.map((milestone) => ({
+    params: { milestone },
+    props: {
+      entries: sortByPhaseNumber(visible.filter((e) => e.id.startsWith(`${milestone}/`))),
+      milestone,
+    },
+  }));
+}
+
+const { entries, milestone } = Astro.props;
+
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+
+const milestoneKey = normalizeMilestone(milestone);
+const roadmapEntry = await getEntry('roadmap', milestoneKey);
+const milestoneDisplay = roadmapEntry
+  ? titleFromH1(roadmapEntry.body, roadmapEntry.id).replace(/^Roadmap Detail\s*[—-]\s*/, '')
+  : milestoneKey.toUpperCase();
+---
+
+<BaseLayout title={`${milestoneDisplay} — Technical Deep-Dives`}>
+  <h2>{milestoneDisplay}</h2>
+  <ul>
+    {entries.map((entry) => (
+      <li>
+        Phase {parsePhaseNumber(entry.id)}:{' '}
+        <a href={`${base}technical/${entry.id}/`}>{titleFromH1(entry.body, entry.id)}</a>
+      </li>
+    ))}
+  </ul>
+  <p><a href={`${base}technical/`}>Back to the full technical index</a></p>
+</BaseLayout>

@@ -6,28 +6,47 @@
 import { getCollection, render } from 'astro:content';
 import { assertNonEmpty, isVisible } from '../../lib/content-guards';
 import { entryDate, entryTitle, formatDate } from '../../lib/devlog-meta';
+import { titleFromH1 } from '../../lib/title-from-h1';
+import { sortByPhaseNumber } from '../../lib/phase-sort';
+import { normalizeMilestone } from '../../lib/milestone-key';
 import PostLayout from '../../layouts/PostLayout.astro';
 
 export async function getStaticPaths() {
   const allEntries = assertNonEmpty(await getCollection('devlog'), 'devlog');
   const visible = allEntries.filter(isVisible);
+  // D-35's other direction: each announcement lists its milestone's
+  // deep-dives, generated from the collection query (isVisible-filtered --
+  // T-02-03, a drafted deep-dive must not leak into this chrome list).
+  const technicalEntries = assertNonEmpty(await getCollection('technical'), 'technical').filter(isVisible);
 
   // Newest first -- same ordering the homepage archive (Plan 05) uses.
   const sorted = [...visible].sort(
     (a, b) => entryDate(b).getTime() - entryDate(a).getTime()
   );
 
-  return sorted.map((entry, index) => ({
-    params: { slug: entry.id },
-    props: {
-      entry,
-      olderEntry: sorted[index + 1],
-      newerEntry: sorted[index - 1],
-    },
-  }));
+  return sorted.map((entry, index) => {
+    const deepDives = entry.data.milestone
+      ? sortByPhaseNumber(
+          technicalEntries.filter((t) => {
+            if (t.id === 'how-to-read') return false;
+            return normalizeMilestone(t.id.split('/')[0]) === normalizeMilestone(entry.data.milestone);
+          })
+        )
+      : [];
+
+    return {
+      params: { slug: entry.id },
+      props: {
+        entry,
+        olderEntry: sorted[index + 1],
+        newerEntry: sorted[index - 1],
+        deepDives,
+      },
+    };
+  });
 }
 
-const { entry, olderEntry, newerEntry } = Astro.props;
+const { entry, olderEntry, newerEntry, deepDives } = Astro.props;
 const { Content, headings } = await render(entry);
 
 const title = entryTitle(entry);
@@ -55,4 +74,14 @@ const backLink = { href: base, label: 'Back to devblog' };
 
 <PostLayout title={title} meta={meta} headings={headings} prevNext={prevNext} backLink={backLink}>
   <Content />
+  {deepDives.length > 0 && (
+    <>
+      <h2>Technical deep-dives for this milestone:</h2>
+      <ul>
+        {deepDives.map((d) => (
+          <li><a href={`${base}technical/${d.id}/`}>{titleFromH1(d.body, d.id)}</a></li>
+        ))}
+      </ul>
+    </>
+  )}
 </PostLayout>
