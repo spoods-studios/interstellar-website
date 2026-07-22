@@ -323,8 +323,15 @@ link from copyright text, and no CSS is needed to get it.
 Joins the existing `<title>` / `description` / `canonical` / `icon` block:
 `<link rel="alternate" type="application/rss+xml" title="Interstellar Engine — Devblog" href="{absolute rss.xml URL}">`
 (D-47, on every page so reader apps autodetect), the OG/Twitter block, and
-`theme-color`. All interpolated attribute values pass through the existing
-`src/lib/escape-html.ts` (02 code-review findings WR-01/WR-02).
+`theme-color`.
+
+**CORRECTED 2026-07-22 by `03-RESEARCH.md`:** interpolated `<meta>` attribute
+values must use plain Astro `{expr}` interpolation and must **NOT** be passed
+through `src/lib/escape-html.ts`. Astro's `{expr}` already escapes attribute
+context correctly (including `"` → `&quot;`), whereas `escapeHtml()`
+deliberately does not escape quotes and would double-escape `&`. The
+WR-01/WR-02 findings applied to `set:html` on titles — a different context
+with the opposite requirement. Do not generalize them to attributes.
 
 ---
 
@@ -414,7 +421,7 @@ client and is outside this contract.
 | error | ✅ covered | Three enumerated loud build failures (D-48 hero path, D-54 invite constant, D-46 feed image path). See Copywriting → Error state. |
 | populated | ✅ covered | Complete tag list specified in § The Discord Embed and § Placement → `<head>`. |
 | partial | ✅ covered | `article:published_time` is the only conditional tag — emitted where a real date exists, omitted on deep-dives (D-33), never fabricated. Every other tag is unconditional. |
-| overflow | ✅ covered | No layout surface. All interpolated attribute values pass through `src/lib/escape-html.ts` (WR-01/WR-02). |
+| overflow | ✅ covered | No layout surface. Attribute values use plain Astro `{expr}` interpolation, which escapes attribute context correctly — **not** `escape-html.ts`, which would double-escape `&` and leave `"` unescaped (corrected by `03-RESEARCH.md`). |
 | zero-one-many | ✅ covered | Exactly one head block per page. |
 | long-text | ✅ covered | Description truncated per D-52; `og:title` unduplicated per Copywriting. |
 

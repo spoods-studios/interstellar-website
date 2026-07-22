@@ -147,6 +147,34 @@ Numbering continues from Phase 2 (which ended at D-44).
   in-phase has precedent (D-25's promote flow). Only fires once a real link
   exists.
 
+### Amendments after research (2026-07-22, developer-confirmed)
+- **D-57:** Success criterion 4 ("validates clean against a standard feed
+  validator") is a **split criterion**, because no maintained offline RSS-2.0
+  *semantic* validator exists. Automated leg: `xmllint --noout dist/rss.xml`
+  (offline, zero new dependency, already on the box) plus structural greps in
+  the smoke harness for the required RSS 2.0 elements. Human leg: one W3C Feed
+  Validation Service run against the deployed feed URL, recorded as a
+  **backstop** truth, never as a build step — nothing else in the harness
+  depends on a third-party network service. Emit `<atom:link rel="self">` from
+  the start, since that is the one warning W3C predictably raises.
+- **D-58:** D-52's truncation is the **strict** reading — last complete
+  sentence under ~160 chars, **no minimum-length floor**. `pages/how-its-made`
+  therefore gets the 52-char `Setare Aerospace is built solo, and I use AI
+  heavily.` rather than a 160-char ellipsis cut. A complete short sentence
+  beats a truncated long one; that is what D-52 was written to achieve.
+  Additionally, an entry whose body yields **no** prose block is a **loud build
+  failure naming the entry** (D-10/D-33/D-39 culture), never a silent empty
+  description.
+- **D-59:** Per-post hero images resolve via `entry.assetImports` — verified
+  present on exactly the two hero posts and `undefined` on all other 73 entries
+  across all four collections — paired with an eager
+  `import.meta.glob('../../assets/*.png')` yielding `ImageMetadata`. `og:image`
+  uses the **PNG** that Vite emits to `dist/_astro/`, not the Markdown
+  pipeline's WebP: Twitter Card WebP support is unreliable.
+  **Do not use `entry.rendered.html`** for feed content — its images are
+  unresolved `__ASTRO_IMAGE_` placeholders that `sanitize-html` silently strips
+  to bare `<img>` tags, a failure invisible in the feed source.
+
 ### Claude's Discretion
 - `@astrojs/rss` (official, not yet installed) vs. a hand-rolled XML endpoint
   — prefer the official package unless research says otherwise; and the
@@ -261,9 +289,12 @@ Numbering continues from Phase 2 (which ended at D-44).
 - `@astrojs/rss` is **not installed** — `package.json` carries astro@^7.0.9,
   @astrojs/sitemap@^3.7.3, satteri@^0.9.5 only. D-46's sanitizer is a second
   new dependency.
-- `@astrojs/sitemap` is already wired in `astro.config.mjs` `integrations` —
-  the new `/rss.xml` route should appear in the sitemap for free; worth an
-  assertion.
+- `@astrojs/sitemap` is already wired in `astro.config.mjs` `integrations`.
+  **CORRECTED 2026-07-22 by `03-RESEARCH.md`:** `/rss.xml` will **not** appear
+  in the sitemap — `@astrojs/sitemap` excludes endpoint routes (proven with a
+  probe endpoint). This is the good outcome: `tests/site.smoke.sh`'s
+  sitemap-count-equals-page-count assertion stays green with no change. Do not
+  write an assertion expecting the feed in the sitemap.
 - The deploy pipeline (Phase 1) rebuilds on every push to main, so D-54's
   hard failure is also a **deploy-blocking** failure — correct, but it means
   the invite constant must be set before the phase's work merges.
