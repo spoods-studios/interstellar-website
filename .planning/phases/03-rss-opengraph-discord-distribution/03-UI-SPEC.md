@@ -1,7 +1,7 @@
 ---
 phase: 3
 slug: rss-opengraph-discord-distribution
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-07-22
@@ -330,18 +330,93 @@ Joins the existing `<title>` / `description` / `canonical` / `icon` block:
 
 ## UI Considerations
 
-Applicable state considerations resolved: 6 covered, 2 backstop, 0 unresolved.
+Computed by `ui-consideration-probe.cjs` over six declared surfaces, resolved
+2026-07-22 against the locked decisions and confirmed by the developer.
 
-| Category | Element(s) | Status | Resolution / Reason |
-|----------|------------|--------|---------------------|
-| empty | RSS feed (list-collection) | ✅ covered | The feed cannot legitimately be empty — the `devlog` collection is populated and an empty collection is a build-time failure (D-10/D-33), not a rendered state. No "no posts yet" branch exists. See Copywriting → Empty state. |
-| zero-one-many | RSS feed item count | ✅ covered | Feed carries **all** announcements uncapped (9 today, growing — Phase 4's M1.1 post enters the same query). Same `getCollection` + `isVisible` filter as the homepage archive (D-45), so archive and feed structurally cannot diverge at any count. |
-| partial | `og:image` per page (2 of 9 posts have a real hero) | ✅ covered | D-48: real hero where a file resolves, `og-default.png` everywhere else (~73 of ~75 pages). Every page has an image; there is no image-less embed state. |
-| error | Unresolvable hero path / unset invite constant | ✅ covered | Both loud-fail the build naming the offender (D-48, D-54) rather than degrading to a silent default or a missing link. See Copywriting → Error state. |
-| overflow | Header nav with a fifth item at <640px | ✅ covered | Existing `nav { display: flex; flex-wrap: wrap; gap: 8px 16px }` (`global.css:66-70`) wraps a fifth item with zero new CSS; no hamburger, no truncation. |
-| long-text | OG/meta description | ✅ covered | D-52 truncates at the last complete sentence under ~160 chars with `…` when cut mid-paragraph — sized to what Discord and SERPs display without visible clipping. See Copywriting → Per-item title/description. |
-| long-text | Long post titles inside the Discord embed | 🧪 backstop | Discord truncates embed titles client-side and the site cannot control it; the contract is only that `og:title` is not doubled with the site name (which is what pushes titles over the visible limit). Verify by pasting the longest deep-dive title into Discord and confirming it reads as a complete thought. |
-| populated | The rendered Discord embed itself | 🧪 backstop | The only proof is a real paste of a real deployed URL (post, deep-dive, and roadmap page) showing title + description + large image + accent border. Grep of `dist/` proves the tags, not the render — both required, and the deployed-site paste cannot be faked at build time. |
+**43 applicable · 33 covered · 4 backstop · 6 dismissed · 0 unresolved**
+
+Surfaces probed: **E1** header Discord CTA · **E2** footer line · **E3** default
+OG card · **E4** Discord embed (off-site) · **E5** `/rss.xml` feed · **E6** page
+`<head>` metadata block.
+
+**Blanket dismissal — `loading` on all six surfaces (6 items).** The site is
+statically prerendered with zero client JS (D-23, Phase 2). Nothing on any
+surface fetches, defers, or streams; there is no interval in which a loading
+state could exist. The Discord embed's own load spinner belongs to Discord's
+client and is outside this contract.
+
+### E1 — Header Discord CTA
+
+| Category | Status | Resolution / Reason |
+|----------|--------|---------------------|
+| empty | ✅ covered | No data-driven state. The `href` is the D-54 build-time constant; there is no runtime condition under which the link renders without a target — an unset constant fails the build. |
+| loading | ⊘ dismissed | Static prerender, no client JS. |
+| error | ✅ covered | D-54: unset or placeholder invite constant fails the build **naming the constant**. Never a dead or absent link. |
+| populated | ✅ covered | Renders as the fifth `<a>` in `<nav>` on every page, label `Discord`. See Placement → Header. |
+| partial | ✅ covered | Binary by construction — constant set (renders) or build fails. No half-configured state. |
+| overflow | ✅ covered | Existing `nav { display: flex; flex-wrap: wrap; gap: 8px 16px }` (`global.css:66-70`) wraps the fifth item at <640px. No hamburger, no truncation, zero new CSS. |
+| zero-one-many | ✅ covered | Exactly one, always. Not a collection. |
+| long-text | ✅ covered | Label is the fixed literal `Discord` (7 chars), never data-derived. |
+
+### E2 — Footer line
+
+| Category | Status | Resolution / Reason |
+|----------|--------|---------------------|
+| loading | ⊘ dismissed | Static prerender, no client JS. |
+| error | ✅ covered | Discord href: D-54 loud build failure. RSS href: `/rss.xml` is a build-generated route — if the endpoint fails to build, the build fails; the link cannot point at a missing route. |
+| overflow | ✅ covered | One `<p>` in normal text flow with ` · ` literal separators; wraps naturally at any width. No fixed-width container, no flex, no truncation. |
+| long-text | ✅ covered | All three strings are fixed literals (`© 2026 Spoods Studios`, `RSS`, `Join the Discord`). Nothing data-derived. |
+
+### E3 — Default OpenGraph card
+
+| Category | Status | Resolution / Reason |
+|----------|--------|---------------------|
+| empty | ✅ covered | A committed static raster, never generated from data. No empty variant exists. |
+| loading | ⊘ dismissed | Never loaded by this site — fetched by the embedding client, whose loading UI we don't control. |
+| error | ✅ covered | A missing or renamed `public/og-default.png` would silently blank every embed and pass any `dist/` grep. **Build-time assertion required:** the file exists in `dist/` and the emitted absolute `og:image` URL resolves to it. |
+| populated | ✅ covered | Full composition contract specified — dimensions, safe area, type scale, glyph placement, exact colors. See § The Default OpenGraph Card. |
+| partial | ✅ covered | D-48: real hero where a file resolves, this card everywhere else (~73 of ~75 pages). No page lacks an image. |
+| overflow | ✅ covered | Text is baked into the raster at authoring time; nothing can overflow at render. Authoring constraint: wordmark + tagline fit the 1008×438 content box inside the 96px safe inset. |
+| zero-one-many | ✅ covered | Exactly one default card exists site-wide. |
+
+### E4 — Discord embed (off-site)
+
+| Category | Status | Resolution / Reason |
+|----------|--------|---------------------|
+| empty | ✅ covered | Never empty — every page emits title, description and image unconditionally (D-50/D-51/D-48). |
+| loading | ⊘ dismissed | Discord's client renders and loads the card; outside this contract. |
+| error | 🧪 backstop | A malformed tag or a **relative** `og:image` degrades the embed to a bare link, and no build step catches it — the phase's single most likely silent failure. Verify by pasting a deployed URL and confirming a card renders, not a naked link. |
+| populated | 🧪 backstop | Only provable by a real paste of a real deployed URL (an announcement, a deep-dive, and a roadmap page) showing title + description + large image + accent border. `dist/` greps prove the tags exist, not that the embed renders. Both required. |
+| partial | 🧪 backstop | The two image paths must both be exercised: paste one post with a real hero (M0.7 or M0.8) and one page falling back to `og-default.png`, and confirm both render a large image. |
+| overflow | ✅ covered | Discord truncates client-side and we cannot control it. The contract is only that `og:title` is not doubled with the site name (`og:site_name` already carries it) — doubling is what pushes titles past the visible limit. |
+| zero-one-many | ✅ covered | One embed per pasted URL. Not a collection. |
+| long-text | 🧪 backstop | Paste the longest deep-dive title and confirm it still reads as a complete thought after Discord's truncation. |
+
+### E5 — `/rss.xml` feed
+
+| Category | Status | Resolution / Reason |
+|----------|--------|---------------------|
+| empty | ✅ covered | Cannot legitimately be empty — the `devlog` collection is populated (9 announcements, D-43) and an empty collection is a build-time failure (D-10/D-33), not a rendered state. No "no posts yet" branch. |
+| loading | ⊘ dismissed | Build-time generated static XML. |
+| error | ✅ covered | D-46: a feed-content image whose relative path cannot be rewritten to an absolute URL fails the build naming the path. Feed validity itself is a success criterion — validate against a standard feed validator as part of verification. |
+| populated | ✅ covered | 9 items today, each carrying title, publication date, link, and the full sanitized post HTML in `<content:encoded>`. |
+| partial | ✅ covered | An item missing an optional frontmatter field (the frontmatter-less manifesto has no `title:` or `date:`) falls back to the shipped D-14 H1 / filename-date rules. No item renders half-formed. |
+| overflow | ✅ covered | Uncapped by decision — the feed grows with the collection; Phase 4's M1.1 post enters the same query. |
+| zero-one-many | ✅ covered | Same `getCollection` + `isVisible` filter as the homepage archive (D-45), so archive and feed structurally cannot diverge at any count. |
+| long-text | ✅ covered | Item descriptions use the same D-52 truncation as OG/meta; item bodies are full-length by design (D-46). |
+
+### E6 — Page `<head>` metadata block
+
+| Category | Status | Resolution / Reason |
+|----------|--------|---------------------|
+| empty | ✅ covered | Every page emits the full block; no page type opts out, including 404 (D-50). |
+| loading | ⊘ dismissed | Static prerender. |
+| error | ✅ covered | Three enumerated loud build failures (D-48 hero path, D-54 invite constant, D-46 feed image path). See Copywriting → Error state. |
+| populated | ✅ covered | Complete tag list specified in § The Discord Embed and § Placement → `<head>`. |
+| partial | ✅ covered | `article:published_time` is the only conditional tag — emitted where a real date exists, omitted on deep-dives (D-33), never fabricated. Every other tag is unconditional. |
+| overflow | ✅ covered | No layout surface. All interpolated attribute values pass through `src/lib/escape-html.ts` (WR-01/WR-02). |
+| zero-one-many | ✅ covered | Exactly one head block per page. |
+| long-text | ✅ covered | Description truncated per D-52; `og:title` unduplicated per Copywriting. |
 
 ---
 
@@ -361,35 +436,49 @@ packages, not UI registry blocks, and are outside this gate's scope.
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS (1 non-blocking FLAG, resolved below)
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** APPROVED — `gsd-ui-checker`, 2026-07-22.
+
+**Spacing FLAG resolution:** the OG card's `96px` safe inset and `40px` block
+gap A are not members of Phase 2's token scale (4/8/16/24/32/48/64). Recorded
+as a **deliberate poster-scale set outside the site token scale** — the card is
+a standalone 1200×630 raster that never participates in page layout, both
+values are multiples of 4 so grid alignment holds, and `96 = 48 × 2`. No change
+required; documented rather than snapped.
 
 ---
 
-## Items for Orchestrator to Confirm with Developer
+## Discretion Items — Developer-Confirmed
 
-*(CONTEXT.md's "Claude's Discretion" list resolved into concrete defaults
-above; flagged here per this agent's no-user-channel constraint.)*
+*(CONTEXT.md's "Claude's Discretion" list was resolved into concrete defaults
+above. The researcher had no user channel; the orchestrator surfaced the three
+substantive ones and the developer confirmed all defaults on 2026-07-22.)*
 
-1. **OG card composition** — glyph `IE` 112px / wordmark 84px / 4px accent rule /
-   D-16 tagline 32px, on 1200×630 `#fefefe` with 96px safe inset. The tagline
-   and the accent rule are the two additions beyond D-49's literal "wordmark +
-   glyph"; either can be dropped for a starker card.
-2. **Accent rule on the card** — the only decorative (non-link) use of `#1d5fae`
-   anywhere. Drop it if the accent should remain strictly link-only.
-3. **`theme-color: #1d5fae`** — colors the Discord embed's left border, but also
-   tints the Chrome-on-Android address bar blue on an otherwise light-only
-   site. Alternatives: `#fefefe`, or omit.
-4. **CTA copy** — header `Discord` (nav-word parity) vs. footer `Join the
-   Discord` (the one invitation on the site). Deliberately asymmetric; make
-   both `Discord` if the asymmetry reads oddly.
-5. **Footer RSS label** — `RSS` (chosen) vs. `RSS feed` vs. `Subscribe`.
+**Confirmed by the developer:**
+
+1. ✅ **OG card composition** — glyph `IE` 112px / wordmark 84px / 4px accent
+   rule / D-16 tagline 32px, on 1200×630 `#fefefe` with 96px safe inset.
+   Tagline and accent rule **kept**: a card seen in a Discord embed with no
+   other context should tell a stranger what the project is.
+2. ✅ **Accent rule on the card** — kept. Enumerated as one of exactly two
+   non-link uses of `#1d5fae` (see Color); the reserved-for list is amended by
+   enumeration, never broadened.
+3. ✅ **`theme-color: #1d5fae`** — kept. The accent left border is a real part
+   of what makes an embed look deliberate rather than auto-scraped, and the
+   Android address-bar tint uses the site's own accent.
+4. ✅ **CTA copy asymmetry** — kept. Header `Discord` holds nav-word parity;
+   footer `Join the Discord` is the one place the site actually invites.
+
+**Resolved at researcher discretion, not separately raised** (all trace to
+CONTEXT.md's discretion list; raise only if implementation finds a conflict):
+
+5. **Footer RSS label** — `RSS` (over `RSS feed` / `Subscribe`).
 6. **Footer line order** — `© 2026 Spoods Studios · RSS · Join the Discord`.
 7. **Discord links open in a new tab** (`target="_blank" rel="noopener noreferrer"`);
    RSS link stays same-tab. This is the site's first `target="_blank"`.
