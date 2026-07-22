@@ -64,8 +64,31 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. A visitor can open the "How It's Made" and "Roadmap" standalone pages, neither of which appears in the archive listing
   4. The site is legible on mobile and desktop, serves a custom 404, shows a favicon, exposes `sitemap.xml`, and emits canonical URLs
 
-**Plans**: TBD
+**Plans**: 8 plans
 **UI hint**: yes
+
+**Wave 1**
+
+- [ ] 02-01-PLAN.md — Promote all four content trees for M0.1–M0.8 (9 announcements, 55 deep-dives + legend, 8 roadmap docs, 2 standalone pages)
+- [ ] 02-02-PLAN.md — Site shell: hand-written CSS, BaseLayout header/nav/footer, favicon, custom 404
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 02-03-PLAN.md — Three new collections, shared helpers, Sätteri wikilink mdast plugin, light-theme Shiki, sitemap
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 02-04-PLAN.md — Shared PostLayout + build-time TOC + announcement post route
+
+**Wave 4** *(blocked on Wave 3)*
+
+- [ ] 02-05-PLAN.md — Archive homepage (includes blocking D-16 one-liner sign-off)
+- [ ] 02-06-PLAN.md — Technical tree: full/per-milestone indexes, deep-dive pages, bidirectional cross-links
+- [ ] 02-07-PLAN.md — Roadmap overview + 8 milestone detail pages + How It's Made page
+
+**Wave 5** *(blocked on Wave 4)*
+
+- [ ] 02-08-PLAN.md — SITE-04 whole-site sweep, loud-fail fixtures, requirement-wording housekeeping, human verification
 
 ### Phase 3: RSS, OpenGraph & Discord Distribution
 
@@ -105,6 +128,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Stack & Scaffolding | 2/2 | Complete    | 2026-07-14 |
-| 2. Content Rendering & Templating | 0/TBD | Not started | - |
+| 2. Content Rendering & Templating | 0/8 | Planned | - |
 | 3. RSS, OpenGraph & Discord Distribution | 0/TBD | Not started | - |
 | 4. Analytics, Launch Content & Deploy Hardening | 0/TBD | Not started | - |

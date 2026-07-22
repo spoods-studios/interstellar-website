@@ -41,17 +41,17 @@ created: 2026-07-22
 
 | Ref | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |-----|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| CONT-02 | TBD | TBD | CONT-02 | — | N/A | build + manual | `npm run build` (exit 0); `/` lists 9 announcement entries; one full post's rendered body matches its source `.md` | ❌ W0 | ⬜ pending |
-| CONT-03 | TBD | TBD | CONT-03 | — | N/A | build + assertion | `npm run build`; `grep -c "how-its-made" dist/index.html` → expect `0` | ❌ W0 | ⬜ pending |
-| CONT-04 | TBD | TBD | CONT-04 | — | N/A | build + manual | `npm run build`; overview → each `/roadmap/m0.X/` → each phase's resolved deep-dive link resolves | ❌ W0 | ⬜ pending |
-| SITE-04 | TBD | TBD | SITE-04 | — | N/A | build + assertion + live | `npm run build`; `test -f dist/404.html && test -f dist/favicon.svg && test -f dist/sitemap.xml`; live-fetch a nonexistent URL post-deploy | ❌ W0 | ⬜ pending |
-| D-33 | TBD | TBD | CONT-02 | — | Malformed content cannot reach rendered HTML silently | negative smoke | Stage a bad-named fixture in a scratch copy (never in real `technical/`), point a throwaway loader at it, confirm non-zero exit **and** the offending filename in stderr | N/A — manual | ⬜ pending |
-| D-39 | TBD | TBD | CONT-02 | T-02-01 | Resolver returns an internal site path or `null` (which throws) — never passes a raw wikilink target through to `href` | negative smoke | Same scratch-fixture approach, applied to the mdast wikilink plugin: unresolvable target → non-zero exit naming file **and** link | N/A — manual | ⬜ pending |
-| D-39b | TBD | TBD | CONT-02 | T-02-01 | `[[nodiscard]]` inside code fences is never rewritten | build + assertion | `npm run build`; grep the rendered HTML of a deep-dive known to contain `[[nodiscard]]` and confirm the literal text survives unmodified inside its `<code>` block | ❌ W0 | ⬜ pending |
-| D-34 | TBD | TBD | CONT-02 | — | N/A | build + manual | Confirm `phase-10.5` sorts between `phase-10` and `phase-11` on the rendered per-milestone technical index (decimal-aware, not lexical) | ❌ W0 | ⬜ pending |
-| D-30 | TBD | TBD | CONT-02 | T-02-03 | A `status: draft` entry never leaks into a generated cross-link list | build + assertion | Temporarily mark one technical doc `status: draft`, rebuild, confirm it is absent from **both** the index **and** its milestone announcement's generated deep-dive list; revert | ❌ W0 | ⬜ pending |
-| D-41 | TBD | TBD | CONT-07 (partial) | — | N/A | build + assertion | `npm run build`; confirm code fences carry Shiki markup **and** that zero client JS is emitted for highlighting; theme is `github-light`, not the `github-dark` default | ❌ W0 | ⬜ pending |
-| D-42 | TBD | TBD | CONT-02 | — | N/A | build + manual | TOC renders on a 3+ H2 doc, is absent below that threshold, anchors match generated heading slugs, and no JS ships | ❌ W0 | ⬜ pending |
+| CONT-02 | 02-01 T1, 02-04 T2, 02-05 T2 | 1, 3, 4 | CONT-02 | — | N/A | build + manual | `npm run build` (exit 0); `/` lists 9 announcement entries; one full post's rendered body matches its source `.md` (manual row, verified in 02-08 T4) | ✅ W0 closed by 02-01 | ⬜ pending |
+| CONT-03 | 02-01 T3, 02-07 T2 | 1, 4 | CONT-03 | — | N/A | build + assertion | `npm run build`; the archive index output contains zero references to the standalone-page slug | ✅ W0 closed by 02-01 | ⬜ pending |
+| CONT-04 | 02-01 T2/T3, 02-07 T1/T2 | 1, 4 | CONT-04 | — | N/A | build + manual | `npm run build`; overview → each `/roadmap/m0.X/` → each phase's resolved deep-dive link resolves (dead-link sweep in 02-08 T1) | ✅ W0 closed by 02-01 | ⬜ pending |
+| SITE-04 | 02-02 T1/T2, 02-03 T3, 02-08 T1/T4 | 1, 2, 5 | SITE-04 | — | N/A | build + assertion + live | `npm run build`; `test -f dist/404.html && test -f dist/favicon.svg`; `ls dist/sitemap*.xml`; canonical + dead-link sweep in `tests/site.smoke.sh`; live-fetch a nonexistent URL post-deploy (02-08 T4) | ✅ W0 closed by 02-02/02-03 | ⬜ pending |
+| D-33 | 02-03 T2 | 2 | CONT-02 | — | Malformed content cannot reach rendered HTML silently | negative smoke | `tests/collections.smoke.sh`: stage a bad-named fixture inside `technical/` under trap-and-restore, confirm non-zero exit **and** the offending filename in output, then assert the tree is clean | ✅ `tests/collections.smoke.sh` (02-03) | ⬜ pending |
+| D-39 | 02-03 T3, 02-08 T2 | 2, 5 | CONT-02 | T-02-01 | Resolver returns an internal site path or `null` (which throws) — never passes a raw wikilink target through to `href` | negative smoke | `tests/lib.smoke.mjs` compile-level case (02-03 T3) plus the `tests/site.smoke.sh` fixture case (02-08 T2): unresolvable target → non-zero exit naming file **and** link | ✅ `tests/lib.smoke.mjs` (02-03) | ⬜ pending |
+| D-39b | 02-03 T3, 02-06 T1 | 2, 4 | CONT-02 | T-02-01 | The C++ double-bracket attribute inside code is never rewritten | build + assertion | Compile-level assertion in `tests/lib.smoke.mjs` (02-03) and route-level assertion in `tests/technical.smoke.sh` (02-06) that the attribute survives verbatim inside a rendered code element | ✅ closed by 02-03/02-06 | ⬜ pending |
+| D-34 | 02-03 T1, 02-06 T2 | 2, 4 | CONT-02 | — | N/A | build + assertion | `tests/lib.smoke.mjs` unit cases on `sortByPhaseNumber`; `tests/technical.smoke.sh` byte-offset assertion that phase-14.5 falls between phase-14 and phase-15 on the rendered M0.3 index | ✅ closed by 02-03/02-06 | ⬜ pending |
+| D-30 | 02-03 T1, 02-08 T2 | 2, 5 | CONT-02 | T-02-03 | A drafted entry never leaks into a generated cross-link list | build + assertion | `tests/lib.smoke.mjs` unit cases on `isVisible`; `tests/site.smoke.sh` fixture case asserting absence from the milestone index, the full index, **and** the announcement's generated deep-dive list | ✅ closed by 02-03/02-08 | ⬜ pending |
+| D-41 | 02-03 T3 | 2 | CONT-07 (partial) | — | N/A | build + assertion | `tests/markdown.smoke.sh`: code fences carry Shiki inline-style markup, zero client JS is emitted, and `astro.config.mjs` sets the light theme rather than the dark default | ✅ `tests/markdown.smoke.sh` (02-03) | ⬜ pending |
+| D-42 | 02-04 T1, 02-06 T1 | 3, 4 | CONT-02 | — | N/A | build + assertion | `tests/lib.smoke.mjs` threshold cases on `buildToc`; `tests/technical.smoke.sh` asserts a TOC on a long deep-dive with anchors matching emitted heading ids and no script tag | ✅ closed by 02-03/02-04 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -59,10 +59,13 @@ created: 2026-07-22
 
 ## Wave 0 Requirements
 
-- [ ] `technical/`, `roadmap/`, `pages/` directories — do not exist in the repo yet; created by the promote step, which is itself a deliverable of this phase. Every `❌ W0` row above is blocked on it.
-- [ ] Three new collection definitions in `src/content.config.ts` — extend Phase 1's file, mirroring its permissive-schema + loud-fail `generateId` pattern
-- [ ] Shared helpers: mdast wikilink plugin, decimal-aware phase sort, milestone-key normalizer (`M0.1` ↔ `m0.1` ↔ `M0.1.md`)
-- [ ] No JS test framework install needed — same MVP-mode reasoning as Phase 1
+All Wave 0 gaps are assigned to real plans; none is left unowned.
+
+- [ ] `technical/`, `roadmap/`, `pages/` directories — **assigned to 02-01 (wave 1)**, the promote plan. Every content-dependent row above is blocked on it.
+- [ ] Three new collection definitions in `src/content.config.ts` — **assigned to 02-03 T2 (wave 2)**
+- [ ] Shared helpers: mdast wikilink plugin, decimal-aware phase sort, milestone-key normalizer (`M0.1` ↔ `m0.1` ↔ `M0.1.md`) — **assigned to 02-03 T1/T3 (wave 2)**
+- [ ] Committed harness runner `tests/run-all.sh` plus `tests/lib.smoke.mjs` — **assigned to 02-03 T1 (wave 2)**. Each plan thereafter adds its own `tests/<area>.smoke.sh`, which the runner auto-discovers, so no two parallel plans edit a shared harness file.
+- [ ] No JS test framework install needed — same MVP-mode reasoning as Phase 1. `tests/lib.smoke.mjs` uses `node:assert/strict` in a plain committed script, matching Phase 1's `tests/build.smoke.sh` precedent; no runner, no dependency.
 
 ---
 
