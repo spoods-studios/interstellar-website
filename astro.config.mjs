@@ -8,6 +8,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createWikilinkResolver } from './src/lib/wikilink-resolver.mjs';
 import { createWikilinkPlugin } from './src/lib/mdast-wikilinks.mjs';
 import { createDeepDiveLinkPlugin } from './src/lib/mdast-deepdive-links.mjs';
+import { assertInviteConfigured } from './src/lib/site.mjs';
 
 const BASE = '/interstellar-website';
 const NORMALIZED_BASE = BASE.endsWith('/') ? BASE : `${BASE}/`;
@@ -108,6 +109,11 @@ function validateContentLoudFail() {
 }
 
 validateContentLoudFail();
+
+// D-54: same reasoning as validateContentLoudFail() above -- config evaluation
+// is the layer nothing downstream swallows, so an unset invite crashes the
+// build here rather than shipping a CTA with an empty href.
+assertInviteConfigured();
 
 export default defineConfig({
   site: 'https://spoods-studios.github.io',
