@@ -57,8 +57,12 @@ const technical = defineCollection({
       return `${milestone}/phase-${phaseNum}-${slug}`; // preserves D-32's URL shape directly
     },
   }),
-  // D-33: no frontmatter fields at all — schema only rejects unexpected keys loudly.
-  schema: z.object({}).strict(),
+  // D-33/D-30: no frontmatter fields beyond `status` -- schema still rejects
+  // any other unexpected key loudly. `status` is optional-and-uniform with
+  // devlog/pages (T-02-03) so isVisible's existing guard, already filtered
+  // onto every technical query site-wide, has a real field to act on rather
+  // than a structural no-op (02-08 Plan Task 2's D-30 fixture proves this).
+  schema: z.object({ status: z.enum(['draft', 'published', 'final']).optional() }).strict(),
 });
 
 const ROADMAP_RE = /^M(\d+(?:\.\d+)?)\.md$/i;
