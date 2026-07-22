@@ -6,6 +6,7 @@
 // body, not as part of it).
 import { getCollection, render } from 'astro:content';
 import { assertNonEmpty, isVisible } from '../../lib/content-guards';
+import { describeBody } from '../../lib/describe-entry';
 import { titleFromH1 } from '../../lib/title-from-h1';
 import { normalizeMilestone, milestoneSortKey } from '../../lib/milestone-key';
 import PostLayout from '../../layouts/PostLayout.astro';
@@ -40,9 +41,19 @@ const milestoneLinks = sortedRoadmapEntries.map((r) => {
   const display = h1.replace(/^Roadmap Detail\s*[—-]\s*/, '');
   return { href: `${base}roadmap/${r.id}/`, label: display || milestoneKey.toUpperCase() };
 });
+
+// D-51: description from the entry's own body. No publishedTime -- `updated`
+// is a revision date, not a publication date.
+const description = describeBody(entry.body, entry.id);
 ---
 
-<PostLayout title={title} meta={meta} headings={headings}>
+<PostLayout
+  title={title}
+  meta={meta}
+  headings={headings}
+  description={description}
+  ogType="website"
+>
   <Content />
   <h2>Milestone detail pages</h2>
   <ul>

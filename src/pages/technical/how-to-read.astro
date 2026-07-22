@@ -5,6 +5,7 @@
 // entry. Renders through the same PostLayout, one page.
 import { getCollection, render } from 'astro:content';
 import { assertNonEmpty, isVisible } from '../../lib/content-guards';
+import { describeBody } from '../../lib/describe-entry';
 import { titleFromH1 } from '../../lib/title-from-h1';
 import PostLayout from '../../layouts/PostLayout.astro';
 
@@ -19,8 +20,18 @@ const title = titleFromH1(entry.body, entry.id);
 const rawBase = import.meta.env.BASE_URL;
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 const backLink = { href: `${base}technical/`, label: 'Back to the technical index' };
+
+// The legend is a standing reference page, not one of the 55 deep-dives, so
+// it is a `website` rather than an `article`.
+const description = describeBody(entry.body, entry.id);
 ---
 
-<PostLayout title={title} headings={headings} backLink={backLink}>
+<PostLayout
+  title={title}
+  headings={headings}
+  backLink={backLink}
+  description={description}
+  ogType="website"
+>
   <Content />
 </PostLayout>
