@@ -20,8 +20,9 @@ created: 2026-07-22
 > proposed: body 18px/1.6, link accent `#1d5fae`, TOC sticky sidebar ≥640px +
 > native `<details>` <640px, wrapping flex-row nav (no hamburger), single
 > 640px breakpoint, one shared post layout + per-index layouts, Shiki
-> `github-light`. **Still open:** the homepage one-liner wording (D-16
-> requires explicit approval — due at plan review, must not ship as drafted).
+> `github-light`. The homepage one-liner (D-16) is also resolved — the
+> developer supplied the exact wording in Plan 02-05 (see Copywriting
+> Contract below); it shipped verbatim and is no longer open.
 
 ---
 
@@ -167,7 +168,7 @@ a second color needing its own reserved-for list.
 |---------|------|
 | Primary CTA | Not applicable this phase — no forms, no signup, no purchase flow. The closest analog is post-to-post navigation, covered below. |
 | Prev/next nav labels (D-15) | "← Previous" / "Next →" (date-adjacent post title as the link text, e.g. "← M0.2: Coordinate System"); archive link reads "Back to devblog" |
-| Homepage top matter (D-16) | ONE quiet sentence, VOICE register, no hype — **exact wording needs developer sign-off at plan review** (per D-16, explicitly not this agent's call); placeholder for planning: "A from-scratch physics-accurate space engine, built in the open." |
+| Homepage top matter (D-16) | ONE quiet sentence, VOICE register, no hype — developer-approved 2026-07-22 (Plan 02-05): **"A space engine built from scratch on real n-body physics."** Ships verbatim on the site root, above the archive list. |
 | Empty state | Not applicable — all four content trees are populated in-phase (D-43: 9 announcements, 55 deep-dives, 8 roadmap docs, 2 pages) before this phase's success criteria are checked. No collection can legitimately render empty; an empty collection is a **build-time error** (D-10/D-33), not a UI empty state. |
 | 404 copy (D-19) | Heading: "Page not found." Body: "The page you're looking for doesn't exist — it may have moved or the link is out of date." Link: "← Back home" (goes to `/`). Same header/footer chrome as every other page. |
 | Error state (build-time, not runtime UI) | Malformed content fails the build with a message naming the offending file (D-10, D-33, D-39) — this is a console/CI message, not rendered UI copy. No client-facing error page beyond 404 exists in this phase (500s are GitHub Pages' own, out of scope). |
@@ -183,6 +184,17 @@ a second color needing its own reserved-for list.
 *(Not a template section, but required to make this UI-SPEC actionable given
 the phase's four-content-tree scope — recorded here per "be prescriptive, not
 exploratory.")*
+
+### Meta-line placement (Plan 02-04, Claude's discretion)
+The meta line (milestone + date, or the tree-appropriate variant per the
+Copywriting Contract) renders **immediately above the `<slot />`** — above
+the rendered body's own H1 — never below it. D-14 forbids splitting the
+rendered Markdown body to slot a meta line beneath its own H1, and Label
+14px styling directly above a Display 30px semibold H1 still reads as
+clearly subordinate (matches this section's "must read as subordinate"
+requirement for the meta line without needing to sit inside or after the
+body). Applies uniformly across `PostLayout`'s single shared shell — every
+content tree's meta line sits in the same position relative to the body.
 
 ### Page shell (every page)
 - Header: wordmark "Interstellar Engine" (links `/`) + nav (Devblog /
@@ -317,6 +329,7 @@ should surface these, not silently ship them.)*
 6. Layout factoring: one shared post-reading layout across all four trees +
    `pages/`, with per-tree index layouts (5 distinct index templates).
 7. Shiki theme: `github-light`.
-8. Homepage one-liner exact wording — **explicitly requires developer sign-off
-   per D-16**, not just a discretionary default; placeholder text above must
-   not ship without confirmation.
+8. Homepage one-liner exact wording — resolved 2026-07-22 (Plan 02-05): the
+   developer supplied "A space engine built from scratch on real n-body
+   physics." directly, superseding all three plan-drafted candidates. Shipped
+   verbatim; no longer open.

@@ -23,7 +23,7 @@ never the long pole.
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Stack & Scaffolding** - Astro pipeline deploys to GitHub Pages with a config-driven URL and permissive devlog ingestion (completed 2026-07-14)
-- [ ] **Phase 2: Content Rendering & Templating** - Full archive + How It's Made + Roadmap pages render with baseline polish, VOICE untouched
+- [x] **Phase 2: Content Rendering & Templating** - Full archive, technical deep-dive series, and How It's Made + Roadmap pages render with baseline polish, VOICE untouched (completed 2026-07-22)
 - [ ] **Phase 3: RSS, OpenGraph & Discord Distribution** - Rich Discord embeds, a clean RSS feed, and a prominent Discord CTA on every page
 - [ ] **Phase 4: Analytics, Launch Content & Deploy Hardening** - Cookieless analytics, the M1.1 launch post live, and a deploy safe against silent failure
 
@@ -53,18 +53,18 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 ### Phase 2: Content Rendering & Templating
 
-**Goal**: The full devblog archive and both standalone pages render as readable, mobile-friendly pages with baseline polish, VOICE.md prose untouched by the site layer.
+**Goal**: The full devblog archive, the technical deep-dive series, and both standalone pages (How It's Made, Roadmap overview + milestone detail pages) render as readable, mobile-friendly pages with baseline polish, VOICE.md prose untouched by the site layer.
 **Mode:** mvp
 **Depends on**: Phase 1
 **Requirements**: CONT-02, CONT-03, CONT-04, SITE-04
 **Success Criteria** (what must be TRUE):
 
-  1. A visitor can browse an archive index listing the manifesto + all M0.1–M0.8 posts and open any one to read the full post
+  1. A visitor can browse an archive index listing the manifesto + all M0.1–M0.8 posts, open any one to read the full post, and follow its generated cross-links into the phase-level technical deep-dive series (55 entries + the how-to-read legend)
   2. Rendered post text matches the source `.md` exactly — the site restyles nothing about the locked VOICE content
-  3. A visitor can open the "How It's Made" and "Roadmap" standalone pages, neither of which appears in the archive listing
+  3. A visitor can open the "How It's Made" standalone page and the Roadmap overview plus its 8 milestone detail pages, none of which appear in the archive listing
   4. The site is legible on mobile and desktop, serves a custom 404, shows a favicon, exposes `sitemap.xml`, and emits canonical URLs
 
-**Plans**: 7/8 plans executed
+**Plans**: 8/8 plans executed
 **UI hint**: yes
 
 **Wave 1**
@@ -88,7 +88,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 5** *(blocked on Wave 4)*
 
-- [ ] 02-08-PLAN.md — SITE-04 whole-site sweep, loud-fail fixtures, requirement-wording housekeeping, human verification
+- [x] 02-08-PLAN.md — SITE-04 whole-site sweep, loud-fail fixtures, requirement-wording housekeeping, human verification
 
 ### Phase 3: RSS, OpenGraph & Discord Distribution
 
@@ -128,6 +128,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Stack & Scaffolding | 2/2 | Complete    | 2026-07-14 |
-| 2. Content Rendering & Templating | 7/8 | In Progress|  |
+| 2. Content Rendering & Templating | 8/8 | Complete    | 2026-07-22 |
 | 3. RSS, OpenGraph & Discord Distribution | 0/TBD | Not started | - |
 | 4. Analytics, Launch Content & Deploy Hardening | 0/TBD | Not started | - |
