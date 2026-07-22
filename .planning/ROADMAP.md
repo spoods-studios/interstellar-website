@@ -103,7 +103,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Every page displays a prominent Discord invite CTA
   4. The RSS feed validates clean against a standard feed validator
 
-**Plans**: 4/6 plans executed
+**Plans**: 5/6 plans executed
 **UI hint**: yes
 
 **Wave 1**
@@ -118,7 +118,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 3** *(blocked on Wave 2)*
 
-- [ ] 03-05-PLAN.md — tests/distribution.smoke.sh: coverage, feed structure, and three trap-and-restore loud-fail fixtures
+- [x] 03-05-PLAN.md — tests/distribution.smoke.sh: coverage, feed structure, and three trap-and-restore loud-fail fixtures
 
 **Wave 4** *(blocked on Wave 3)*
 
@@ -148,5 +148,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Stack & Scaffolding | 2/2 | Complete    | 2026-07-14 |
 | 2. Content Rendering & Templating | 8/8 | Complete   | 2026-07-22 |
-| 3. RSS, OpenGraph & Discord Distribution | 4/6 | In Progress|  |
+| 3. RSS, OpenGraph & Discord Distribution | 5/6 | In Progress|  |
 | 4. Analytics, Launch Content & Deploy Hardening | 0/TBD | Not started | - |

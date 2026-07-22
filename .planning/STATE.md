@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 3
 current_phase_name: RSS, OpenGraph & Discord Distribution
 status: executing
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-07-22T20:55:41.012Z"
+stopped_at: Completed 03-05-PLAN.md
+last_updated: "2026-07-22T21:30:14.781Z"
 last_activity: 2026-07-22
 last_activity_desc: Phase 3 execution started
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 16
-  completed_plans: 11
+  completed_plans: 15
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-07-13)
 ## Current Position
 
 Phase: 3 (RSS, OpenGraph & Discord Distribution) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-07-22 — Phase 3 execution started
 
-Progress: [███████░░░] 69%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
@@ -69,6 +69,7 @@ Progress: [███████░░░] 69%
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 3 P01 | 12min | 4 tasks | 13 files |
+| Phase 3 P05 | 35 min | 3 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -107,6 +108,8 @@ Recent decisions affecting current work:
 - [Phase ?]: Package legitimacy: @astrojs/rss + sanitize-html SUS/too-new verdict accepted as a recency-keyed false positive on live registry evidence (D-03-01)
 - [Phase ?]: D-55 Discord invite published into shipped markup — one-way, confirmed; 03-06 must match byte-for-byte
 - [Phase ?]: truncate() implements the strict D-52 reading with no minimum-length floor
+- [Phase ?]: absolutize()'s a/href branch stays fixture-free; a live negative assertion in tests/distribution.smoke.sh gates it instead
+- [Phase ?]: The D-48 fixture runs two legs because Astro's own ImageNotFound guard fires upstream of heroFor()
 
 ### Pending Todos
 
@@ -135,6 +138,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-22T20:55:35.011Z
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-07-22T21:30:14.764Z
+Stopped at: Completed 03-05-PLAN.md
 Resume file: None
