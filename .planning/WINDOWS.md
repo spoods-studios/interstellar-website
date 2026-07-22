@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 1
+open_count: 2
 waived_count: 0
 fixed_count: 0
-total_count: 1
-last_updated: 2026-07-22T20:55:47.583Z
+total_count: 2
+last_updated: 2026-07-22T21:30:27.076Z
 ---
 
 # Broken Windows Ledger
@@ -16,6 +16,7 @@ last_updated: 2026-07-22T20:55:47.583Z
 | id | phase | kind | file | line | description | status | reason | recorded_at | resolved_at |
 |----|-------|------|------|------|-------------|--------|--------|-------------|-------------|
 | 1 | 3 | deviation | tests/lib.smoke.mjs |  | Plan 03-01 Task 4 test input replaced with the real pages/how-its-made prose block; the plan's 81-char paraphrase could not reach truncate's cut path | open |  | 2026-07-22T20:55:47.583Z |  |
+| 2 | 3 | deviation | src/pages/rss.xml.ts |  | absolutize()'s a/href branch is unexercised by real content (zero anchors in all 9 devlog bodies); gated by a live negative assertion in tests/distribution.smoke.sh rather than a fixture | open |  | 2026-07-22T21:30:27.076Z |  |
 
 ````json
 [
@@ -29,6 +30,18 @@ last_updated: 2026-07-22T20:55:47.583Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-07-22T20:55:47.583Z",
+    "resolved_at": null
+  },
+  {
+    "id": 2,
+    "kind": "deviation",
+    "phase": "3",
+    "file": "src/pages/rss.xml.ts",
+    "line": null,
+    "description": "absolutize()'s a/href branch is unexercised by real content (zero anchors in all 9 devlog bodies); gated by a live negative assertion in tests/distribution.smoke.sh rather than a fixture",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-07-22T21:30:27.076Z",
     "resolved_at": null
   }
 ]
