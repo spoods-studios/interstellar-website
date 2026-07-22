@@ -103,7 +103,26 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Every page displays a prominent Discord invite CTA
   4. The RSS feed validates clean against a standard feed validator
 
-**Plans**: TBD
+**Plans**: 0/6 plans complete
+**UI hint**: yes
+
+**Wave 1**
+
+- [ ] 03-01-PLAN.md — Tracer: distribution spine end-to-end (deps + legitimacy gate, invite constant with D-54 build guard, default OG card, description extractor, full head block + Discord CTA on the announcement route)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 03-02-PLAN.md — RSS feed endpoint via the Container API + feed discovery in head and footer
+- [ ] 03-03-PLAN.md — Per-post hero images: pure lookup with the D-48 loud-fail plus its Vite glob supplier
+- [ ] 03-04-PLAN.md — OpenGraph coverage across the remaining nine routes (55 deep-dives, roadmap tree, standalone pages, homepage, 404)
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 03-05-PLAN.md — tests/distribution.smoke.sh: coverage, feed structure, and three trap-and-restore loud-fail fixtures
+
+**Wave 4** *(blocked on Wave 3)*
+
+- [ ] 03-06-PLAN.md — D-56 studio-vault write-back, live deploy verification, and human sign-off (Discord embeds + W3C validator)
 
 ### Phase 4: Analytics, Launch Content & Deploy Hardening
 
@@ -129,5 +148,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Stack & Scaffolding | 2/2 | Complete    | 2026-07-14 |
 | 2. Content Rendering & Templating | 8/8 | Complete   | 2026-07-22 |
-| 3. RSS, OpenGraph & Discord Distribution | 0/TBD | Not started | - |
+| 3. RSS, OpenGraph & Discord Distribution | 0/6 | Planned | - |
 | 4. Analytics, Launch Content & Deploy Hardening | 0/TBD | Not started | - |
