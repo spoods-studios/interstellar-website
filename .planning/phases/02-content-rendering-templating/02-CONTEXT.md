@@ -148,8 +148,22 @@ amending to match the decisions below — flagged, not silently assumed.
   by milestone number.
 
 ### Rendering fidelity
-- **D-39:** Obsidian wikilinks (`[[../_how-to-read|How to Read]]`) are
-  resolved to real anchors by a **site-side remark plugin at build time**.
+- **D-39 (amended 2026-07-22, post-research):** Obsidian wikilinks
+  (`[[../_how-to-read|How to Read]]`) are resolved to real anchors by a
+  **site-side mdast plugin at build time**, registered through Sätteri —
+  `markdown.processor: satteri({ mdastPlugins: [wikilinkPlugin] })` in
+  `astro.config.mjs`, using `defineMdastPlugin` from the `satteri` package.
+  **Not remark.** Astro 7 replaced remark with Sätteri as the default Markdown
+  engine; `markdown.remarkPlugins` is deprecated and — verified in
+  `node_modules/astro/dist/core/config/validate.js:54` — hard-*errors* unless
+  `@astrojs/markdown-remark` is installed, because setting it swaps the entire
+  Markdown pipeline. Chosen over the unified/remark route (user call,
+  2026-07-22) to add zero dependencies and keep the default renderer, so the
+  55-file corpus renders byte-identically and D-14's "rendered text matches
+  source exactly" is not put at risk by an engine swap. The plugin MUST visit
+  mdast `text` nodes only — the C++ attribute `[[nodiscard]]` appears in 6+
+  deep-dives inside code fences and must never be treated as a wikilink.
+  Unchanged from the original D-39:
   Source Markdown stays byte-identical (D-14 holds; the promote pipeline stays
   dumb, and an automated promote script is explicitly out of this repo's scope
   per REQUIREMENTS.md). An unresolvable wikilink target is a **loud build
