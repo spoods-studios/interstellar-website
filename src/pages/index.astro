@@ -7,18 +7,19 @@
 import { getCollection } from 'astro:content';
 import { assertNonEmpty, isVisible } from '../lib/content-guards';
 import { titleFromH1 } from '../lib/title-from-h1';
-import { entryDate, formatDate } from '../lib/devlog-meta';
+import { entryDate, formatDate, sortEntriesNewestFirst } from '../lib/devlog-meta';
 import { escapeHtml } from '../lib/escape-html';
+import { SITE_TAGLINE } from '../lib/site.mjs';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const allEntries = assertNonEmpty(await getCollection('devlog'), 'devlog');
 const visible = allEntries.filter(isVisible);
 
-// Same ordering as src/pages/devlog/[slug].astro's prev/next chain -- the
-// archive and the post route must never disagree on order.
-const sorted = [...visible].sort(
-  (a, b) => entryDate(b).getTime() - entryDate(a).getTime()
-);
+// D-45: the archive, the post route's prev/next chain and the feed all run
+// this one expression -- the archive and the post route must never disagree on
+// order, and the shared comparator's id tie-break makes that structural rather
+// than an accident of the nine announcements carrying nine distinct dates.
+const sorted = sortEntriesNewestFirst(visible);
 
 const rawBase = import.meta.env.BASE_URL;
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
@@ -36,11 +37,14 @@ const posts = sorted.map((entry) => {
 });
 
 // D-16: developer-approved verbatim, 2026-07-22 -- plain interpolation since
-// this is developer-authored copy, not content-derived HTML.
-const oneLiner = 'A space engine built from scratch on real n-body physics.';
+// this is developer-authored copy, not content-derived HTML. The string has
+// exactly one home in the repo (src/lib/site.mjs), shared by this paragraph,
+// the homepage's og:description below and the feed channel copy, so it can
+// never be re-typed into three copies that drift apart.
+const oneLiner = SITE_TAGLINE;
 ---
 
-<BaseLayout title="Interstellar Engine — Devblog">
+<BaseLayout title="Interstellar Engine — Devblog" description={SITE_TAGLINE}>
   <p>{oneLiner}</p>
   <ul>
     {posts.map((post) => (
