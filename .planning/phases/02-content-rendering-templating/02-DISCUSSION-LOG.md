@@ -3,6 +3,209 @@
 > **Audit trail only.** Do not use as input to planning, research, or execution agents.
 > Decisions are captured in CONTEXT.md — this log preserves the alternatives considered.
 
+**Sessions:** 2026-07-22 (re-discuss, current) · 2026-07-14 (original, retained below)
+
+---
+
+# Session 2 — 2026-07-22 (re-discuss)
+
+**Phase:** 2-content-rendering-templating
+**Areas discussed:** Two-layer IA & URLs, Technical-post fidelity, Roadmap page shape, Browsability at ~70 posts
+
+**Why re-discussed:** The 2026-07-14 context was written before studio decisions
+[D-M] and [D-N] (both 2026-07-21), which created a 60-document phase-granular
+technical devlog series and restructured the roadmap layer. User's call
+(2026-07-22): the website carries the technical devlogs.
+
+---
+
+## Two-layer IA & URLs
+
+### Where technical deep-dives land in the repo
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| New `technical/` root dir | Sibling to `devlog/`/`pages/`, milestone subdirs preserved, own collection and URL space, same read-only promote contract | ✓ |
+| Subdir of `devlog/` | `devlog/technical/m0.X/…` in the existing collection, filtered by path or `type:` frontmatter | |
+| One flat collection, `type:` field | All content in `devlog/`, distinguished only by frontmatter | |
+
+**User's choice:** New `technical/` root dir.
+**Notes:** Separate collection means archive/RSS queries structurally cannot mix layers. The rejected options both broke the existing `YYYY-MM-DD-slug.md` filename contract, since deep-dives are named `phase-NN-slug.md` with no date.
+
+### URL shape
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| `/technical/m0.1/phase-01-window-surface/` | Mirrors vault path; milestone readable in URL; slug derivable with no mapping table | ✓ |
+| `/technical/phase-01-window-surface/` | Flat — global phase numbers 1–52 are already unique | |
+| `/devlog/technical/…` | Nest under devlog in URL space to signal "part of the devblog" | |
+
+**User's choice:** Path-mirroring URLs.
+**Notes:** Gives `/technical/` and `/technical/m0.1/` as natural index routes.
+
+### What `/` becomes
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| Keep `/` = announcement archive | D-13 unchanged; `/technical/` is its own index in the nav | ✓ |
+| `/` = unified stream | Both layers interleaved reverse-chron with a type distinction | |
+| `/` = small landing, both indexes below | Homepage becomes a landing page, reversing D-13 | |
+
+**User's choice:** Keep `/` as the announcement archive.
+**Notes:** 60 deep-dives would swamp the 9 posts a newcomer should read first, and the retroactive backfill dates would scramble a merged chronology.
+
+### Cross-linking between layers
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| Auto both directions by milestone | Announcement lists its milestone's deep-dives; deep-dive breadcrumbs back; derived from the collection query | ✓ |
+| Deep-dive → announcement only | One-way breadcrumb; announcements get nothing appended | |
+| No auto-linking | Nav + indexes only; cross-references come from body prose | |
+
+**User's choice:** Auto both directions.
+**Notes:** Derived from data so it can't rot as content lands; no hand-maintained link lists in the `.md` bodies. Generated lists are chrome outside the body, so D-14's "body renders untouched" still holds.
+
+---
+
+## Technical-post fidelity
+
+### Obsidian wikilinks
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| remark plugin, site-side | Resolves `[[target\|label]]` to real anchors at build time; source stays byte-identical; unresolvable target = loud build failure | ✓ |
+| Rewrite at promote time | Studio-side conversion before the file lands; no plugin needed, but repo copy diverges from vault and depends on a script this repo doesn't own | |
+| Strip to plain text | Render the label, drop the link | |
+
+**User's choice:** Site-side remark plugin.
+**Notes:** Stripping was rejected because `_how-to-read.md` is load-bearing — every deep-dive points at it for the tag legend, and a reader landing mid-corpus would have no route to it.
+
+### CONT-07 (syntax highlighting / KaTeX)
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| Highlighting now, KaTeX v2 | Astro's built-in Shiki, build-time, light theme per D-22; KaTeX stays deferred | ✓ |
+| Both now | Pull all of CONT-07 forward including math rendering | |
+| Keep all of CONT-07 in v2 | Ship plain `<pre><code>` | |
+
+**User's choice:** Split CONT-07 — highlighting in Phase 2, KaTeX in v2.
+**Notes:** Verified during the session that the 60 deep-dives contain zero LaTeX and zero mermaid, so the KaTeX deferral costs nothing today. Shiki adds no dependency and no client JS.
+
+### Metadata source (no frontmatter, no date)
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| Derive from path, order by phase number | Milestone from dir, phase+slug from filename, title from body H1; loud-fail on non-conforming name | ✓ |
+| Ask studio to add frontmatter | Backfill YAML onto all 60 vault docs | |
+| Path-derived + optional frontmatter override | Path by default, frontmatter wins if it ever appears | |
+
+**User's choice:** Derive from path.
+**Notes:** Discovered mid-session that the deep-dives have no YAML frontmatter at all and no date of any kind. Ordering by phase number rather than date follows, since the retroactive backfill was all written Jul 2026 about Apr–Jul work. Flagged for the planner: phase numbers include decimals (`phase-10.5`, `phase-27.5`, `phase-46.1`), so the sort key must be numeric-aware.
+
+---
+
+## Roadmap page shape
+
+### What `/roadmap` renders
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| Overview page + per-milestone detail | Living era→milestone overview at `/roadmap`, each milestone linking to `/roadmap/m0.X/` | ✓ |
+| Overview only | Single page; the 9 detail docs stay vault/Discord-only | |
+| Detail only, no overview | Index of the 9 milestone docs without the era-level arc | |
+
+**User's choice:** Overview + per-milestone detail.
+**Notes:** Mirrors [D-N]'s Discord structure (pinned overview + thread per milestone) and gives the deep-dives a natural parent page.
+
+### Overview sourcing
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| Transcribed `pages/roadmap.md`, hand-synced | Site-voice transcription with the pinned file as reference text | ✓ |
+| Render the pinned file verbatim | Zero drift by construction | |
+| Generate from the site's own data | Build the era→milestone list from the roadmap-detail collection | |
+
+**User's choice:** Transcribed `pages/roadmap.md`.
+**Notes:** The pinned copy is Discord-framed — it opens with "How this channel works" and points readers at `#technical-devlog`/`#announcements` for content the site itself hosts. Verbatim rendering would tell site readers to go read Discord. Generating from data was rejected because the detail docs carry no machine-readable status field.
+
+### Where the 9 detail docs land
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| `roadmap/` root dir, third collection | Fourth drop target alongside devlog/technical/pages, same read-only contract | ✓ |
+| Inside `pages/` | Treat them as more standalone pages | |
+| Inside `technical/` | Keep a milestone's material in one directory | |
+
+**User's choice:** `roadmap/` root dir.
+**Notes:** They're a structured series, not one-offs; `pages/`'s no-date one-off shape fits them badly.
+
+---
+
+## Browsability at ~70 posts
+
+### Finding things
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| Milestone-grouped indexes, no search | Era→milestone grouping on `/technical/`; `/roadmap/m0.X/` as a second route; CONT-08 stays v2 | ✓ |
+| Add client-side search now | Static search index (Pagefind-class) in Phase 2 | |
+| Grouped indexes + milestone tag filter | Grouping plus a no-JS filter | |
+
+**User's choice:** Grouped indexes, no search.
+**Notes:** CONT-08's stated rationale ("no payoff at ~9 posts") is dead at ~70, but its conclusion survives because the corpus is well-structured — two structural routes to any document. Revisit if the corpus grows past Era 1.
+
+### In-page navigation for long docs
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| Auto TOC from headings, no JS | Static list from Astro's rendered `headings` array | ✓ |
+| No TOC | Body only, maximum fidelity to "add nothing between reader and text" | |
+| TOC on technical only | Two post layouts instead of one | |
+
+**User's choice:** Auto TOC, build-time, no JS.
+**Notes:** Deep-dives run 250–350 lines with many H2/H3 sections; the Discord exports already ship a section index for the same reason. Readers land in these mid-corpus rather than reading linearly.
+
+### Promote scope for the phase
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| All closed milestones now; M1.1 with the launch post | 9 announcements + 55 deep-dives + 8 roadmap docs + 2 pages in Phase 2; M1.1's material rides with CONT-05 in Phase 4 | ✓ |
+| Everything now, including M1.1 | All 60 deep-dives and all 9 roadmap docs in Phase 2 | |
+| Structure now, content drips | Templates against representative docs; rest promoted incrementally | |
+
+**User's choice:** Era-0-complete in Phase 2; M1.1 in Phase 4.
+**Notes:** "Structure now, content drips" was rejected because CONT-02's "full archive live at launch" wouldn't hold at phase end. Timeline risk turned out lower than first flagged — the vault backfill is essentially complete (60 docs on disk), so this is a copy-and-render job, not a writing job.
+
+---
+
+## Claude's Discretion (session 2)
+
+- Sitemap/canonical mechanics; responsive breakpoints; link accent color; meta-line placement
+- Loader configs for the `technical/` and `roadmap/` collections
+- TOC presentation (sticky sidebar vs inline) and heading depth
+- Layout factoring — one shared layout with variants vs per-collection layouts
+- Promote-step sequencing within the phase (which plan/wave)
+- Whether the era→milestone grouping is data-derived or a small hand-written map
+
+## Deferred Ideas (session 2)
+
+- Dark mode (SITE-05) — v2; now pairs with a Shiki theme, which is why SITE-05 and CONT-07 were bundled originally
+- KaTeX math (other half of CONT-07) — v2; zero LaTeX in the current corpus
+- Search / tag taxonomy (CONT-08) — v2 per the grouping decision; Pagefind-class static index is the shape to reach for if grouping stops being enough
+- `hero_visual` rendering / OG image source — Phase 3 or v2
+- Old-Discord-link 404 behavior — Phase 4's CONT-06 slug-immutability and redirect-stub work now spans three URL trees, not one
+- Automated studio→website promote script — still out of scope for this repo; three more drop targets strengthens the case for studio-side automation later
+
+## Follow-ups outside this phase
+
+- `.planning/REQUIREMENTS.md` — CONT-02 and CONT-04 wording predates the technical series; CONT-07/CONT-08 v2 deferrals need amending per D-40/D-41
+- `.planning/ROADMAP.md` — Phase 2 success criteria don't mention the technical or roadmap trees
+- `studio/vault/decisions/Decision Log.md` — "website v1 carries the technical devlog series" amends [D-H]'s website scope and is a cross-repo decision; needs an entry
+
+---
+
+# Session 1 — 2026-07-14 (original, superseded where session 2 overlaps)
+
 **Date:** 2026-07-14
 **Phase:** 2-Content Rendering & Templating
 **Areas discussed:** Archive index presentation, Site chrome & navigation, Visual baseline, Content sourcing, Round 2 (hero_visual / homepage / post nav / draft pages)
