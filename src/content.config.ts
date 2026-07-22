@@ -27,7 +27,9 @@ const devlog = defineCollection({
     milestone: z.string().optional(),
     title: z.string().optional(),
     date: z.coerce.date().optional(),
-    status: z.enum(['draft', 'published']).optional(),
+    // 'final' added because the promoted M0.7/M0.8 announcements carry it verbatim (D-25);
+    // it renders identically to 'published' — only 'draft' hides an entry (D-30).
+    status: z.enum(['draft', 'published', 'final']).optional(),
     discord_post_id: z.string().optional(),
     audience: z.string().optional(),
     hero_visual: z.string().optional(),

@@ -15,6 +15,13 @@ grep -q "2026-04-07" dist/index.html
 ! grep -rIn -e 'github\.io' -e '/interstellar-website' src/
 echo "positive check OK"
 
+echo "== Positive check: full nine-announcement archive (CONT-02) =="
+# grep -c counts matching LINES, not occurrences -- Astro's production build
+# minifies dist/index.html to a single line, so -c always reports 1 regardless
+# of post count. grep -o | wc -l counts actual '<li' occurrences instead.
+test "$(grep -o '<li' dist/index.html | wc -l)" -eq 9
+echo "nine-announcement check OK"
+
 echo "== Negative check (D-10): malformed devlog file fails the build loudly =="
 MARKER="zzz-not-a-post.md"
 trap 'rm -f "devlog/$MARKER"' EXIT
