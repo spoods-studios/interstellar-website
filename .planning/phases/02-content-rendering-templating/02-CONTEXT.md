@@ -349,6 +349,17 @@ amending to match the decisions below — flagged, not silently assumed.
 - Automated studio→website promote script — still out of scope for this repo
   (REQUIREMENTS.md); three more drop targets makes the manual step bigger,
   which strengthens the case for studio-side automation later.
+- **Visual richness beyond the locked minimal aesthetic** — captured
+  observation, not an accepted requirement. At Plan 02-08's Task 4 human
+  verification (2026-07-22), the developer signed off on the whole built
+  site with: "looks pretty bare, not in scope for this phase but looks good."
+  This is D-21/D-22/D-23 (system fonts, light-only, hand-written minimal CSS)
+  working exactly as designed against this phase's "add nothing between
+  reader and text" philosophy, and the developer explicitly scoped any
+  change out of this phase. Flagged here as a candidate topic for a future
+  visual-polish milestone, which would naturally bundle with the two other
+  visual deferrals already on this list — dark mode (SITE-05) and the KaTeX
+  half of CONT-07 — since all three touch the same theming/CSS surface.
 
 </deferred>
 
