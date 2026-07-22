@@ -8,6 +8,7 @@ import { getCollection } from 'astro:content';
 import { assertNonEmpty, isVisible } from '../lib/content-guards';
 import { titleFromH1 } from '../lib/title-from-h1';
 import { entryDate, formatDate } from '../lib/devlog-meta';
+import { escapeHtml } from '../lib/escape-html';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const allEntries = assertNonEmpty(await getCollection('devlog'), 'devlog');
@@ -44,7 +45,7 @@ const oneLiner = 'A space engine built from scratch on real n-body physics.';
   <ul>
     {posts.map((post) => (
       <li>
-        <a href={post.href} set:html={post.title} />
+        <a href={post.href} set:html={escapeHtml(post.title)} />
         <p class="meta">{post.meta}</p>
       </li>
     ))}

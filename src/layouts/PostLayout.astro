@@ -4,6 +4,7 @@
 // props to this same layout rather than re-deriving the shell.
 import BaseLayout from './BaseLayout.astro';
 import TableOfContents from '../components/TableOfContents.astro';
+import { escapeHtml } from '../lib/escape-html';
 import type { MarkdownHeading } from '../lib/toc';
 
 export interface LinkRef {
@@ -34,8 +35,8 @@ const { title, meta, headings, breadcrumbs, prevNext, backLink } = Astro.props;
   <slot />
   {(prevNext?.prev || prevNext?.next || backLink) && (
     <nav class="post-nav">
-      {prevNext?.prev && <a href={prevNext.prev.href} set:html={`&larr; ${prevNext.prev.label}`} />}
-      {prevNext?.next && <a href={prevNext.next.href} set:html={`${prevNext.next.label} &rarr;`} />}
+      {prevNext?.prev && <a href={prevNext.prev.href} set:html={`&larr; ${escapeHtml(prevNext.prev.label)}`} />}
+      {prevNext?.next && <a href={prevNext.next.href} set:html={`${escapeHtml(prevNext.next.label)} &rarr;`} />}
       {backLink && <a href={backLink.href}>{backLink.label}</a>}
     </nav>
   )}
