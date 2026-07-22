@@ -196,3 +196,141 @@ if [ "$METADATA_BEFORE" != "$METADATA_AFTER" ]; then
   exit 1
 fi
 echo "build determinism OK"
+
+echo "== DIST-01: the feed is well-formed XML =="
+# This is only the OFFLINE half of D-57's split acceptance criterion: it proves
+# the document parses, not that it is semantically valid RSS 2.0. The other
+# half -- submitting the deployed feed to the W3C feed validation service --
+# is a network service and stays a human verification in Plan 03-06. Do not
+# bolt a network validator into this harness to "finish" this check.
+xmllint --noout dist/rss.xml
+echo "feed well-formedness OK"
+
+echo "== DIST-01/D-45: the feed and the homepage archive cannot drift =="
+FEED_ITEMS=$(grep -o '<item>' dist/rss.xml | wc -l)
+ARCHIVE_LINKS=$(grep -o 'href="[^"]*devlog/[^"]*/"' dist/index.html | wc -l)
+if [ "$FEED_ITEMS" -ne "$ARCHIVE_LINKS" ]; then
+  echo "FAIL: the feed carries $FEED_ITEMS items but the homepage archive lists $ARCHIVE_LINKS announcements"
+  exit 1
+fi
+# Equal counts are not equal ordering. This build tree is the only place in the
+# phase where both artifacts exist together -- Plans 03-02 and 03-04 are wave
+# siblings, so neither could assert across the pair. 03-04 put the archive onto
+# the same shared comparator the feed uses; this diff is what makes that
+# permanent, and it is the only check that would catch a reintroduced inline
+# comparator on either side.
+if ! diff \
+  <(grep -o 'href="[^"]*devlog/[^"]*/"' dist/index.html | sed -E 's#.*devlog/([^"]+)/"#\1#') \
+  <(grep -oP '<guid[^>]*>\K[^<]+' dist/rss.xml | sed -E 's#.*devlog/([^/]+)/$#\1#'); then
+  echo "FAIL: the homepage archive and the feed list announcements in different orders"
+  exit 1
+fi
+if grep -qE 'entryDate\(b\)\.getTime\(\)' src/pages/index.astro "src/pages/devlog/[slug].astro" src/pages/rss.xml.ts; then
+  echo "FAIL: an inline ordering comparator was reintroduced alongside the shared sortEntriesNewestFirst()"
+  exit 1
+fi
+echo "feed/archive drift lock OK ($FEED_ITEMS items, identical order, one shared comparator)"
+
+echo "== DIST-01: channel shape =="
+CHANNEL_COUNT=$(grep -o '<channel>' dist/rss.xml | wc -l)
+if [ "$CHANNEL_COUNT" -ne 1 ]; then
+  echo "FAIL: expected exactly 1 channel element, found $CHANNEL_COUNT"
+  exit 1
+fi
+grep -q '<title>' dist/rss.xml
+grep -q '<link>' dist/rss.xml
+grep -q '<description>' dist/rss.xml
+grep -q '<language>' dist/rss.xml
+# D-57: the self-referencing atom link pre-empts the one recommendation the
+# W3C feed validation service predictably raises.
+grep -q 'rel="self"' dist/rss.xml
+# The package declares the content module namespace automatically whenever an
+# item carries `content`; a second occurrence means it was also declared by hand.
+CONTENT_NS_COUNT=$(grep -o 'xmlns:content' dist/rss.xml | wc -l)
+if [ "$CONTENT_NS_COUNT" -ne 1 ]; then
+  echo "FAIL: xmlns:content declared $CONTENT_NS_COUNT times (expected exactly 1)"
+  exit 1
+fi
+echo "channel shape OK"
+
+echo "== DIST-01: item shape -- absolute links, unique guids, RFC-822 dates =="
+ITEM_FAIL=0
+while IFS= read -r url; do
+  case "$url" in
+    "$PREFIX"*) ;;
+    *) echo "FAIL: feed link '$url' does not carry the expected prefix '$PREFIX'"; ITEM_FAIL=1 ;;
+  esac
+done < <(grep -oP '<link>\K[^<]+' dist/rss.xml)
+while IFS= read -r guid; do
+  case "$guid" in
+    "$PREFIX"*) ;;
+    *) echo "FAIL: feed guid '$guid' does not carry the expected prefix '$PREFIX'"; ITEM_FAIL=1 ;;
+  esac
+done < <(grep -oP '<guid[^>]*>\K[^<]+' dist/rss.xml)
+GUID_COUNT=$(grep -oP '<guid[^>]*>\K[^<]+' dist/rss.xml | wc -l)
+DISTINCT_GUIDS=$(grep -oP '<guid[^>]*>\K[^<]+' dist/rss.xml | sort -u | wc -l)
+if [ "$GUID_COUNT" -ne "$FEED_ITEMS" ] || [ "$DISTINCT_GUIDS" -ne "$FEED_ITEMS" ]; then
+  echo "FAIL: $FEED_ITEMS items carry $GUID_COUNT guids, $DISTINCT_GUIDS of them distinct (both must equal the item count)"
+  ITEM_FAIL=1
+fi
+PUBDATE_COUNT=$(grep -oP '<pubDate>\K[^<]+' dist/rss.xml | wc -l)
+if [ "$PUBDATE_COUNT" -ne "$FEED_ITEMS" ]; then
+  echo "FAIL: $FEED_ITEMS items carry $PUBDATE_COUNT publication dates"
+  ITEM_FAIL=1
+fi
+# A zero non-matching count makes the counting grep exit 1, which set -e would
+# otherwise read as a script failure -- the opposite of what a clean result means.
+BAD_DATES=$(grep -oP '<pubDate>\K[^<]+' dist/rss.xml | grep -cvP '^[A-Z][a-z]{2}, [0-9]{2} [A-Z][a-z]{2} [0-9]{4} ') || true
+if [ "$BAD_DATES" -ne 0 ]; then
+  echo "FAIL: $BAD_DATES publication dates are not RFC-822 shaped"
+  ITEM_FAIL=1
+fi
+[ "$ITEM_FAIL" -eq 0 ]
+echo "item shape OK ($GUID_COUNT unique, absolute, RFC-822-dated items)"
+
+echo "== DIST-01: content fidelity -- absolutized images, no second-parse artifacts =="
+# @astrojs/rss@4.0.19 emits content:encoded as XML-ESCAPED markup, not a CDATA
+# block, so the rendered attributes read `src=&quot;https://…&quot;`. Every
+# assertion below targets that escaped form; a pattern written against the raw
+# quote would pass vacuously forever.
+HERO_URLS=$(grep -o "${SITE}[^&\"]*_astro/[^&\"]*\.webp" dist/rss.xml | wc -l)
+if [ "$HERO_URLS" -ne 2 ]; then
+  echo "FAIL: expected 2 absolute hero image URLs in the feed, found $HERO_URLS"
+  exit 1
+fi
+# A root-relative src is broken in every reader; the pattern is built from the
+# derived BASE, never typed.
+if grep -q "src=&quot;${BASE}" dist/rss.xml || grep -q "src=\"${BASE}" dist/rss.xml; then
+  echo "FAIL: the feed carries a root-relative image source -- absolutize() did not fire"
+  exit 1
+fi
+# absolutize()'s href branch is currently unexercised: no devlog body contains
+# an anchor (03-02 logged this as partial coverage rather than papering over
+# it). This assertion is deliberately a live gate rather than a fixture -- the
+# moment a post does add a link, a non-absolute href fails here instead of
+# shipping a dead URL to every reader.
+if grep -q "href=&quot;${BASE}" dist/rss.xml || grep -q "href=&quot;\.\." dist/rss.xml; then
+  echo "FAIL: the feed carries a non-absolute anchor href -- absolutize()'s href branch did not fire"
+  exit 1
+fi
+# Both of these exit 0 and are invisible in the feed source: a pre-rendered
+# content field ships unresolved image placeholders, and a second Markdown
+# parser never sees this repo's wikilink plugin.
+if grep -qF '__ASTRO_IMAGE_' dist/rss.xml; then
+  echo "FAIL: the feed carries unresolved Astro image placeholders"
+  exit 1
+fi
+if grep -qF '[[' dist/rss.xml; then
+  echo "FAIL: the feed carries an unresolved wikilink delimiter"
+  exit 1
+fi
+echo "content fidelity OK"
+
+echo "== DIST-01: no second Markdown parser was adopted =="
+# The published recipe for this task recommends one; adopting it would silently
+# emit feed content that differs from the site's own rendering.
+if grep -q 'markdown-it' package.json; then
+  echo "FAIL: a second Markdown parser dependency appeared in package.json"
+  exit 1
+fi
+echo "dependency hygiene OK"
