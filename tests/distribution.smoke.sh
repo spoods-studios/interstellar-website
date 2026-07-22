@@ -334,3 +334,115 @@ if grep -q 'markdown-it' package.json; then
   exit 1
 fi
 echo "dependency hygiene OK"
+
+echo "== D-48 fixture: an unresolvable body hero reference fails the build, naming the post and the path =="
+HERO_FILE="devlog/2026-07-10-warping-without-losing-the-moon.md"
+HERO_BACKUP=$(mktemp)
+cp "$HERO_FILE" "$HERO_BACKUP"
+trap 'cp "$HERO_BACKUP" "$HERO_FILE" 2>/dev/null || true; rm -f "$HERO_BACKUP"' EXIT
+
+# Leg 1 -- a path with no file behind it at all. Astro's own ImageNotFound guard
+# fires during the Markdown asset import, upstream of heroFor(), so the message
+# names the referenced path but not the post. That is still a loud build
+# failure, and it is the layer that actually catches a bad promote, so it is
+# asserted here rather than pretended away.
+sed -i 's|(../assets/m0.7-hero-contrast.png)|(../assets/m0.7-hero-does-not-exist.png)|' "$HERO_FILE"
+if npm run build > /tmp/gsd-dist-d48-missing.log 2>&1; then
+  cp "$HERO_BACKUP" "$HERO_FILE"
+  echo "D-48 FIXTURE FAIL: build did not error on a body image with no file behind it"
+  exit 1
+fi
+grep -q "m0.7-hero-does-not-exist.png" /tmp/gsd-dist-d48-missing.log
+cp "$HERO_BACKUP" "$HERO_FILE"
+
+# Leg 2 -- a reference Astro CAN import but that is not a built hero record.
+# This is the leg that reaches lookupHero()'s own throw, which is the one
+# required to name both the collection id and the referenced path.
+sed -i 's|(../assets/m0.7-hero-contrast.png)|(../src/assets/og-default.svg)|' "$HERO_FILE"
+if npm run build > /tmp/gsd-dist-d48-unresolved.log 2>&1; then
+  cp "$HERO_BACKUP" "$HERO_FILE"
+  echo "D-48 FIXTURE FAIL: build did not error on a body image that is not a built hero asset"
+  exit 1
+fi
+grep -q "2026-07-10-warping-without-losing-the-moon" /tmp/gsd-dist-d48-unresolved.log
+grep -q "og-default.svg" /tmp/gsd-dist-d48-unresolved.log
+cp "$HERO_BACKUP" "$HERO_FILE"
+
+if git status --porcelain devlog/ technical/ roadmap/ pages/ | grep -q .; then
+  echo "D-48 FIXTURE FAIL: a content tree was left dirty"
+  exit 1
+fi
+echo "D-48 fixture OK: both unresolvable-hero paths fail the build loudly; content trees clean"
+
+echo "== D-54 fixture: an unset, blank or placeholder invite constant fails the build, naming the constant =="
+SITE_LIB="src/lib/site.mjs"
+SITE_LIB_BACKUP=$(mktemp)
+cp "$SITE_LIB" "$SITE_LIB_BACKUP"
+INVITE_PLACEHOLDER=$(grep -oP "^export const INVITE_PLACEHOLDER = '\K[^']+" "$SITE_LIB")
+trap 'cp "$SITE_LIB_BACKUP" "$SITE_LIB" 2>/dev/null || true; rm -f "$SITE_LIB_BACKUP" "$HERO_BACKUP"' EXIT
+# A near-miss value must be rejected too -- the requirement is that no page can
+# ever ship a CTA with a blank or scaffold href, not merely that an empty
+# constant breaks something.
+for BAD_INVITE in "" "   " "$INVITE_PLACEHOLDER"; do
+  sed "s|^export const DISCORD_INVITE_URL = '.*';|export const DISCORD_INVITE_URL = '${BAD_INVITE}';|" \
+    "$SITE_LIB_BACKUP" > "$SITE_LIB"
+  if npm run build > /tmp/gsd-dist-d54.log 2>&1; then
+    cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+    echo "D-54 FIXTURE FAIL: build succeeded with the invite constant set to '${BAD_INVITE}'"
+    exit 1
+  fi
+  if ! grep -q "DISCORD_INVITE_URL" /tmp/gsd-dist-d54.log; then
+    cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+    echo "D-54 FIXTURE FAIL: the failure for '${BAD_INVITE}' did not name the constant"
+    exit 1
+  fi
+done
+cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+if git status --porcelain devlog/ technical/ roadmap/ pages/ src/ | grep -q .; then
+  echo "D-54 FIXTURE FAIL: a tree was left dirty"
+  exit 1
+fi
+echo "D-54 fixture OK: unset, blank and placeholder invites all fail loudly naming the constant; trees clean"
+
+echo "== D-45/D-30 fixture: a drafted announcement leaves the feed and the archive together =="
+npm run build > /dev/null 2>&1
+BASELINE_ITEMS=$(grep -o '<item>' dist/rss.xml | wc -l)
+BASELINE_ARCHIVE=$(grep -o 'href="[^"]*devlog/[^"]*/"' dist/index.html | wc -l)
+DRAFT_FILE="devlog/2026-04-07-why-im-building-a-hyperrealistic-space-sim.md"
+DRAFT_BACKUP=$(mktemp)
+cp "$DRAFT_FILE" "$DRAFT_BACKUP"
+trap 'cp "$DRAFT_BACKUP" "$DRAFT_FILE" 2>/dev/null || true; rm -f "$DRAFT_BACKUP" "$SITE_LIB_BACKUP" "$HERO_BACKUP"' EXIT
+# The manifesto carries no frontmatter block at all, so prepending one cannot
+# produce a duplicate block.
+{ printf -- '---\nstatus: draft\n---\n\n'; cat "$DRAFT_BACKUP"; } > "$DRAFT_FILE"
+npm run build
+DRAFT_LEAK=0
+DRAFT_ITEMS=$(grep -o '<item>' dist/rss.xml | wc -l)
+DRAFT_ARCHIVE=$(grep -o 'href="[^"]*devlog/[^"]*/"' dist/index.html | wc -l)
+if [ "$DRAFT_ITEMS" -ne $((BASELINE_ITEMS - 1)) ]; then
+  echo "D-30 FIXTURE FAIL: feed went from $BASELINE_ITEMS to $DRAFT_ITEMS items (expected one fewer)"
+  DRAFT_LEAK=1
+fi
+if [ "$DRAFT_ARCHIVE" -ne $((BASELINE_ARCHIVE - 1)) ]; then
+  echo "D-30 FIXTURE FAIL: archive went from $BASELINE_ARCHIVE to $DRAFT_ARCHIVE links (expected one fewer)"
+  DRAFT_LEAK=1
+fi
+cp "$DRAFT_BACKUP" "$DRAFT_FILE"
+[ "$DRAFT_LEAK" -eq 0 ]
+if git status --porcelain devlog/ technical/ roadmap/ pages/ | grep -q .; then
+  echo "D-30 FIXTURE FAIL: a content tree was left dirty"
+  exit 1
+fi
+echo "D-30 fixture OK: the drafted announcement left both surfaces together; content trees clean"
+
+trap - EXIT
+rm -f "$HERO_BACKUP" "$SITE_LIB_BACKUP" "$DRAFT_BACKUP"
+
+echo "== Final clean rebuild after all fixtures restored =="
+npm run build
+if git status --porcelain devlog/ technical/ roadmap/ pages/ src/ | grep -q .; then
+  echo "FAIL: trees not clean after the full fixture run"
+  exit 1
+fi
+
+echo "ALL CHECKS PASSED"
