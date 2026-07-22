@@ -4,6 +4,31 @@
 **Domain:** Astro 7 Content Layer (4 collections outside `src/content/`), build-time remark plugin authoring, Shiki syntax highlighting, GitHub Pages static-file mechanics
 **Confidence:** MEDIUM-HIGH — core Astro API facts VERIFIED directly against the installed `astro@7.0.9`/`@astrojs/markdown-satteri@0.3.4` package source and `.d.ts` files in `node_modules/` (highest-confidence evidence available, stronger than docs since it's the exact shipped code); the four content trees' real shape and counts were read directly off disk this session. WebFetch/WebSearch (docs.astro.build, GitHub community discussions) fill secondary gaps at MEDIUM/LOW per this repo's established convention (see 01-RESEARCH.md's confidence-tier note — this session's config also has all of `exa_search`/`brave_search`/`firecrawl`/`tavily_search`/`ref_search`/`perplexity`/`jina` set `false`).
 
+---
+
+> ## ⚠ POST-RESEARCH CORRECTION — read before planning (2026-07-22)
+>
+> This document was written before the developer resolved the D-39 pipeline
+> fork. **The decision is Sätteri, not remark.** Where this research proposes
+> `@astrojs/markdown-remark` + `unified({ remarkPlugins })`, or names a file
+> `src/lib/remark-wikilinks.mjs`, or lists `@astrojs/markdown-remark` as a
+> package to install — **those are superseded**. See amended D-39 in
+> `02-CONTEXT.md`.
+>
+> The binding shape is:
+> `markdown.processor: satteri({ mdastPlugins: [wikilinkPlugin] })`, with the
+> plugin authored via `defineMdastPlugin` from the already-installed `satteri`
+> package. **Zero new dependencies** — do not add `@astrojs/markdown-remark`.
+> Name the helper for what it is (e.g. `src/lib/mdast-wikilinks.mjs`), not
+> `remark-*`.
+>
+> Everything else in this research stands — in particular the `[[nodiscard]]`
+> collision (visit mdast `text` nodes ONLY), the `Deep-dive:`-is-a-placeholder
+> correction, the `github-light` Shiki default, the milestone case-mismatch,
+> and all verified corpus counts.
+
+---
+
 <user_constraints>
 ## User Constraints (from CONTEXT.md)
 
