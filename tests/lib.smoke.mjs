@@ -15,6 +15,7 @@ import { assertNonEmpty, isVisible } from '../src/lib/content-guards.ts';
 import { buildToc } from '../src/lib/toc.ts';
 import { firstProseBlock, stripInline, truncate, describeBody } from '../src/lib/describe-entry.ts';
 import { compareNewestFirst } from '../src/lib/entry-order.ts';
+import { heroBasename, lookupHero } from '../src/lib/hero-image.ts';
 import { createWikilinkResolver } from '../src/lib/wikilink-resolver.mjs';
 import { createWikilinkPlugin } from '../src/lib/mdast-wikilinks.mjs';
 import { markdownToHtml } from 'satteri';
@@ -296,5 +297,40 @@ console.log('== entry-order ==');
   assert.equal(compareNewestFirst(x, x), 0);
 }
 console.log('entry-order OK');
+
+console.log('== hero-image ==');
+// The lookup takes its map as a parameter precisely so it is reachable here:
+// the eager import.meta.glob that supplies it in production is Vite-only and
+// lives in hero-assets.ts, which bare Node cannot evaluate.
+assert.equal(heroBasename('../assets/m0.7-hero-contrast.png'), 'm0.7-hero-contrast.png');
+assert.equal(heroBasename('assets/m0.8-hero-precession.png'), 'm0.8-hero-precession.png');
+assert.equal(heroBasename('m0.7-hero-contrast.png'), 'm0.7-hero-contrast.png');
+{
+  const record = { src: '/interstellar-website/_astro/m0.7-hero-contrast.pk4qHc1U.png', width: 1900, height: 1060 };
+  const map = new Map([['m0.7-hero-contrast.png', record]]);
+
+  // No body image means the default card, not an error.
+  assert.equal(lookupHero(map, undefined, 'devlog/x'), null);
+
+  const hit = lookupHero(map, '../assets/m0.7-hero-contrast.png', 'devlog/x');
+  assert.equal(hit.src, record.src);
+  assert.equal(hit.width, 1900);
+  assert.equal(hit.height, 1060);
+
+  // D-48: a reference that does not resolve is a loud failure naming the post
+  // AND the path -- never a silent fall-through to the default card.
+  assert.throws(
+    () => lookupHero(map, '../assets/does-not-exist.png', 'devlog/2026-07-10-warping-without-losing-the-moon'),
+    /2026-07-10-warping-without-losing-the-moon/
+  );
+  assert.throws(
+    () => lookupHero(map, '../assets/does-not-exist.png', 'devlog/2026-07-10-warping-without-losing-the-moon'),
+    /does-not-exist\.png/
+  );
+
+  // An unresolvable reference is never downgraded to "no image".
+  assert.throws(() => lookupHero(new Map(), '../assets/m0.7-hero-contrast.png', 'devlog/x'), /m0\.7-hero-contrast\.png/);
+}
+console.log('hero-image OK');
 
 console.log('ALL CHECKS PASSED');

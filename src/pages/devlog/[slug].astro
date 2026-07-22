@@ -10,6 +10,7 @@ import { describeBody } from '../../lib/describe-entry';
 import { titleFromH1 } from '../../lib/title-from-h1';
 import { sortByPhaseNumber } from '../../lib/phase-sort';
 import { normalizeMilestone } from '../../lib/milestone-key';
+import { heroFor } from '../../lib/hero-assets';
 import PostLayout from '../../layouts/PostLayout.astro';
 
 export async function getStaticPaths() {
@@ -75,6 +76,15 @@ const backLink = { href: base, label: 'Back to devblog' };
 // real dates, so article:published_time is legitimate here (deep-dives, which
 // have no date per D-33, must not get a fabricated one).
 const description = describeBody(entry.body, entry.id);
+
+// D-48: the two announcements that carry a real engine plot in their body embed
+// that plot; everywhere else hero is null and BaseLayout applies the default
+// card, so exactly one image is ever emitted. Alt is the post's own title --
+// the site layer cannot interpret a plot well enough to describe it (UI-SPEC).
+const hero = heroFor(entry);
+const ogImage = hero
+  ? { src: hero.src, width: hero.width, height: hero.height, alt: title }
+  : undefined;
 ---
 
 <PostLayout
@@ -85,6 +95,7 @@ const description = describeBody(entry.body, entry.id);
   backLink={backLink}
   description={description}
   ogType="article"
+  ogImage={ogImage}
   publishedTime={date.toISOString()}
 >
   <Content />
