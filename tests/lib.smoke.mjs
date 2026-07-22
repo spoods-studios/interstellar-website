@@ -13,6 +13,8 @@ import { normalizeMilestone, milestoneSortKey } from '../src/lib/milestone-key.t
 import { titleFromH1 } from '../src/lib/title-from-h1.ts';
 import { assertNonEmpty, isVisible } from '../src/lib/content-guards.ts';
 import { buildToc } from '../src/lib/toc.ts';
+import { firstProseBlock, stripInline, truncate, describeBody } from '../src/lib/describe-entry.ts';
+import { compareNewestFirst } from '../src/lib/entry-order.ts';
 import { createWikilinkResolver } from '../src/lib/wikilink-resolver.mjs';
 import { createWikilinkPlugin } from '../src/lib/mdast-wikilinks.mjs';
 import { markdownToHtml } from 'satteri';
@@ -193,5 +195,106 @@ console.log('== mdast-wikilinks plugin (compile assertions) ==');
   }
 }
 console.log('mdast-wikilinks plugin OK');
+
+console.log('== describe-entry ==');
+// D-51: the first block that is not chrome. The H1, a leading hero image, the
+// boilerplate blockquote opening all 55 deep-dives, list/table/rule blocks are
+// all skipped -- what survives is the entry's first real sentence.
+assert.equal(firstProseBlock('# Title\n\nReal prose here.'), 'Real prose here.');
+assert.equal(
+  firstProseBlock('# Title\n\n![alt](../assets/x.png)\n\nReal prose here.'),
+  'Real prose here.'
+);
+assert.equal(
+  firstProseBlock('# Title\n\n> Retroactive technical devlog. Code shown as built.\n\nReal prose here.'),
+  'Real prose here.'
+);
+assert.equal(firstProseBlock('# Title\n\n- a\n- b\n\nReal prose here.'), 'Real prose here.');
+assert.equal(firstProseBlock('# Title\n\n1. a\n2. b\n\nReal prose here.'), 'Real prose here.');
+assert.equal(
+  firstProseBlock('# Title\n\n| a | b |\n| - | - |\n\nReal prose here.'),
+  'Real prose here.'
+);
+assert.equal(firstProseBlock('# Title\n\n---\n\nReal prose here.'), 'Real prose here.');
+assert.equal(firstProseBlock('# Only a heading'), null);
+
+assert.equal(
+  stripInline('**bold** and *em* and `code` and [link](/x) and ![img](/y.png)'),
+  'bold and em and code and link and'
+);
+assert.equal(stripInline('line one\nline two'), 'line one line two');
+
+// D-52: unchanged under the limit; otherwise the last COMPLETE sentence, with
+// no minimum-length floor -- a finished 53-char thought beats a severed 160.
+assert.equal(truncate('Short sentence.', 160), 'Short sentence.');
+{
+  const two = `A short opening sentence. ${'padding word '.repeat(15)}end.`;
+  assert.ok(two.length > 160);
+  assert.equal(truncate(two, 160), 'A short opening sentence.');
+}
+{
+  const oneSentence = `${'wordy '.repeat(33)}tail`;
+  assert.equal(oneSentence.length, 202);
+  const result = truncate(oneSentence, 160);
+  assert.ok(result.endsWith('…'), 'no sentence break -> ellipsis');
+  assert.ok(result.length <= 161, `expected <=161, got ${result.length}`);
+  const body = result.slice(0, -1);
+  assert.ok(oneSentence.startsWith(body), 'cut must be a prefix of the input');
+  assert.equal(oneSentence[body.length], ' ', 'cut must land on a word boundary');
+}
+// A cut must never sever a surrogate pair -- the corpus is full of astral
+// punctuation and a lone surrogate is an invalid attribute value.
+{
+  const hasLoneSurrogate = (s) =>
+    [...s].some((ch) => {
+      const cp = ch.codePointAt(0);
+      return cp >= 0xd800 && cp <= 0xdfff;
+    });
+  const astral = '\u{1F680}'.repeat(100);
+  assert.equal(astral.length, 200);
+  assert.ok(!hasLoneSurrogate(truncate(astral, 160)), 'pure-astral cut split a pair');
+  const mixed = `${'orbit \u{1F680} '.repeat(30)}tail`;
+  assert.ok(mixed.length > 160);
+  assert.ok(!hasLoneSurrogate(truncate(mixed, 160)), 'mixed cut split a pair');
+}
+// Curly quotes, em-dash and the prime mark must survive byte-identical.
+assert.equal(
+  truncate('He said “it drifts” — by 43″/century, exactly.', 160),
+  'He said “it drifts” — by 43″/century, exactly.'
+);
+
+// D-58: a body with no extractable prose is a loud failure naming the entry,
+// never an empty description.
+assert.throws(() => describeBody('# Only a heading', 'devlog/example'), /devlog\/example/);
+assert.equal(
+  describeBody(
+    "# How It's Made\n\nSetare Aerospace is built solo, and I use AI heavily. This page says exactly how —\nwhat AI does here, what it never does, and why you can trust the result anyway.\nIt's permanent, versioned, and I'll keep it current as the tooling changes.",
+    'pages/how-its-made'
+  ),
+  'Setare Aerospace is built solo, and I use AI heavily.'
+);
+console.log('describe-entry OK');
+
+console.log('== entry-order ==');
+{
+  const d = (s) => new Date(`${s}T00:00:00Z`);
+  const a = { id: 'a', date: d('2026-01-01') };
+  const b = { id: 'b', date: d('2026-07-13') };
+  const c = { id: 'c', date: d('2026-04-07') };
+  assert.deepEqual(
+    [a, b, c].sort(compareNewestFirst).map((e) => e.id),
+    ['b', 'c', 'a']
+  );
+
+  // Identical dates must tie-break on id, independent of input order --
+  // otherwise the archive, the post route and the feed can disagree.
+  const x = { id: 'alpha', date: d('2026-05-05') };
+  const y = { id: 'beta', date: d('2026-05-05') };
+  assert.deepEqual([x, y].sort(compareNewestFirst).map((e) => e.id), ['alpha', 'beta']);
+  assert.deepEqual([y, x].sort(compareNewestFirst).map((e) => e.id), ['alpha', 'beta']);
+
+  assert.equal(compareNewestFirst(x, x), 0);
+}
+console.log('entry-order OK');
 
 console.log('ALL CHECKS PASSED');
