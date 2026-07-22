@@ -64,7 +64,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. A visitor can open the "How It's Made" and "Roadmap" standalone pages, neither of which appears in the archive listing
   4. The site is legible on mobile and desktop, serves a custom 404, shows a favicon, exposes `sitemap.xml`, and emits canonical URLs
 
-**Plans**: 6/8 plans executed
+**Plans**: 7/8 plans executed
 **UI hint**: yes
 
 **Wave 1**
@@ -84,7 +84,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] 02-05-PLAN.md — Archive homepage (includes blocking D-16 one-liner sign-off)
 - [x] 02-06-PLAN.md — Technical tree: full/per-milestone indexes, deep-dive pages, bidirectional cross-links
-- [ ] 02-07-PLAN.md — Roadmap overview + 8 milestone detail pages + How It's Made page
+- [x] 02-07-PLAN.md — Roadmap overview + 8 milestone detail pages + How It's Made page
 
 **Wave 5** *(blocked on Wave 4)*
 
@@ -128,6 +128,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Stack & Scaffolding | 2/2 | Complete    | 2026-07-14 |
-| 2. Content Rendering & Templating | 6/8 | In Progress|  |
+| 2. Content Rendering & Templating | 7/8 | In Progress|  |
 | 3. RSS, OpenGraph & Discord Distribution | 0/TBD | Not started | - |
 | 4. Analytics, Launch Content & Deploy Hardening | 0/TBD | Not started | - |

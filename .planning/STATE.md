@@ -4,16 +4,16 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 2
 current_phase_name: Content Rendering & Templating
-status: executing
-stopped_at: Completed 02-06-PLAN.md
-last_updated: "2026-07-22T17:45:17.687Z"
+status: verifying
+stopped_at: Completed 02-07-PLAN.md
+last_updated: "2026-07-22T18:00:52.317Z"
 last_activity: 2026-07-22
 last_activity_desc: Phase 2 execution started
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 10
-  completed_plans: 8
+  completed_plans: 9
   percent: 25
 ---
 
@@ -29,8 +29,8 @@ See: .planning/PROJECT.md (updated 2026-07-13)
 ## Current Position
 
 Phase: 2 (Content Rendering & Templating) — EXECUTING
-Plan: 7 of 8
-Status: Ready to execute
+Plan: 8 of 8
+Status: Phase complete — ready for verification
 Last activity: 2026-07-22 — Phase 2 execution started
 
 Progress: [░░░░░░░░░░] 0%
@@ -63,6 +63,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02 P04 | 20min | 2 tasks | 5 files |
 | Phase 02 P05 | 15min | 2 tasks | 2 files |
 | Phase 02 P06 | 35min | 2 tasks | 6 files |
+| Phase 02 P07 | 45min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -93,6 +94,9 @@ Recent decisions affecting current work:
 - [Phase 02-06]: how-to-read routed via a dedicated static file (src/pages/technical/how-to-read.astro) rather than special-casing the dynamic [milestone]/[slug] route -- its collection id has no slash
 - [Phase 02-06]: Milestone display name and era read from each roadmap entry's H1 (Roadmap Detail prefix stripped) and Era line, not a hand-written map -- future era/milestone renames move in the vault, not the template
 - [Phase 02-06]: Era grouping is data-driven even though all 8 roadmap entries currently share one era value -- observed mismatch with plan's read_first expectation, no code change needed since implementation already reads the line dynamically
+- [Phase ?]: [Phase 02-07]: Extended the placeholder marker regex to cover a plain unbolded 'Deep dive: [Phase N ]post(ed) in #technical-devlog[.]' wording variant scattered across M0.5-M0.8, not shown in the plan's sampled M0.3 file
+- [Phase ?]: [Phase 02-07]: M0.5-M0.8's generic intro-blockquote mention of #technical-devlog (not tied to any phase) is stripped rather than linked, since there's no single phase to point it at
+- [Phase ?]: [Phase 02-07]: resolvePhase's phase-to-id map lives directly in astro.config.mjs (cached per milestone), not a new src/lib file, mirroring the existing wikilink-resolver's shape
 
 ### Pending Todos
 
@@ -121,6 +125,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-22T17:45:17.682Z
-Stopped at: Completed 02-06-PLAN.md
+Last session: 2026-07-22T18:00:49.070Z
+Stopped at: Completed 02-07-PLAN.md
 Resume file: None
