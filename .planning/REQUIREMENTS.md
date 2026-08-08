@@ -19,7 +19,7 @@ plus research-promoted table stakes. Target: live at engine M1.1 close.
 - [x] **CONT-03**: "How It's Made" AI-transparency standalone page renders from `pages/` (structurally separate collection — never appears in archive/RSS), content per D-G honesty constraints
 - [x] **CONT-04**: Roadmap overview page rendering the site-voice transcription of the Discord #roadmap pinned overview (D-37), plus 8 milestone-level roadmap detail pages (D-38) sourced from a separate `roadmap/` collection, each cross-linking into its milestone's technical deep-dives
 - [x] **CONT-05**: M1.1 devblog post published as the launch post
-- [ ] **CONT-06**: Slug-immutability norm documented; redirect-stub mechanism exists for any future slug change (Discord links must not 404)
+- [x] **CONT-06**: Slug-immutability norm documented; redirect-stub mechanism exists for any future slug change (Discord links must not 404)
 
 ### Distribution
 
@@ -63,7 +63,7 @@ plus research-promoted table stakes. Target: live at engine M1.1 close.
 | DIST-03 | Phase 3 | Complete |
 | ANLT-01 | Phase 4 | Pending |
 | CONT-05 | Phase 4 | Complete |
-| CONT-06 | Phase 4 | Pending |
+| CONT-06 | Phase 4 | Complete |
 | SITE-03 | Phase 4 | Pending |
 
 **Coverage:** 14/14 v1 requirements mapped — no orphans, no duplicates.
