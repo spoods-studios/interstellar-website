@@ -5,7 +5,9 @@
 // for why a layout-level guard would not hold.
 //
 // Decisions: D-49 (default OG card), D-53 (plain-text Discord CTA),
-// D-54 (build-time invite guard), D-55 (the permanent invite), D-16 (tagline).
+// D-54 (build-time invite guard), D-55 (the permanent invite), D-16 (tagline),
+// D-60 (GoatCounter hosted), D-61 (optional-if-unset site code), D-62 (script
+// in the shared layout so the 404 page counts too).
 
 // D-55: permanent invite, created with Expire After: Never and no use limit.
 // Locked -- regenerating it dead-links every URL already shared, and Plan
@@ -41,6 +43,38 @@ export const OG_DEFAULT = {
   height: 630,
   alt: 'Interstellar Engine — a space engine built from scratch on real n-body physics.',
 };
+
+// D-60: the GoatCounter site code, unset until the developer signs up
+// (post-phase). Set it to the account's code (lowercase letters, digits and
+// hyphens) after creating the account.
+export const GOATCOUNTER_CODE = '';
+
+// The sentinel a scaffolded-but-unconfigured checkout would carry. Rejected
+// by assertGoatcounterConfigured() so a near-miss value can never ship.
+export const GOATCOUNTER_PLACEHOLDER = 'REPLACE_ME';
+
+// D-61: deliberately asymmetric with assertInviteConfigured() below -- an
+// UNSET code warns and returns null rather than throwing, because unset is
+// the expected pre-signup state and D-08 means every push deploys: a hard
+// block here would freeze the pipeline until an account exists. A placeholder
+// or malformed code still throws, so the two adjacent states never collapse.
+// Called bare at astro.config.mjs top level and from BaseLayout.astro.
+export function assertGoatcounterConfigured() {
+  const code = typeof GOATCOUNTER_CODE === 'string' ? GOATCOUNTER_CODE.trim() : '';
+  if (code === '') {
+    console.warn(
+      'GOATCOUNTER_CODE is unset — the site builds and deploys WITHOUT analytics. ' +
+        'Set it in src/lib/site.mjs after creating the GoatCounter account (ANLT-01).'
+    );
+    return null;
+  }
+  if (code === GOATCOUNTER_PLACEHOLDER || !/^[a-z0-9-]+$/.test(code)) {
+    throw new Error(
+      `GOATCOUNTER_CODE: "${code}" is the placeholder or not a valid GoatCounter site code — set the real code in src/lib/site.mjs`
+    );
+  }
+  return code;
+}
 
 // D-54: an unset or placeholder invite must fail the build loudly rather than
 // render a CTA with an empty href. Called bare at astro.config.mjs top level.

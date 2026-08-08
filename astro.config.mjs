@@ -8,7 +8,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createWikilinkResolver } from './src/lib/wikilink-resolver.mjs';
 import { createWikilinkPlugin } from './src/lib/mdast-wikilinks.mjs';
 import { createDeepDiveLinkPlugin } from './src/lib/mdast-deepdive-links.mjs';
-import { assertInviteConfigured } from './src/lib/site.mjs';
+import { assertInviteConfigured, assertGoatcounterConfigured } from './src/lib/site.mjs';
 
 const BASE = '/interstellar-website';
 const NORMALIZED_BASE = BASE.endsWith('/') ? BASE : `${BASE}/`;
@@ -114,6 +114,12 @@ validateContentLoudFail();
 // is the layer nothing downstream swallows, so an unset invite crashes the
 // build here rather than shipping a CTA with an empty href.
 assertInviteConfigured();
+
+// D-61: same layer as assertInviteConfigured() -- config evaluation is where
+// nothing downstream swallows a throw. Unset only warns here (pre-signup is
+// an expected state and every push deploys), but a placeholder or malformed
+// code crashes the build before it can silently send pageviews nowhere.
+assertGoatcounterConfigured();
 
 export default defineConfig({
   site: 'https://spoods-studios.github.io',
