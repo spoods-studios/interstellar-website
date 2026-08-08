@@ -14,7 +14,15 @@ echo "== Positive check: all four collections resolve at their exact expected co
 # exist on disk -- counting built dist/ routes is exactly as sensitive to that
 # regression as the old getCollection()-backed JSON endpoint was.
 npm run build
-DEVLOG_COUNT=$(find dist/devlog -name index.html | wc -l)
+# CONT-06/D-65: redirect stubs (meta-refresh pages from astro.config.mjs's
+# SLUG_REDIRECTS) land under dist/devlog/ too but are not collection pages --
+# exclude them by the same predicate the other harnesses use, so this stays a
+# count of reader-facing devlog routes.
+DEVLOG_COUNT=0
+while IFS= read -r f; do
+  if grep -q 'http-equiv="refresh"' "$f"; then continue; fi
+  DEVLOG_COUNT=$((DEVLOG_COUNT + 1))
+done < <(find dist/devlog -name index.html)
 # Milestone glob widened off the m0 series (04-02): an m0-anchored path would
 # keep passing while silently ignoring every other milestone directory.
 TECHNICAL_COUNT=$(( $(find dist/technical -path 'dist/technical/m*/phase-*' -name index.html | wc -l) + 1 )) # +1 for how-to-read

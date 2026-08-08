@@ -9,7 +9,15 @@ echo "== Build =="
 npm run build
 
 echo "== All ten announcements built =="
-test "$(find dist/devlog -name index.html | wc -l)" -eq 10
+# CONT-06/D-65: redirect stubs (meta-refresh pages from astro.config.mjs's
+# SLUG_REDIRECTS) land under dist/devlog/ too but are not announcement pages --
+# exclude them by the same predicate the other harnesses use.
+ANNOUNCEMENT_COUNT=0
+while IFS= read -r f; do
+  if grep -q 'http-equiv="refresh"' "$f"; then continue; fi
+  ANNOUNCEMENT_COUNT=$((ANNOUNCEMENT_COUNT + 1))
+done < <(find dist/devlog -name index.html)
+test "$ANNOUNCEMENT_COUNT" -eq 10
 
 echo "== Manifesto and a full-frontmatter post both exist =="
 test -f dist/devlog/2026-04-07-why-im-building-a-hyperrealistic-space-sim/index.html
