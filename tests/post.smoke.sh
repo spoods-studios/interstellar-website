@@ -47,12 +47,15 @@ fi
 echo "== An embedded body image resolves to a real built asset (D-28) =="
 IMG_POST=dist/devlog/2026-07-10-warping-without-losing-the-moon/index.html
 test "$(grep -o '<img' "$IMG_POST" | wc -l)" -ge 1
-SRC=$(grep -o 'src="[^"]*"' "$IMG_POST" | head -1 | sed 's/src="//;s/"$//')
+# Scope src= extraction to <img> tags: once the D-61 analytics script is
+# configured, the page's first bare src= is the script's, not an image's.
+SRC=$(grep -o '<img[^>]*src="[^"]*"' "$IMG_POST" | head -1 | grep -o 'src="[^"]*"' | sed 's/src="//;s/"$//')
 ASSET_PATH="dist${SRC#/interstellar-website}"
 test -f "$ASSET_PATH"
 
-echo "== No client JS on any announcement page =="
-test "$(grep -c '<script' dist/devlog/2026-04-13-before-the-galaxy-a-triangle/index.html)" -eq 0
+echo "== No client JS beyond the sanctioned analytics tag on any announcement page (D-60/D-61) =="
+POST_JS_PAGE=dist/devlog/2026-04-13-before-the-galaxy-a-triangle/index.html
+test "$(grep -o '<script' "$POST_JS_PAGE" | wc -l)" -eq "$(grep -o 'gc\.zgo\.at' "$POST_JS_PAGE" | wc -l)"
 
 echo "== No hardcoded host/base string under src/ (T-02-07) =="
 ! grep -rIn -e 'github\.io' -e '/interstellar-website' src/

@@ -125,6 +125,10 @@ echo "SITE-03 fixture OK: schema violation failed the build loudly naming the fi
 
 echo "== D-61 fixture: an unset site code warns and builds; a placeholder or malformed one fails loudly =="
 SITE_LIB="src/lib/site.mjs"
+# Snapshot, don't demand emptiness: the fixtures must leave src/ exactly as
+# they found it, but a set-and-not-yet-committed GOATCOUNTER_CODE (the D-61
+# post-signup state) is legitimate dirt that must not read as fixture damage.
+PRE_SRC_STATUS=$(git status --porcelain src/)
 SITE_LIB_BACKUP=$(mktemp)
 cp "$SITE_LIB" "$SITE_LIB_BACKUP"
 # Derive the sentinel from the module itself (the D-54 idiom in
@@ -183,11 +187,11 @@ fi
 cp "$SITE_LIB_BACKUP" "$SITE_LIB"
 rm -f "$SITE_LIB_BACKUP"
 trap - EXIT
-if git status --porcelain src/ | grep -q .; then
-  echo "D-61 FIXTURE FAIL: src/ left dirty"
+if [ "$(git status --porcelain src/)" != "$PRE_SRC_STATUS" ]; then
+  echo "D-61 FIXTURE FAIL: src/ left in a different state than the fixture found it"
   exit 1
 fi
-echo "D-61 fixture OK: unset/blank warn and build; placeholder/malformed fail loudly; valid is silent; src/ clean"
+echo "D-61 fixture OK: unset/blank warn and build; placeholder/malformed fail loudly; valid is silent; src/ restored"
 
 echo "== ANLT-01/D-62: analytics emission matches the configured state on every page, the 404 included =="
 # Rebuild first: earlier fixtures leave dist/ from a mutated module, and this
@@ -245,11 +249,11 @@ rm -f "$GC_BACKUP"
 trap - EXIT
 [ "$SET_FAIL" -eq 0 ]
 [ "$SET_SAW_404" -eq 1 ]
-if git status --porcelain src/ | grep -q .; then
-  echo "ANLT-01 FIXTURE FAIL: src/ left dirty"
+if [ "$(git status --porcelain src/)" != "$PRE_SRC_STATUS" ]; then
+  echo "ANLT-01 FIXTURE FAIL: src/ left in a different state than the fixture found it"
   exit 1
 fi
-echo "ANLT-01/D-62 fixture OK: one tag everywhere incl. 404, endpoint carries the code, async, empty body; src/ clean"
+echo "ANLT-01/D-62 fixture OK: one tag everywhere incl. 404, endpoint carries the code, async, empty body; src/ restored"
 
 echo "== Final clean rebuild: leave dist/ as a plain local build =="
 npm run build > /dev/null

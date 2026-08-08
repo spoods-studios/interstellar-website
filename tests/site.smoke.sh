@@ -71,9 +71,11 @@ done < <(find dist -name "*.html")
 [ "$FAVICON_FAIL" -eq 0 ]
 echo "favicon coverage OK"
 
-echo "== Zero client JS anywhere in dist/ =="
-test "$(grep -rl '<script' dist/ | wc -l)" -eq 0
-echo "zero-JS OK"
+echo "== Every script tag anywhere in dist/ is the sanctioned analytics tag (D-60/D-61) =="
+# State-free: while GOATCOUNTER_CODE is unset both totals are zero; once it is
+# set both are one per page. A stray script breaks it in either state.
+test "$(grep -ro '<script' dist/ | wc -l)" -eq "$(grep -ro 'gc\.zgo\.at' dist/ | wc -l)"
+echo "no-extra-JS OK"
 
 echo "== Dead-link sweep: every internal href resolves to a real file in dist/ =="
 DEADLINKS_LOG=/tmp/gsd-site-deadlinks.log

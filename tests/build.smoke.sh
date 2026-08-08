@@ -44,8 +44,9 @@ test "$(grep -o 'M1.1' dist/index.html | wc -l)" -ge 1
 test "$(grep -o 'M0.8' dist/index.html | wc -l)" -ge 1
 test "$(grep -o 'M0.1' dist/index.html | wc -l)" -ge 1
 
-# No client JS.
-test "$(grep -o '<script' dist/index.html | wc -l)" -eq 0
+# No client JS beyond the sanctioned analytics tag (D-60/D-61: the script-tag
+# count must equal the analytics-tag count in either constant state).
+test "$(grep -o '<script' dist/index.html | wc -l)" -eq "$(grep -o 'gc\.zgo\.at' dist/index.html | wc -l)"
 
 # T-02-03/D-26/D-31: neither standalone page (pages/how-its-made.md,
 # pages/roadmap.md) may leak into the archive listing. A whole-page substring

@@ -36,11 +36,12 @@ if ! sed 's/<[^>]*>//g' "$NODISCARD_PAGE" | grep -q '\[\[nodiscard\]\]'; then
   exit 1
 fi
 
-echo "== Shiki light-theme inline styles present, zero client JS =="
+echo "== Shiki light-theme inline styles present, no client JS beyond the analytics tag (D-60/D-61) =="
 PAGE_01="dist/technical/m0.1/phase-01-window-surface/index.html"
 grep -q 'background-color:#fff' "$PAGE_01"
-test "$(grep -c '<script' "$PAGE_01")" -eq 0
-test "$(grep -c '<script' dist/technical/how-to-read/index.html)" -eq 0
+test "$(grep -o '<script' "$PAGE_01" | wc -l)" -eq "$(grep -o 'gc\.zgo\.at' "$PAGE_01" | wc -l)"
+HTR_PAGE=dist/technical/how-to-read/index.html
+test "$(grep -o '<script' "$HTR_PAGE" | wc -l)" -eq "$(grep -o 'gc\.zgo\.at' "$HTR_PAGE" | wc -l)"
 
 echo "== Body H1 title and milestone/phase meta line, no fabricated date (D-33) =="
 grep -q 'Phase 14.5' "$PAGE_14_5"
@@ -97,7 +98,8 @@ if grep -q 'Technical deep-dives for this milestone' dist/devlog/2026-04-07-why-
   exit 1
 fi
 
-echo "== Zero client JS on the full index =="
-test "$(grep -c '<script' dist/technical/index.html)" -eq 0
+echo "== No client JS beyond the analytics tag on the full index (D-60/D-61) =="
+TECH_INDEX=dist/technical/index.html
+test "$(grep -o '<script' "$TECH_INDEX" | wc -l)" -eq "$(grep -o 'gc\.zgo\.at' "$TECH_INDEX" | wc -l)"
 
 echo "ALL CHECKS PASSED"
