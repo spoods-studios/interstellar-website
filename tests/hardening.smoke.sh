@@ -189,6 +189,68 @@ if git status --porcelain src/ | grep -q .; then
 fi
 echo "D-61 fixture OK: unset/blank warn and build; placeholder/malformed fail loudly; valid is silent; src/ clean"
 
+echo "== ANLT-01/D-62: analytics emission matches the configured state on every page, the 404 included =="
+# Rebuild first: earlier fixtures leave dist/ from a mutated module, and this
+# section's whole point is that dist/ agrees with the module AS COMMITTED.
+npm run build > /dev/null 2>&1
+# sed, not grep -oP: the captured value is legitimately empty while the code
+# is unset, and a zero-length grep match is not a portable exit-0.
+GC_CODE=$(sed -n "s|^export const GOATCOUNTER_CODE = '\(.*\)';\$|\1|p" "$SITE_LIB" | tr -d '[:space:]')
+if [ -n "$GC_CODE" ]; then EXPECTED=1; else EXPECTED=0; fi
+GATE_FAIL=0
+SAW_404=0
+while IFS= read -r f; do
+  COUNT=$(count_occurrences 'gc\.zgo\.at' "$f")
+  if [ "$COUNT" -ne "$EXPECTED" ]; then
+    echo "FAIL: $f carries $COUNT analytics tags (expected exactly $EXPECTED on every page)"
+    GATE_FAIL=1
+  fi
+  case "$f" in */404.html) SAW_404=1 ;; esac
+done < <(find dist -name "*.html")
+[ "$GATE_FAIL" -eq 0 ]
+[ "$SAW_404" -eq 1 ]
+echo "analytics gating OK (expected $EXPECTED per page, 404 covered)"
+
+echo "== ANLT-01/D-62 fixture: a configured code puts exactly one tag on every page =="
+GC_BACKUP=$(mktemp)
+cp "$SITE_LIB" "$GC_BACKUP"
+trap 'cp "$GC_BACKUP" "$SITE_LIB" 2>/dev/null || true; rm -f "$GC_BACKUP"' EXIT
+TEST_CODE="interstellar-smoke"
+sed "s|^export const GOATCOUNTER_CODE = '.*';|export const GOATCOUNTER_CODE = '${TEST_CODE}';|" \
+  "$GC_BACKUP" > "$SITE_LIB"
+npm run build > /dev/null 2>&1
+SET_FAIL=0
+SET_SAW_404=0
+while IFS= read -r f; do
+  if [ "$(count_occurrences 'gc\.zgo\.at' "$f")" -ne 1 ]; then
+    echo "FAIL: $f does not carry exactly one analytics tag with the code set"
+    SET_FAIL=1
+  fi
+  if ! grep -q "data-goatcounter=\"https://${TEST_CODE}.goatcounter.com/count\"" "$f"; then
+    echo "FAIL: $f analytics endpoint does not carry the configured site code"
+    SET_FAIL=1
+  fi
+  if ! grep -o '<script[^>]*>' "$f" | grep 'gc\.zgo\.at' | grep -q 'async'; then
+    echo "FAIL: $f analytics tag does not carry the async attribute"
+    SET_FAIL=1
+  fi
+  if ! grep -q 'count\.js"></script>' "$f"; then
+    echo "FAIL: $f analytics tag is not an empty-bodied external src reference"
+    SET_FAIL=1
+  fi
+  case "$f" in */404.html) SET_SAW_404=1 ;; esac
+done < <(find dist -name "*.html")
+cp "$GC_BACKUP" "$SITE_LIB"
+rm -f "$GC_BACKUP"
+trap - EXIT
+[ "$SET_FAIL" -eq 0 ]
+[ "$SET_SAW_404" -eq 1 ]
+if git status --porcelain src/ | grep -q .; then
+  echo "ANLT-01 FIXTURE FAIL: src/ left dirty"
+  exit 1
+fi
+echo "ANLT-01/D-62 fixture OK: one tag everywhere incl. 404, endpoint carries the code, async, empty body; src/ clean"
+
 echo "== Final clean rebuild: leave dist/ as a plain local build =="
 npm run build > /dev/null
 

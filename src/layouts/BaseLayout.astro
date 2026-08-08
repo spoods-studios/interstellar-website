@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import { DISCORD_INVITE_URL, SITE_NAME, SITE_TAGLINE, OG_DEFAULT, FEED_TITLE } from '../lib/site.mjs';
+import { DISCORD_INVITE_URL, SITE_NAME, SITE_TAGLINE, OG_DEFAULT, FEED_TITLE, assertGoatcounterConfigured } from '../lib/site.mjs';
 
 export interface Props {
   title: string;
@@ -34,6 +34,10 @@ const card = ogImage ?? { ...OG_DEFAULT, src: `${base}${OG_DEFAULT.file}` };
 // the absolute form without any manual slash arithmetic (SITE-02: the host
 // comes from astro.config.mjs's `site`, never a literal).
 const ogImageUrl = new URL(card.src, Astro.site).toString();
+// D-60/D-61: resolved via the same guard astro.config.mjs calls, so the
+// layout and the config share one definition of "configured" -- null while
+// the code is unset, the trimmed code once the developer signs up.
+const goatcounterCode = assertGoatcounterConfigured();
 ---
 
 <html lang="en">
@@ -70,6 +74,21 @@ const ogImageUrl = new URL(card.src, Astro.site).toString();
         unconditionally: 404.astro inherits this layout and D-67's probe needs
         the marker on the 404 page too. */}
     <meta name="build-sha" content={buildSha} />
+    {/* D-60/D-61/D-62: the site's ONLY client JavaScript -- one cookieless
+        GoatCounter pageview tag, rendered only when the site code is
+        configured. Lives in this shared layout so the 404 page counts too:
+        Pages serves the 404 at the dead URL's own path, so dead links show up
+        in the dashboard (the CONT-06 radar). No dev-mode gate and no bot
+        detection on purpose -- count.js suppresses localhost/private ranges
+        itself, and an extra gate is a path that can silently disable
+        production counting. is:inline so Astro emits it verbatim. */}
+    {goatcounterCode && (
+      <script
+        is:inline
+        data-goatcounter={`https://${goatcounterCode}.goatcounter.com/count`}
+        async
+        src="//gc.zgo.at/count.js"></script>
+    )}
     <link rel="canonical" href={canonicalUrl} />
     {/* D-47: autodiscovery lives in the shared layout, not per-route, so every
         built page tells a reader app where the feed is. */}
