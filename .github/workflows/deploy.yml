@@ -4,6 +4,14 @@ on:
     branches: [main]   # D-08: no path filters, every push deploys
   workflow_dispatch:
 
+# Serialize deploys (starter-workflow shape): without this, an older run's
+# deploy-pages can finish after a newer run's, leaving the live site stale
+# while the stale run stays green and the fresh run's probe turns red.
+# cancel-in-progress stays false so every queued push still deploys, in order.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
