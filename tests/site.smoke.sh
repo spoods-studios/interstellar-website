@@ -26,9 +26,20 @@ NORMALIZED_BASE="${BASE%/}/"
 PREFIX="${SITE}${NORMALIZED_BASE}"
 echo "expected canonical/sitemap prefix: $PREFIX"
 
+# CONT-06/D-65: redirect stubs are machine-facing artifacts, not pages a
+# reader lands on -- Astro's stub template carries a refresh directive and
+# none of the reader-facing chrome. Every sweep below that asserts a
+# reader-facing per-page invariant skips them by this predicate; the stub's
+# own contract is asserted in tests/hardening.smoke.sh instead. The invariants
+# themselves are unchanged -- this is a page-selection predicate only.
+is_redirect_stub() {
+  grep -q 'http-equiv="refresh"' "$1"
+}
+
 echo "== Canonical coverage: every built page carries exactly one canonical link, base-prefixed =="
 CANON_FAIL=0
 while IFS= read -r f; do
+  if is_redirect_stub "$f"; then continue; fi
   COUNT=$(grep -o '<link rel="canonical"' "$f" | wc -l)
   if [ "$COUNT" -ne 1 ]; then
     echo "FAIL: $f has $COUNT canonical link elements (expected exactly 1)"
@@ -52,9 +63,16 @@ ls dist/sitemap*.xml >/dev/null
 SITEMAP_FILE="dist/sitemap-0.xml"
 [ -f "$SITEMAP_FILE" ] || SITEMAP_FILE="dist/sitemap.xml"
 SITEMAP_URLS=$(grep -o '<loc>[^<]*</loc>' "$SITEMAP_FILE" | wc -l)
-BUILT_PAGES=$(find dist -name "*.html" ! -name "404.html" | wc -l)
+# Redirect stubs are subtracted on the same predicate terms as every other
+# sweep, so this stays an EQUALITY between reader-facing pages and sitemap
+# entries -- never loosened to an inequality.
+BUILT_PAGES=0
+while IFS= read -r f; do
+  if is_redirect_stub "$f"; then continue; fi
+  BUILT_PAGES=$((BUILT_PAGES + 1))
+done < <(find dist -name "*.html" ! -name "404.html")
 if [ "$SITEMAP_URLS" -ne "$BUILT_PAGES" ]; then
-  echo "FAIL: sitemap lists $SITEMAP_URLS URLs but $BUILT_PAGES non-404 pages were built (counts must match)"
+  echo "FAIL: sitemap lists $SITEMAP_URLS URLs but $BUILT_PAGES non-404 reader-facing pages were built (counts must match)"
   exit 1
 fi
 if ! grep -q "$PREFIX" "$SITEMAP_FILE"; then
@@ -66,6 +84,7 @@ echo "sitemap OK ($SITEMAP_URLS sitemap URLs == $BUILT_PAGES built non-404 pages
 echo "== Favicon reference on every built page =="
 FAVICON_FAIL=0
 while IFS= read -r f; do
+  if is_redirect_stub "$f"; then continue; fi
   grep -q 'favicon.svg' "$f" || { echo "FAIL: $f has no favicon reference"; FAVICON_FAIL=1; }
 done < <(find dist -name "*.html")
 [ "$FAVICON_FAIL" -eq 0 ]
@@ -119,9 +138,15 @@ echo "== Expected total page count sanity check (four trees + indexes + standalo
 # routes (collection-counts.json.ts, markdown-render-check.astro) are already
 # deleted, so they're not counted here.
 EXPECTED_PAGES=99
-ACTUAL_PAGES=$(find dist -name "*.html" | wc -l)
+# The enumeration above counts reader-facing pages; redirect stubs (CONT-06)
+# are excluded on the same predicate terms as every other sweep.
+ACTUAL_PAGES=0
+while IFS= read -r f; do
+  if is_redirect_stub "$f"; then continue; fi
+  ACTUAL_PAGES=$((ACTUAL_PAGES + 1))
+done < <(find dist -name "*.html")
 if [ "$ACTUAL_PAGES" -ne "$EXPECTED_PAGES" ]; then
-  echo "FAIL: expected $EXPECTED_PAGES built HTML pages, found $ACTUAL_PAGES"
+  echo "FAIL: expected $EXPECTED_PAGES built reader-facing HTML pages, found $ACTUAL_PAGES"
   exit 1
 fi
 echo "page count OK ($ACTUAL_PAGES)"

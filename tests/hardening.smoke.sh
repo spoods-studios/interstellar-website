@@ -39,9 +39,21 @@ count_occurrences() {
   printf '%s' "$n"
 }
 
+# CONT-06/D-65: redirect stubs are machine-facing artifacts, not pages a
+# reader lands on -- Astro's stub template carries a refresh directive and
+# none of the reader-facing chrome (no BaseLayout stamp, no analytics tag).
+# The per-page sweeps below skip them by this predicate; the stub is instead
+# held to its own contract in the CONT-06 section near the end of this file.
+# The invariants themselves are unchanged -- this is a page-selection
+# predicate only.
+is_redirect_stub() {
+  grep -q 'http-equiv="refresh"' "$1"
+}
+
 echo "== D-68: every built page carries exactly one build-sha stamp =="
 STAMP_FAIL=0
 while IFS= read -r f; do
+  if is_redirect_stub "$f"; then continue; fi
   COUNT=$(count_occurrences '<meta name="build-sha"' "$f")
   if [ "$COUNT" -ne 1 ]; then
     echo "FAIL: $f carries $COUNT build-sha stamps (expected exactly 1)"
@@ -54,6 +66,7 @@ echo "stamp coverage OK"
 echo "== D-68: a build without GITHUB_SHA stamps the literal 'local' =="
 LOCAL_FAIL=0
 while IFS= read -r f; do
+  if is_redirect_stub "$f"; then continue; fi
   if [ "$(count_occurrences '<meta name="build-sha" content="local"' "$f")" -ne 1 ]; then
     echo "FAIL: $f local-build stamp is not the literal 'local'"
     LOCAL_FAIL=1
@@ -67,6 +80,7 @@ SYNTHETIC_SHA="cafef00dcafef00dcafef00dcafef00dcafef00d"
 GITHUB_SHA="$SYNTHETIC_SHA" npm run build > /dev/null
 TRACK_FAIL=0
 while IFS= read -r f; do
+  if is_redirect_stub "$f"; then continue; fi
   if [ "$(count_occurrences "<meta name=\"build-sha\" content=\"$SYNTHETIC_SHA\"" "$f")" -ne 1 ]; then
     echo "FAIL: $f does not carry the exported GITHUB_SHA value in its stamp"
     TRACK_FAIL=1
@@ -204,6 +218,7 @@ if [ -n "$GC_CODE" ]; then EXPECTED=1; else EXPECTED=0; fi
 GATE_FAIL=0
 SAW_404=0
 while IFS= read -r f; do
+  if is_redirect_stub "$f"; then continue; fi
   COUNT=$(count_occurrences 'gc\.zgo\.at' "$f")
   if [ "$COUNT" -ne "$EXPECTED" ]; then
     echo "FAIL: $f carries $COUNT analytics tags (expected exactly $EXPECTED on every page)"
@@ -226,6 +241,7 @@ npm run build > /dev/null 2>&1
 SET_FAIL=0
 SET_SAW_404=0
 while IFS= read -r f; do
+  if is_redirect_stub "$f"; then continue; fi
   if [ "$(count_occurrences 'gc\.zgo\.at' "$f")" -ne 1 ]; then
     echo "FAIL: $f does not carry exactly one analytics tag with the code set"
     SET_FAIL=1
@@ -254,6 +270,68 @@ if [ "$(git status --porcelain src/)" != "$PRE_SRC_STATUS" ]; then
   exit 1
 fi
 echo "ANLT-01/D-62 fixture OK: one tag everywhere incl. 404, endpoint carries the code, async, empty body; src/ restored"
+
+echo "== CONT-06/D-65: redirect stub contract -- base-prefixed target, noindex, canonical, resolvable destination =="
+# Derive the map's single key and destination suffix from astro.config.mjs
+# itself (the SITE-02 idiom: no base or slug literal repeated here). The
+# config composes its destination from NORMALIZED_BASE, so recompose it here
+# from the same derived value and demand the emitted stub agrees. `|| true`
+# keeps a missing map reportable under pipefail rather than a silent exit.
+REDIRECT_KEY=$(sed -n '/^const SLUG_REDIRECTS = {/,/^};/p' astro.config.mjs | grep -oP "'\K/[^']+(?=':)" | head -1) || true
+REDIRECT_DEST_SUFFIX=$(sed -n '/^const SLUG_REDIRECTS = {/,/^};/p' astro.config.mjs | grep -oP '\$\{NORMALIZED_BASE\}\K[^`]+' | head -1) || true
+if [ -z "$REDIRECT_KEY" ] || [ -z "$REDIRECT_DEST_SUFFIX" ]; then
+  echo "FAIL: no SLUG_REDIRECTS entry in astro.config.mjs -- the demonstration stub cannot exist (CONT-06)"
+  exit 1
+fi
+STUB_FILE="dist${REDIRECT_KEY}/index.html"
+if [ ! -f "$STUB_FILE" ]; then
+  echo "FAIL: redirect stub missing at $STUB_FILE for map key $REDIRECT_KEY"
+  exit 1
+fi
+if ! grep -q 'http-equiv="refresh"' "$STUB_FILE"; then
+  echo "FAIL: $STUB_FILE carries no meta refresh directive"
+  exit 1
+fi
+if ! grep -q '<meta name="robots" content="noindex"' "$STUB_FILE"; then
+  echo "FAIL: $STUB_FILE carries no robots noindex directive"
+  exit 1
+fi
+if ! grep -q '<link rel="canonical"' "$STUB_FILE"; then
+  echo "FAIL: $STUB_FILE carries no canonical link"
+  exit 1
+fi
+REFRESH_TARGET=$(grep -oP 'http-equiv="refresh" content="[0-9]+;url=\K[^"]+' "$STUB_FILE")
+# Pitfall 1 (04-RESEARCH): Astro emits string destinations VERBATIM into the
+# refresh URL while applying the base only to the match side -- a base-less
+# destination builds clean and sends readers to a path that does not exist.
+case "$REFRESH_TARGET" in
+  "$NORMALIZED_BASE"*) ;;
+  *)
+    echo "FAIL: stub refresh target '$REFRESH_TARGET' does not start with the configured base '$NORMALIZED_BASE'"
+    exit 1
+    ;;
+esac
+if [ "$REFRESH_TARGET" != "${NORMALIZED_BASE}${REDIRECT_DEST_SUFFIX}" ]; then
+  echo "FAIL: emitted refresh target '$REFRESH_TARGET' differs from the config's composed destination '${NORMALIZED_BASE}${REDIRECT_DEST_SUFFIX}'"
+  exit 1
+fi
+# Astro never validates concrete-path destinations -- a typo'd one builds
+# fine and redirects every reader to a 404. Resolve the emitted target to a
+# real build artifact, not merely a non-empty string.
+TARGET_REL="${REFRESH_TARGET#"$NORMALIZED_BASE"}"
+TARGET_REL="${TARGET_REL%%#*}"
+if [ -z "$TARGET_REL" ]; then
+  TARGET_FILE="dist/index.html"
+elif [[ "$TARGET_REL" == */ ]]; then
+  TARGET_FILE="dist/${TARGET_REL}index.html"
+else
+  TARGET_FILE="dist/${TARGET_REL}"
+fi
+if [ ! -f "$TARGET_FILE" ]; then
+  echo "FAIL: stub refresh target '$REFRESH_TARGET' does not resolve to a built file (looked for $TARGET_FILE)"
+  exit 1
+fi
+echo "redirect stub contract OK ($REDIRECT_KEY -> $REFRESH_TARGET)"
 
 echo "== Final clean rebuild: leave dist/ as a plain local build =="
 npm run build > /dev/null
