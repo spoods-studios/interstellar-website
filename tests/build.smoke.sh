@@ -17,14 +17,14 @@ grep -q "April 7, 2026" dist/index.html
 ! grep -rIn -e 'github\.io' -e '/interstellar-website' src/
 echo "positive check OK"
 
-echo "== Positive check: full nine-announcement archive (CONT-02/CONT-03) =="
+echo "== Positive check: full ten-announcement archive (CONT-02/CONT-03/CONT-05) =="
 # grep -c counts matching LINES, not occurrences -- Astro's production build
 # minifies dist/index.html to a single line, so -c always reports 1 regardless
 # of post count. grep -o | wc -l counts actual occurrences instead. Assert on
 # the archive row's href shape rather than a bare '<li>' count, matching the
-# plan's own acceptance criterion ("nine links whose href matches the devlog
+# plan's own acceptance criterion ("ten links whose href matches the devlog
 # post path shape").
-test "$(grep -o 'href="[^"]*devlog/[^"]*/"' dist/index.html | wc -l)" -eq 9
+test "$(grep -o 'href="[^"]*devlog/[^"]*/"' dist/index.html | wc -l)" -eq 10
 
 # D-16: the developer-approved sentence must ship verbatim; the UI-SPEC
 # placeholder must not.
@@ -32,12 +32,15 @@ grep -qF "A space engine built from scratch on real n-body physics." dist/index.
 ! grep -qF "A from-scratch physics-accurate space engine, built in the open." dist/index.html
 
 # Newest-first ordering (D-12): the newest post's title must appear at a
-# smaller byte offset than the oldest (the manifesto's) title.
-NEWEST_OFFSET=$(grep -boF "Making Mercury Precess" dist/index.html | head -1 | cut -d: -f1)
+# smaller byte offset than the oldest (the manifesto's) title. The newest post
+# is the M1.1 launch post (04-02).
+NEWEST_OFFSET=$(grep -boF "First Burn" dist/index.html | head -1 | cut -d: -f1)
 OLDEST_OFFSET=$(grep -boF "Why I'm Building a Hyperrealistic Space Sim from Scratch" dist/index.html | head -1 | cut -d: -f1)
 test "$NEWEST_OFFSET" -lt "$OLDEST_OFFSET"
 
-# Both milestone tags render (spot-check the newest and oldest milestone posts).
+# Milestone tags render (spot-check the newest, the newest m0-era, and the
+# oldest milestone posts).
+test "$(grep -o 'M1.1' dist/index.html | wc -l)" -ge 1
 test "$(grep -o 'M0.8' dist/index.html | wc -l)" -ge 1
 test "$(grep -o 'M0.1' dist/index.html | wc -l)" -ge 1
 
@@ -59,7 +62,7 @@ if echo "$ARCHIVE_LIST" | grep -q 'roadmap'; then
   echo "FAIL: roadmap page leaked into the archive list"
   exit 1
 fi
-echo "nine-announcement check OK"
+echo "ten-announcement check OK"
 
 echo "== Negative check (D-10): malformed devlog file fails the build loudly =="
 MARKER="zzz-not-a-post.md"

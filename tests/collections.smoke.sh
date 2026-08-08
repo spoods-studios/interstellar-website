@@ -15,17 +15,19 @@ echo "== Positive check: all four collections resolve at their exact expected co
 # regression as the old getCollection()-backed JSON endpoint was.
 npm run build
 DEVLOG_COUNT=$(find dist/devlog -name index.html | wc -l)
-TECHNICAL_COUNT=$(( $(find dist/technical -path 'dist/technical/m0.*/phase-*' -name index.html | wc -l) + 1 )) # +1 for how-to-read
+# Milestone glob widened off the m0 series (04-02): an m0-anchored path would
+# keep passing while silently ignoring every other milestone directory.
+TECHNICAL_COUNT=$(( $(find dist/technical -path 'dist/technical/m*/phase-*' -name index.html | wc -l) + 1 )) # +1 for how-to-read
 ROADMAP_COUNT=$(find dist/roadmap -mindepth 2 -maxdepth 2 -name index.html | wc -l)
 PAGES_COUNT=0
 test -f dist/how-its-made/index.html && PAGES_COUNT=$((PAGES_COUNT + 1))
 test -f dist/roadmap/index.html && PAGES_COUNT=$((PAGES_COUNT + 1))
 echo "devlog:$DEVLOG_COUNT technical:$TECHNICAL_COUNT roadmap:$ROADMAP_COUNT pages:$PAGES_COUNT"
-test "$DEVLOG_COUNT" -eq 9
-test "$TECHNICAL_COUNT" -eq 56
-test "$ROADMAP_COUNT" -eq 8
+test "$DEVLOG_COUNT" -eq 10
+test "$TECHNICAL_COUNT" -eq 66
+test "$ROADMAP_COUNT" -eq 9
 test "$PAGES_COUNT" -eq 2
-echo "counts OK (devlog 9 / technical 56 / roadmap 8 / pages 2)"
+echo "counts OK (devlog 10 / technical 66 / roadmap 9 / pages 2)"
 
 echo "== Negative check (D-33): malformed technical/ filename fails the build loudly =="
 MARKER="technical/m0.1/not-a-conforming-name.md"

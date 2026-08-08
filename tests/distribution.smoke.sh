@@ -114,12 +114,12 @@ if grep -rq 'og:title" content="[^"]*— Interstellar Engine"' dist --include='*
 fi
 echo "og:title de-duplication OK"
 
-echo "== DIST-02: exactly three distinct card images site-wide, all at or above the embed threshold =="
+echo "== DIST-02: exactly four distinct card images site-wide, all at or above the embed threshold =="
 DISTINCT_IMAGES=$(grep -rho '<meta property="og:image" content="[^"]*"' dist --include='*.html' \
   | sed -E 's/.*content="([^"]*)".*/\1/' | sort -u)
 DISTINCT_IMAGE_COUNT=$(printf '%s\n' "$DISTINCT_IMAGES" | wc -l)
-if [ "$DISTINCT_IMAGE_COUNT" -ne 3 ]; then
-  echo "FAIL: expected 3 distinct og:image values (default card + 2 hero plots), found $DISTINCT_IMAGE_COUNT"
+if [ "$DISTINCT_IMAGE_COUNT" -ne 4 ]; then
+  echo "FAIL: expected 4 distinct og:image values (default card + 3 hero plots), found $DISTINCT_IMAGE_COUNT"
   printf '%s\n' "$DISTINCT_IMAGES"
   exit 1
 fi
@@ -294,8 +294,8 @@ echo "== DIST-01: content fidelity -- absolutized images, no second-parse artifa
 # assertion below targets that escaped form; a pattern written against the raw
 # quote would pass vacuously forever.
 HERO_URLS=$(grep -o "${SITE}[^&\"]*_astro/[^&\"]*\.webp" dist/rss.xml | wc -l)
-if [ "$HERO_URLS" -ne 2 ]; then
-  echo "FAIL: expected 2 absolute hero image URLs in the feed, found $HERO_URLS"
+if [ "$HERO_URLS" -ne 3 ]; then
+  echo "FAIL: expected 3 absolute hero image URLs in the feed, found $HERO_URLS"
   exit 1
 fi
 # A root-relative src is broken in every reader; the pattern is built from the

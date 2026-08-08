@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 2
+open_count: 3
 waived_count: 0
 fixed_count: 0
-total_count: 2
-last_updated: 2026-07-22T21:30:27.076Z
+total_count: 3
+last_updated: 2026-08-08T21:19:49.821Z
 ---
 
 # Broken Windows Ledger
@@ -17,6 +17,7 @@ last_updated: 2026-07-22T21:30:27.076Z
 |----|-------|------|------|------|-------------|--------|--------|-------------|-------------|
 | 1 | 3 | deviation | tests/lib.smoke.mjs |  | Plan 03-01 Task 4 test input replaced with the real pages/how-its-made prose block; the plan's 81-char paraphrase could not reach truncate's cut path | open |  | 2026-07-22T20:55:47.583Z |  |
 | 2 | 3 | deviation | src/pages/rss.xml.ts |  | absolutize()'s a/href branch is unexercised by real content (zero anchors in all 9 devlog bodies); gated by a live negative assertion in tests/distribution.smoke.sh rather than a fixture | open |  | 2026-07-22T21:30:27.076Z |  |
+| 3 | 4 | deviation | assets/m1.1-hero-first-burn.png |  | M1.1 hero upscaled 1139x1068 -> 1200x1125 (Lanczos, studio-side commit 54f30e9) to clear the OG large-embed floor; author may prefer regenerating the matplotlib plot at native >=1200 width | open |  | 2026-08-08T21:19:49.821Z |  |
 
 ````json
 [
@@ -42,6 +43,18 @@ last_updated: 2026-07-22T21:30:27.076Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-07-22T21:30:27.076Z",
+    "resolved_at": null
+  },
+  {
+    "id": 3,
+    "kind": "deviation",
+    "phase": "4",
+    "file": "assets/m1.1-hero-first-burn.png",
+    "line": null,
+    "description": "M1.1 hero upscaled 1139x1068 -> 1200x1125 (Lanczos, studio-side commit 54f30e9) to clear the OG large-embed floor; author may prefer regenerating the matplotlib plot at native >=1200 width",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-08T21:19:49.821Z",
     "resolved_at": null
   }
 ]

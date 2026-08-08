@@ -9,8 +9,8 @@ cd "$(dirname "$0")/.."
 echo "== Build =="
 npm run build
 
-echo "== Eight roadmap detail pages built =="
-for m in m0.1 m0.2 m0.3 m0.4 m0.5 m0.6 m0.7 m0.8; do
+echo "== Nine roadmap detail pages built =="
+for m in m0.1 m0.2 m0.3 m0.4 m0.5 m0.6 m0.7 m0.8 m1.1; do
   test -f "dist/roadmap/$m/index.html"
 done
 
@@ -28,7 +28,7 @@ if grep -rq 'technical-devlog' dist/roadmap/; then
 fi
 
 echo "== Each roadmap detail page carries at least one anchor into its own milestone's technical tree =="
-for m in m0.1 m0.2 m0.3 m0.4 m0.5 m0.6 m0.7 m0.8; do
+for m in m0.1 m0.2 m0.3 m0.4 m0.5 m0.6 m0.7 m0.8 m1.1; do
   COUNT=$(grep -o "href=\"[^\"]*technical/$m/[^\"]*\"" "dist/roadmap/$m/index.html" | wc -l)
   test "$COUNT" -ge 1
 done
@@ -46,18 +46,26 @@ echo "== Roadmap overview and How It's Made standalone pages both build =="
 test -f dist/roadmap/index.html
 test -f dist/how-its-made/index.html
 
-echo "== Overview carries exactly 8 generated milestone links, zero M1.1 detail link =="
+echo "== Overview carries exactly 9 generated milestone links, including the M1.1 detail link =="
 OVERVIEW="dist/roadmap/index.html"
-test "$(grep -o 'href="[^"]*roadmap/m0\.[0-9]*/"' "$OVERVIEW" | sort -u | wc -l)" -eq 8
-if grep -q 'roadmap/m1\.1' "$OVERVIEW"; then
-  echo "FAIL: overview links to a nonexistent M1.1 roadmap detail page"
-  exit 1
-fi
+# Href regex widened off the m0 anchor (04-02) so a new milestone's link counts.
+test "$(grep -o 'href="[^"]*roadmap/m[0-9]*\.[0-9]*/"' "$OVERVIEW" | sort -u | wc -l)" -eq 9
+# Inverted from the pre-promote negative (04-02): src/pages/roadmap/index.astro
+# generates one link per visible roadmap collection entry, so once roadmap/M1.1.md
+# is promoted this link is required, not forbidden.
+grep -q 'roadmap/m1\.1' "$OVERVIEW"
 
-echo "== Overview carries the authored era-arc prose and mentions M1.1 as in progress =="
+echo "== Overview carries the authored era-arc prose, presents M1.1 as closed, and names M1.2 as next =="
 grep -q 'Era 0' "$OVERVIEW"
 grep -q 'Era 1' "$OVERVIEW"
-grep -q 'M1.1' "$OVERVIEW"
+M11_ROW=$(grep -o '<strong>M1.1 Spacecraft Control</strong>[^<]*' "$OVERVIEW" | head -1)
+echo "$M11_ROW" | grep -q '✅'
+if echo "$M11_ROW" | grep -qi 'in progress'; then
+  echo "FAIL: overview still presents M1.1 as in progress"
+  exit 1
+fi
+M12_ROW=$(grep -o '<strong>M1.2[^<]*</strong>[^<]*' "$OVERVIEW" | head -1)
+echo "$M12_ROW" | grep -qi 'next'
 
 echo "== How It's Made page carries its title and a last-updated meta line =="
 HIM="dist/how-its-made/index.html"

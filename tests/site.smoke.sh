@@ -111,12 +111,12 @@ fi
 echo "dead-link sweep OK (zero dead internal targets)"
 
 echo "== Expected total page count sanity check (four trees + indexes + standalone + error pages) =="
-# devlog 9 + technical 55 deep-dives + how-to-read 1 + technical indexes 9
-# (full + 8 per-milestone) + roadmap 8 detail + roadmap overview 1 +
-# how-its-made 1 + homepage 1 + 404 1 = 86. The two Plan 02-03 diagnostic
+# devlog 10 + technical 65 deep-dives + how-to-read 1 + technical indexes 10
+# (full + 9 per-milestone) + roadmap 9 detail + roadmap overview 1 +
+# how-its-made 1 + homepage 1 + 404 1 = 99. The two Plan 02-03 diagnostic
 # routes (collection-counts.json.ts, markdown-render-check.astro) are already
 # deleted, so they're not counted here.
-EXPECTED_PAGES=86
+EXPECTED_PAGES=99
 ACTUAL_PAGES=$(find dist -name "*.html" | wc -l)
 if [ "$ACTUAL_PAGES" -ne "$EXPECTED_PAGES" ]; then
   echo "FAIL: expected $EXPECTED_PAGES built HTML pages, found $ACTUAL_PAGES"
