@@ -12,6 +12,20 @@ import { assertInviteConfigured, assertGoatcounterConfigured } from './src/lib/s
 
 const BASE = '/interstellar-website';
 const NORMALIZED_BASE = BASE.endsWith('/') ? BASE : `${BASE}/`;
+
+// D-65/CONT-06: one entry per renamed published slug -- a deployed URL is
+// permanent, and a rename lands here in the same commit. Keys are base-FREE
+// old paths because Astro applies the base to the match side itself;
+// destinations MUST be base-composed (never a literal) because Astro emits
+// string destinations verbatim into the stub's meta-refresh URL -- a base-less
+// destination builds clean and sends readers to a path that does not exist.
+// The entry below is a demonstration: a never-published old slug pointing at
+// the launch post, kept so the harness exercises the mechanism end-to-end
+// rather than because a real rename happened.
+const SLUG_REDIRECTS = {
+  '/devlog/2026-07-30-demo-old-slug': `${NORMALIZED_BASE}devlog/2026-07-30-first-burn/`,
+};
+
 const TECHNICAL_ROOT = fileURLToPath(new URL('./technical', import.meta.url));
 
 const wikilinkResolver = createWikilinkResolver({
@@ -124,6 +138,7 @@ assertGoatcounterConfigured();
 export default defineConfig({
   site: 'https://spoods-studios.github.io',
   base: BASE,
+  redirects: SLUG_REDIRECTS,
   integrations: [sitemap()],
   markdown: {
     // D-39, amended: registered via Sätteri's own mdastPlugins option, not the

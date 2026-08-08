@@ -43,6 +43,16 @@ attr_value() {
   grep -o "$1 content=\"[^\"]*\"" "$2" | sed -E 's/.*content="([^"]*)".*/\1/'
 }
 
+# CONT-06/D-65: redirect stubs are machine-facing artifacts, not pages a
+# reader lands on -- Astro's stub template carries a refresh directive and
+# none of the reader-facing chrome (no OpenGraph block, no CTA, no feed
+# autodiscovery). The per-page sweeps below skip them by this predicate; the
+# stub's own contract lives in tests/hardening.smoke.sh. The invariants
+# themselves are unchanged -- this is a page-selection predicate only.
+is_redirect_stub() {
+  grep -q 'http-equiv="refresh"' "$1"
+}
+
 echo "== DIST-02: metadata coverage, absolute URLs, and resolvable images on every built page =="
 META_FAIL=0
 UNCONDITIONAL_TAGS=(
@@ -60,6 +70,7 @@ UNCONDITIONAL_TAGS=(
   '<meta name="theme-color"'
 )
 while IFS= read -r f; do
+  if is_redirect_stub "$f"; then continue; fi
   for tag in "${UNCONDITIONAL_TAGS[@]}"; do
     COUNT=$(count_occurrences "$tag" "$f")
     if [ "$COUNT" -ne 1 ]; then
@@ -153,6 +164,7 @@ echo "description variety OK ($DISTINCT_DESCRIPTIONS distinct values)"
 echo "== DIST-03: CTA placements and feed autodiscovery on every built page =="
 CTA_FAIL=0
 while IFS= read -r f; do
+  if is_redirect_stub "$f"; then continue; fi
   INVITE_COUNT=$(count_occurrences "$INVITE" "$f")
   if [ "$INVITE_COUNT" -ne 2 ]; then
     echo "FAIL: $f carries $INVITE_COUNT invite links (expected exactly 2: header nav + footer)"
