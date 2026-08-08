@@ -1,6 +1,6 @@
 ---
 title: Roadmap
-updated: 2026-07-22
+updated: 2026-08-08
 status: published
 ---
 
@@ -36,4 +36,9 @@ the Technical section explains the whole system.
 
 ## Era 1 — first gameplay 🔨
 
-- **M1.1 Spacecraft Control** 🔨 — in progress
+- **M1.1 Spacecraft Control** ✅ — 6DOF craft, real thrust + fuel
+  (Tsiolkovsky), RCS, deterministic input, debug HUD; first playable build
+  (21 phases incl. gate fixes)
+- **M1.2 Maneuver Nodes & Trajectory Prediction** 🔨 — next:
+  click-to-place nodes, predicted trajectories, plus the fine-time-step
+  work that unlocks 1× launches
