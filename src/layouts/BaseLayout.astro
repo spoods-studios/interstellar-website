@@ -22,6 +22,12 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 // D-50: every page emits the full block -- the 404 included -- so the
 // description falls back to the tagline rather than being omitted.
 const metaDescription = description ?? SITE_TAGLINE;
+
+// D-68: build-time server context, so process.env is readable here --
+// import.meta.env only exposes PUBLIC_-prefixed vars. GITHUB_SHA is set in
+// every Actions step; the 'local' fallback keeps local builds green and makes
+// the CI-vs-local distinction greppable in tests.
+const buildSha = process.env.GITHUB_SHA ?? 'local';
 const resolvedType = ogType ?? 'website';
 const card = ogImage ?? { ...OG_DEFAULT, src: `${base}${OG_DEFAULT.file}` };
 // card.src already carries the base in both branches, so new URL() composes
@@ -58,6 +64,12 @@ const ogImageUrl = new URL(card.src, Astro.site).toString();
     {publishedTime && <meta property="article:published_time" content={publishedTime} />}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#1d5fae" />
+    {/* D-68: freshness stamp -- a post-deploy probe greps for this exact meta
+        carrying the deploying commit's SHA to tell the deployed bytes apart
+        from a stale CDN copy (an HTTP 200 alone proves nothing). Emitted
+        unconditionally: 404.astro inherits this layout and D-67's probe needs
+        the marker on the 404 page too. */}
+    <meta name="build-sha" content={buildSha} />
     <link rel="canonical" href={canonicalUrl} />
     {/* D-47: autodiscovery lives in the shared layout, not per-route, so every
         built page tells a reader app where the feed is. */}
