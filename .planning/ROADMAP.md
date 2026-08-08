@@ -137,7 +137,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. A malformed or invalid post fails the build loudly (no silent skip), and a post-deploy smoke check confirms the live site actually served the new content
   4. The slug-immutability norm is documented and a redirect-stub mechanism exists, so a future renamed post's old URL does not 404
 
-**Plans**: 2/5 plans executed
+**Plans**: 3/5 plans executed
 
 Plans:
 
@@ -151,7 +151,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2)*
 
-- [ ] 04-03-PLAN.md — Cookieless analytics: gated site-code constant with D-61 warn/fail guard, script on every page incl. 404, zero-JS assertions retightened to survive signup
+- [x] 04-03-PLAN.md — Cookieless analytics: gated site-code constant with D-61 warn/fail guard, script on every page incl. 404, zero-JS assertions retightened to survive signup
 
 **Wave 4** *(blocked on Wave 3)*
 
@@ -171,4 +171,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Stack & Scaffolding | 2/2 | Complete    | 2026-07-14 |
 | 2. Content Rendering & Templating | 8/8 | Complete   | 2026-07-22 |
 | 3. RSS, OpenGraph & Discord Distribution | 5/6 | In Progress|  |
-| 4. Analytics, Launch Content & Deploy Hardening | 2/5 | In Progress|  |
+| 4. Analytics, Launch Content & Deploy Hardening | 3/5 | In Progress|  |
