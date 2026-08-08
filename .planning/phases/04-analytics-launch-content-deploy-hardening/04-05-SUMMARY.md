@@ -25,7 +25,7 @@ decisions:
   - "Smoke job declares no permissions block — read-only requests against a public site under the workflow's restricted default"
 metrics:
   duration: 12min
-  tasks: 2 of 3 (Task 3 checkpoint pending — orchestrator owns the live leg)
+  tasks: 3 of 3 (Task 3 verified live 2026-08-08, user approved)
   completed: 2026-08-08
 status: complete
 ---
@@ -96,27 +96,23 @@ liability reasoning.
 - `git diff --stat package.json package-lock.json` — empty (T-04-SC: zero
   new dependencies).
 
-## Task 3 — Checkpoint: PENDING (awaiting orchestrator)
+## Task 3 — Checkpoint: RESOLVED (verified live 2026-08-08, user approved)
 
-Task 3 (`checkpoint:human-verify`, gate=blocking — "First live deploy —
-verify or honestly defer") was **not executed** in this worktree. The deploy
-fires only after the orchestrator merges to `main` and pushes; the live site
-cannot be observed from a pre-merge worktree. Recorded honestly per the
-plan's own instruction: a check marked passed without evidence is the exact
-silent failure this phase exists to eliminate.
+Verified after merge + push (`681c1ea`, workflow run `31280806927`):
 
-**Owed by the orchestrator/human after merge + push:**
+1. ✓ Workflow build → deploy → **smoke green** — the smoke job probed the
+   deployed site for SHA `681c1ea` plus all five route legs (SITE-03 live
+   criterion met).
+2. ✓ Launch post `2026-07-30-first-burn` first on the archive homepage.
+3. ✓ Launch post first item in the deployed feed (`/rss.xml`).
+4. ✓ Roadmap overview shows M1.1 Spacecraft Control closed with detail
+   link, M1.2 next.
+5. ✓ Demo redirect stub `2026-07-30-demo-old-slug` meta-refreshes to the
+   launch post with correct base-prefixed destination.
+6. ✓ Bonus: live 404 under the base path serves the custom 404 page —
+   closes the Phase 2 deferred live-404 check ("Phase 4 owns the follow-up").
 
-1. Watch the workflow run build → deploy → smoke to green (SITE-03 live
-   criterion).
-2. Confirm launch post first on the archive homepage with hero image.
-3. Confirm launch post first in the deployed feed.
-4. Confirm roadmap overview lists M1.1 detail link (M1.1 closed, M1.2
-   next); M1.1 detail deep-dive links resolve.
-5. Confirm the demo redirect stub's old URL lands on the launch post.
-6. If GitHub Actions cannot be observed green (it was degraded when Phase 3
-   deferred), record the live legs as deferred in STATE.md per the Phase 3
-   precedent — never marked passed.
+User approved the checkpoint in-session (autonomous --interactive).
 
 **Two deferrals expected regardless of workflow health:**
 

@@ -9,7 +9,7 @@ plus research-promoted table stakes. Target: live at engine M1.1 close.
 
 - [x] **SITE-01**: Site builds with Astro and deploys to GitHub Pages via GitHub Actions on every push to main
 - [x] **SITE-02**: Site URL/base path is config-driven in one place, so attaching a custom domain later requires no content or template changes
-- [ ] **SITE-03**: Build fails loudly on schema/content errors (no silent skips); a post-deploy smoke check verifies the live site actually updated
+- [x] **SITE-03**: Build fails loudly on schema/content errors (no silent skips); a post-deploy smoke check verifies the live site actually updated
 - [x] **SITE-04**: Baseline polish present: mobile-responsive layout, custom 404 page, favicon, canonical URLs, sitemap.xml
 
 ### Content
@@ -64,7 +64,7 @@ plus research-promoted table stakes. Target: live at engine M1.1 close.
 | ANLT-01 | Phase 4 | Pending |
 | CONT-05 | Phase 4 | Complete |
 | CONT-06 | Phase 4 | Complete |
-| SITE-03 | Phase 4 | Pending |
+| SITE-03 | Phase 4 | Complete |
 
 **Coverage:** 14/14 v1 requirements mapped — no orphans, no duplicates.
 
