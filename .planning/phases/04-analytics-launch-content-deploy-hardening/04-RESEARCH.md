@@ -597,16 +597,23 @@ test "$(grep -rl 'data-goatcounter' dist/ | wc -l)" -eq 0
 | A5 | Loader `load()` rejection fails `astro build` (not just logs) | SITE-03 audit | Source chain verified to the sync `Promise.all` (`content-layer.js:265`); the final await-in-build hop is standard observed Astro behavior. The recommended trap-and-restore fixture converts this to empirical proof in-phase |
 | A6 | `@astrojs/sitemap` handling of redirect routes (may include stub URLs in sitemap.xml) | Pattern 3 | Stubs carry `noindex`, so SEO impact ≈ 0 even if listed; optionally assert/inspect `dist/sitemap-*.xml` in the hardening smoke |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+All three were resolved during phase planning (2026-08-08). Resolutions are
+recorded here so the research document does not read as still-open after the
+plans that closed it were committed.
 
 1. **Should `npm test` run in CI (build job)?**
    - What we know: schema/content errors already fail the CI build; the smoke harness's count/dead-link/zero-JS classes run only locally (SITE-03 audit gap 3).
    - What's unclear: whether the user considers this in-scope for SITE-03 or scope creep (t3 gate, "do exactly what is asked").
    - Recommendation: planner surfaces it as a one-line optional task; default to including it only if it doesn't complicate the withastro/action job (harness needs `dist/` + `node`, both present post-build).
+   - **RESOLVED: decided against.** The harness performs several full rebuilds and mutates the working tree with trap-and-restore fixtures, and D-08 means every push deploys — gating deploys on it trades a small silent-failure class for a large flaky-deploy class. The CI build already fails on every schema and content error class at config-load time, which is SITE-03's build-side letter. Rationale is recorded in the hardening harness header (Plan 04-01 Task 3) and the decision is restated as a negative instruction in Plan 04-05 Task 2.
 2. **Exact slug for the promoted launch post** (`2026-07-30-first-burn.md` assumed from the title-derived-slug precedent).
    - Recommendation: planner fixes it early — the redirect demo entry, smoke probe URL, and archive assertions all reference it. Once deployed it is immutable (D-66).
+   - **RESOLVED: escalated to a blocking `checkpoint:decision`** as Plan 04-02 Task 1, presenting the convention-derived slug against a milestone-named alternative. It is gated rather than assumed because the URL is a genuine one-way door (D-66), and Plan 04-02's promote task carries the matching `<reversibility rating="one-way">`.
 3. **goatcounter.com availability** — down during discuss and again this session.
    - Recommendation: nothing in-phase depends on it (D-61 unset path); keep the deferred-verification record explicit so `/gsd-verify-work 4` doesn't mark ANLT-01 passed.
+   - **RESOLVED: no in-phase dependency.** Plan 04-03 implements and tests entirely against the D-61 unset path; ANLT-01's live "pageviews recorded" criterion is carried as deferred human verification in Plan 04-03's Flagged Assumptions and in Plan 04-05's verification checkpoint, which states explicitly that it must be recorded deferred rather than passed.
 
 ## Environment Availability
 
