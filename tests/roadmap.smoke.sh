@@ -39,8 +39,9 @@ test "$(grep -o 'href="[^"]*technical/m0\.3/[^"]*"' "$M03_PAGE" | wc -l)" -ge 8
 echo "== A breadcrumb to the M0.1 announcement is present =="
 grep -q 'devlog/2026-04-13-before-the-galaxy-a-triangle' dist/roadmap/m0.1/index.html
 
-echo "== Zero client JS on roadmap detail pages =="
-test "$(grep -c '<script' dist/roadmap/m0.1/index.html)" -eq 0
+echo "== No client JS beyond the analytics tag on roadmap detail pages (D-60/D-61) =="
+RM_PAGE=dist/roadmap/m0.1/index.html
+test "$(grep -o '<script' "$RM_PAGE" | wc -l)" -eq "$(grep -o 'gc\.zgo\.at' "$RM_PAGE" | wc -l)"
 
 echo "== Roadmap overview and How It's Made standalone pages both build =="
 test -f dist/roadmap/index.html
@@ -79,8 +80,8 @@ if echo "$ARCHIVE_MAIN" | grep -q 'how-its-made\|/roadmap/'; then
   exit 1
 fi
 
-echo "== Zero client JS on the overview and How It's Made pages =="
-test "$(grep -c '<script' "$OVERVIEW")" -eq 0
-test "$(grep -c '<script' "$HIM")" -eq 0
+echo "== No client JS beyond the analytics tag on the overview and How It's Made pages (D-60/D-61) =="
+test "$(grep -o '<script' "$OVERVIEW" | wc -l)" -eq "$(grep -o 'gc\.zgo\.at' "$OVERVIEW" | wc -l)"
+test "$(grep -o '<script' "$HIM" | wc -l)" -eq "$(grep -o 'gc\.zgo\.at' "$HIM" | wc -l)"
 
 echo "ALL CHECKS PASSED"

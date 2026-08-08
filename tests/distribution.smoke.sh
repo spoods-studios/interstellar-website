@@ -376,6 +376,10 @@ echo "D-48 fixture OK: both unresolvable-hero paths fail the build loudly; conte
 
 echo "== D-54 fixture: an unset, blank or placeholder invite constant fails the build, naming the constant =="
 SITE_LIB="src/lib/site.mjs"
+# Snapshot, don't demand emptiness: the fixture must leave the trees exactly
+# as it found them, but a set-and-not-yet-committed GOATCOUNTER_CODE (the
+# D-61 post-signup state) is legitimate src/ dirt, not fixture damage.
+PRE_FIXTURE_STATUS=$(git status --porcelain devlog/ technical/ roadmap/ pages/ src/)
 SITE_LIB_BACKUP=$(mktemp)
 cp "$SITE_LIB" "$SITE_LIB_BACKUP"
 INVITE_PLACEHOLDER=$(grep -oP "^export const INVITE_PLACEHOLDER = '\K[^']+" "$SITE_LIB")
@@ -398,11 +402,11 @@ for BAD_INVITE in "" "   " "$INVITE_PLACEHOLDER"; do
   fi
 done
 cp "$SITE_LIB_BACKUP" "$SITE_LIB"
-if git status --porcelain devlog/ technical/ roadmap/ pages/ src/ | grep -q .; then
-  echo "D-54 FIXTURE FAIL: a tree was left dirty"
+if [ "$(git status --porcelain devlog/ technical/ roadmap/ pages/ src/)" != "$PRE_FIXTURE_STATUS" ]; then
+  echo "D-54 FIXTURE FAIL: a tree was left in a different state than the fixture found it"
   exit 1
 fi
-echo "D-54 fixture OK: unset, blank and placeholder invites all fail loudly naming the constant; trees clean"
+echo "D-54 fixture OK: unset, blank and placeholder invites all fail loudly naming the constant; trees restored"
 
 echo "== D-45/D-30 fixture: a drafted announcement leaves the feed and the archive together =="
 npm run build > /dev/null 2>&1
@@ -440,8 +444,8 @@ rm -f "$HERO_BACKUP" "$SITE_LIB_BACKUP" "$DRAFT_BACKUP"
 
 echo "== Final clean rebuild after all fixtures restored =="
 npm run build
-if git status --porcelain devlog/ technical/ roadmap/ pages/ src/ | grep -q .; then
-  echo "FAIL: trees not clean after the full fixture run"
+if [ "$(git status --porcelain devlog/ technical/ roadmap/ pages/ src/)" != "$PRE_FIXTURE_STATUS" ]; then
+  echo "FAIL: trees not restored to their pre-fixture state after the full fixture run"
   exit 1
 fi
 

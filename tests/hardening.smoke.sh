@@ -123,6 +123,138 @@ if git status --porcelain devlog/ | grep -q .; then
 fi
 echo "SITE-03 fixture OK: schema violation failed the build loudly naming the file; devlog/ clean"
 
+echo "== D-61 fixture: an unset site code warns and builds; a placeholder or malformed one fails loudly =="
+SITE_LIB="src/lib/site.mjs"
+# Snapshot, don't demand emptiness: the fixtures must leave src/ exactly as
+# they found it, but a set-and-not-yet-committed GOATCOUNTER_CODE (the D-61
+# post-signup state) is legitimate dirt that must not read as fixture damage.
+PRE_SRC_STATUS=$(git status --porcelain src/)
+SITE_LIB_BACKUP=$(mktemp)
+cp "$SITE_LIB" "$SITE_LIB_BACKUP"
+# Derive the sentinel from the module itself (the D-54 idiom in
+# tests/distribution.smoke.sh) rather than repeating it as a literal the
+# module could silently drift away from.
+GC_PLACEHOLDER=$(grep -oP "^export const GOATCOUNTER_PLACEHOLDER = '\K[^']+" "$SITE_LIB")
+trap 'cp "$SITE_LIB_BACKUP" "$SITE_LIB" 2>/dev/null || true; rm -f "$SITE_LIB_BACKUP"' EXIT
+# D-61 legs 1-2: unset and whitespace-only are the same expected pre-signup
+# state -- the build must WARN naming the constant and still exit 0, because
+# D-08 means every push deploys and a hard block would freeze the pipeline.
+for SOFT_CODE in "" "   "; do
+  sed "s|^export const GOATCOUNTER_CODE = '.*';|export const GOATCOUNTER_CODE = '${SOFT_CODE}';|" \
+    "$SITE_LIB_BACKUP" > "$SITE_LIB"
+  if ! npm run build > /tmp/gsd-hardening-d61.log 2>&1; then
+    cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+    echo "D-61 FIXTURE FAIL: build failed with the site code set to '${SOFT_CODE}' (unset must warn, not throw)"
+    exit 1
+  fi
+  if ! grep -q "GOATCOUNTER_CODE" /tmp/gsd-hardening-d61.log; then
+    cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+    echo "D-61 FIXTURE FAIL: the build for '${SOFT_CODE}' did not warn naming the constant"
+    exit 1
+  fi
+done
+# D-61 legs 3-4: the placeholder sentinel and an out-of-charset value are NOT
+# the unset state -- both must fail the build loudly naming the constant, so
+# the two adjacent states can never collapse into each other.
+for BAD_CODE in "$GC_PLACEHOLDER" "Bad/Code" "not valid"; do
+  sed "s|^export const GOATCOUNTER_CODE = '.*';|export const GOATCOUNTER_CODE = '${BAD_CODE}';|" \
+    "$SITE_LIB_BACKUP" > "$SITE_LIB"
+  if npm run build > /tmp/gsd-hardening-d61.log 2>&1; then
+    cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+    echo "D-61 FIXTURE FAIL: build succeeded with the site code set to '${BAD_CODE}'"
+    exit 1
+  fi
+  if ! grep -q "GOATCOUNTER_CODE" /tmp/gsd-hardening-d61.log; then
+    cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+    echo "D-61 FIXTURE FAIL: the failure for '${BAD_CODE}' did not name the constant"
+    exit 1
+  fi
+done
+# D-61 leg 5: a well-formed code builds clean with no warning naming the
+# constant -- the post-signup push must not cry wolf.
+sed "s|^export const GOATCOUNTER_CODE = '.*';|export const GOATCOUNTER_CODE = 'interstellar-smoke';|" \
+  "$SITE_LIB_BACKUP" > "$SITE_LIB"
+if ! npm run build > /tmp/gsd-hardening-d61.log 2>&1; then
+  cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+  echo "D-61 FIXTURE FAIL: build failed with a well-formed site code"
+  exit 1
+fi
+if grep -q "GOATCOUNTER_CODE" /tmp/gsd-hardening-d61.log; then
+  cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+  echo "D-61 FIXTURE FAIL: a well-formed site code still produced a warning naming the constant"
+  exit 1
+fi
+cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+rm -f "$SITE_LIB_BACKUP"
+trap - EXIT
+if [ "$(git status --porcelain src/)" != "$PRE_SRC_STATUS" ]; then
+  echo "D-61 FIXTURE FAIL: src/ left in a different state than the fixture found it"
+  exit 1
+fi
+echo "D-61 fixture OK: unset/blank warn and build; placeholder/malformed fail loudly; valid is silent; src/ restored"
+
+echo "== ANLT-01/D-62: analytics emission matches the configured state on every page, the 404 included =="
+# Rebuild first: earlier fixtures leave dist/ from a mutated module, and this
+# section's whole point is that dist/ agrees with the module AS COMMITTED.
+npm run build > /dev/null 2>&1
+# sed, not grep -oP: the captured value is legitimately empty while the code
+# is unset, and a zero-length grep match is not a portable exit-0.
+GC_CODE=$(sed -n "s|^export const GOATCOUNTER_CODE = '\(.*\)';\$|\1|p" "$SITE_LIB" | tr -d '[:space:]')
+if [ -n "$GC_CODE" ]; then EXPECTED=1; else EXPECTED=0; fi
+GATE_FAIL=0
+SAW_404=0
+while IFS= read -r f; do
+  COUNT=$(count_occurrences 'gc\.zgo\.at' "$f")
+  if [ "$COUNT" -ne "$EXPECTED" ]; then
+    echo "FAIL: $f carries $COUNT analytics tags (expected exactly $EXPECTED on every page)"
+    GATE_FAIL=1
+  fi
+  case "$f" in */404.html) SAW_404=1 ;; esac
+done < <(find dist -name "*.html")
+[ "$GATE_FAIL" -eq 0 ]
+[ "$SAW_404" -eq 1 ]
+echo "analytics gating OK (expected $EXPECTED per page, 404 covered)"
+
+echo "== ANLT-01/D-62 fixture: a configured code puts exactly one tag on every page =="
+GC_BACKUP=$(mktemp)
+cp "$SITE_LIB" "$GC_BACKUP"
+trap 'cp "$GC_BACKUP" "$SITE_LIB" 2>/dev/null || true; rm -f "$GC_BACKUP"' EXIT
+TEST_CODE="interstellar-smoke"
+sed "s|^export const GOATCOUNTER_CODE = '.*';|export const GOATCOUNTER_CODE = '${TEST_CODE}';|" \
+  "$GC_BACKUP" > "$SITE_LIB"
+npm run build > /dev/null 2>&1
+SET_FAIL=0
+SET_SAW_404=0
+while IFS= read -r f; do
+  if [ "$(count_occurrences 'gc\.zgo\.at' "$f")" -ne 1 ]; then
+    echo "FAIL: $f does not carry exactly one analytics tag with the code set"
+    SET_FAIL=1
+  fi
+  if ! grep -q "data-goatcounter=\"https://${TEST_CODE}.goatcounter.com/count\"" "$f"; then
+    echo "FAIL: $f analytics endpoint does not carry the configured site code"
+    SET_FAIL=1
+  fi
+  if ! grep -o '<script[^>]*>' "$f" | grep 'gc\.zgo\.at' | grep -q 'async'; then
+    echo "FAIL: $f analytics tag does not carry the async attribute"
+    SET_FAIL=1
+  fi
+  if ! grep -q 'count\.js"></script>' "$f"; then
+    echo "FAIL: $f analytics tag is not an empty-bodied external src reference"
+    SET_FAIL=1
+  fi
+  case "$f" in */404.html) SET_SAW_404=1 ;; esac
+done < <(find dist -name "*.html")
+cp "$GC_BACKUP" "$SITE_LIB"
+rm -f "$GC_BACKUP"
+trap - EXIT
+[ "$SET_FAIL" -eq 0 ]
+[ "$SET_SAW_404" -eq 1 ]
+if [ "$(git status --porcelain src/)" != "$PRE_SRC_STATUS" ]; then
+  echo "ANLT-01 FIXTURE FAIL: src/ left in a different state than the fixture found it"
+  exit 1
+fi
+echo "ANLT-01/D-62 fixture OK: one tag everywhere incl. 404, endpoint carries the code, async, empty body; src/ restored"
+
 echo "== Final clean rebuild: leave dist/ as a plain local build =="
 npm run build > /dev/null
 

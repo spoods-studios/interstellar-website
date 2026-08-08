@@ -25,7 +25,10 @@ RENDERED="dist/technical/m0.3/phase-14.5-swapchain-acquire-fix/index.html"
 test -f "$RENDERED"
 grep -q '<a href="/interstellar-website/technical/m0.1/phase-03-rendering-pipeline/"' "$RENDERED"
 grep -q 'background-color:#fff' "$RENDERED"
-! grep -q '<script' "$RENDERED"
-echo "wikilink + Shiki + zero-JS OK"
+# $RENDERED is the whole built document (BaseLayout head included), so the
+# zero-script form breaks on the post-signup push -- state-free instead
+# (D-60/D-61: script count must equal analytics-tag count).
+test "$(grep -o '<script' "$RENDERED" | wc -l)" -eq "$(grep -o 'gc\.zgo\.at' "$RENDERED" | wc -l)"
+echo "wikilink + Shiki + no-extra-JS OK"
 
 echo "ALL CHECKS PASSED"
