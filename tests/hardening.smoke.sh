@@ -123,6 +123,72 @@ if git status --porcelain devlog/ | grep -q .; then
 fi
 echo "SITE-03 fixture OK: schema violation failed the build loudly naming the file; devlog/ clean"
 
+echo "== D-61 fixture: an unset site code warns and builds; a placeholder or malformed one fails loudly =="
+SITE_LIB="src/lib/site.mjs"
+SITE_LIB_BACKUP=$(mktemp)
+cp "$SITE_LIB" "$SITE_LIB_BACKUP"
+# Derive the sentinel from the module itself (the D-54 idiom in
+# tests/distribution.smoke.sh) rather than repeating it as a literal the
+# module could silently drift away from.
+GC_PLACEHOLDER=$(grep -oP "^export const GOATCOUNTER_PLACEHOLDER = '\K[^']+" "$SITE_LIB")
+trap 'cp "$SITE_LIB_BACKUP" "$SITE_LIB" 2>/dev/null || true; rm -f "$SITE_LIB_BACKUP"' EXIT
+# D-61 legs 1-2: unset and whitespace-only are the same expected pre-signup
+# state -- the build must WARN naming the constant and still exit 0, because
+# D-08 means every push deploys and a hard block would freeze the pipeline.
+for SOFT_CODE in "" "   "; do
+  sed "s|^export const GOATCOUNTER_CODE = '.*';|export const GOATCOUNTER_CODE = '${SOFT_CODE}';|" \
+    "$SITE_LIB_BACKUP" > "$SITE_LIB"
+  if ! npm run build > /tmp/gsd-hardening-d61.log 2>&1; then
+    cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+    echo "D-61 FIXTURE FAIL: build failed with the site code set to '${SOFT_CODE}' (unset must warn, not throw)"
+    exit 1
+  fi
+  if ! grep -q "GOATCOUNTER_CODE" /tmp/gsd-hardening-d61.log; then
+    cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+    echo "D-61 FIXTURE FAIL: the build for '${SOFT_CODE}' did not warn naming the constant"
+    exit 1
+  fi
+done
+# D-61 legs 3-4: the placeholder sentinel and an out-of-charset value are NOT
+# the unset state -- both must fail the build loudly naming the constant, so
+# the two adjacent states can never collapse into each other.
+for BAD_CODE in "$GC_PLACEHOLDER" "Bad/Code" "not valid"; do
+  sed "s|^export const GOATCOUNTER_CODE = '.*';|export const GOATCOUNTER_CODE = '${BAD_CODE}';|" \
+    "$SITE_LIB_BACKUP" > "$SITE_LIB"
+  if npm run build > /tmp/gsd-hardening-d61.log 2>&1; then
+    cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+    echo "D-61 FIXTURE FAIL: build succeeded with the site code set to '${BAD_CODE}'"
+    exit 1
+  fi
+  if ! grep -q "GOATCOUNTER_CODE" /tmp/gsd-hardening-d61.log; then
+    cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+    echo "D-61 FIXTURE FAIL: the failure for '${BAD_CODE}' did not name the constant"
+    exit 1
+  fi
+done
+# D-61 leg 5: a well-formed code builds clean with no warning naming the
+# constant -- the post-signup push must not cry wolf.
+sed "s|^export const GOATCOUNTER_CODE = '.*';|export const GOATCOUNTER_CODE = 'interstellar-smoke';|" \
+  "$SITE_LIB_BACKUP" > "$SITE_LIB"
+if ! npm run build > /tmp/gsd-hardening-d61.log 2>&1; then
+  cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+  echo "D-61 FIXTURE FAIL: build failed with a well-formed site code"
+  exit 1
+fi
+if grep -q "GOATCOUNTER_CODE" /tmp/gsd-hardening-d61.log; then
+  cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+  echo "D-61 FIXTURE FAIL: a well-formed site code still produced a warning naming the constant"
+  exit 1
+fi
+cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+rm -f "$SITE_LIB_BACKUP"
+trap - EXIT
+if git status --porcelain src/ | grep -q .; then
+  echo "D-61 FIXTURE FAIL: src/ left dirty"
+  exit 1
+fi
+echo "D-61 fixture OK: unset/blank warn and build; placeholder/malformed fail loudly; valid is silent; src/ clean"
+
 echo "== Final clean rebuild: leave dist/ as a plain local build =="
 npm run build > /dev/null
 
