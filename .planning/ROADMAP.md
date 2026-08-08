@@ -137,7 +137,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. A malformed or invalid post fails the build loudly (no silent skip), and a post-deploy smoke check confirms the live site actually served the new content
   4. The slug-immutability norm is documented and a redirect-stub mechanism exists, so a future renamed post's old URL does not 404
 
-**Plans**: 4/5 plans executed
+**Plans**: 5/5 plans executed
 
 Plans:
 
@@ -159,7 +159,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4)*
 
-- [ ] 04-05-PLAN.md — Post-deploy smoke job: full live route set (freshness, feed, launch post, 404-under-base, redirect stub) wired into deploy.yml, plus live verification or honest deferral
+- [x] 04-05-PLAN.md — Post-deploy smoke job: full live route set (freshness, feed, launch post, 404-under-base, redirect stub) wired into deploy.yml, plus live verification or honest deferral
 
 ## Progress
 
@@ -171,4 +171,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Stack & Scaffolding | 2/2 | Complete    | 2026-07-14 |
 | 2. Content Rendering & Templating | 8/8 | Complete   | 2026-07-22 |
 | 3. RSS, OpenGraph & Discord Distribution | 5/6 | In Progress|  |
-| 4. Analytics, Launch Content & Deploy Hardening | 4/5 | In Progress|  |
+| 4. Analytics, Launch Content & Deploy Hardening | 5/5 | In Progress|  |
