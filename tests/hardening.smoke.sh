@@ -75,6 +75,54 @@ done < <(find dist -name "*.html")
 [ "$TRACK_FAIL" -eq 0 ]
 echo "SHA tracking OK"
 
+# --- SITE-03 loud-fail audit conclusion (04-RESEARCH, verified against the
+# installed astro@7.0.9 source and proven empirically by the fixture below):
+# every schema/content error class is already a loud build failure, each with
+# an owning decision -- frontmatter schema violations (this fixture; Zod enum
+# via parseData, which sits OUTSIDE the glob loader's try/catch), filename
+# violations (D-10 devlog, D-33 technical, D-38 roadmap: generateId throws),
+# render-time wikilink/deep-dive placeholder failures (D-39: the config-load
+# preflight re-runs the full mdast pipeline and crashes the process), empty
+# collections (assertNonEmpty at every query site), missing body heroes
+# (D-48: lookupHero throws; Astro's ImageNotFound fires upstream), and an
+# unset/blank/placeholder invite constant (D-54: config-load assert).
+# Three residual silent classes are ACCEPTED, per the 04-RESEARCH audit:
+#   1. unreadable-file skip (glob loader logs and skips) -- near-impossible in
+#      a clean git checkout, and the exact-count assertions catch it locally;
+#   2. duplicate-collection-id overwrite (warn-only, last-write-wins) --
+#      structurally impossible here: every id derives from a unique path;
+#   3. this smoke harness itself does not run in CI -- deliberate: it performs
+#      several full rebuilds and mutates the working tree with fixtures, and
+#      D-08 means every push deploys, so gating deploys on it would trade a
+#      small silent-failure class for a large flaky-deploy class. The CI build
+#      already fails loudly on every schema and content error class above,
+#      which is SITE-03's build-side letter.
+echo "== SITE-03 fixture: an out-of-enum frontmatter status fails the build, naming the file =="
+# The fixture filename conforms to YYYY-MM-DD-slug.md so the D-10 filename
+# guard is NOT what fires -- only the schema enum can reject it. The status
+# value is the exact one the studio's unpublished how-this-gets-built.md
+# carries: the landmine this fixture retires (04-CONTEXT).
+SCHEMA_FIXTURE="2026-01-01-schema-audit-fixture.md"
+trap 'rm -f "devlog/$SCHEMA_FIXTURE"' EXIT
+printf -- '---\nstatus: skeleton\n---\n\n# Schema Audit Fixture\n\nfixture body\n' > "devlog/$SCHEMA_FIXTURE"
+if npm run build > /tmp/gsd-hardening-schema.log 2>&1; then
+  rm -f "devlog/$SCHEMA_FIXTURE"
+  echo "SITE-03 FIXTURE FAIL: build succeeded with an out-of-enum status value"
+  exit 1
+fi
+if ! grep -q "2026-01-01-schema-audit-fixture" /tmp/gsd-hardening-schema.log; then
+  rm -f "devlog/$SCHEMA_FIXTURE"
+  echo "SITE-03 FIXTURE FAIL: the failure output did not name the offending file"
+  exit 1
+fi
+rm -f "devlog/$SCHEMA_FIXTURE"
+trap - EXIT
+if git status --porcelain devlog/ | grep -q .; then
+  echo "SITE-03 FIXTURE FAIL: devlog/ left dirty"
+  exit 1
+fi
+echo "SITE-03 fixture OK: schema violation failed the build loudly naming the file; devlog/ clean"
+
 echo "== Final clean rebuild: leave dist/ as a plain local build =="
 npm run build > /dev/null
 
