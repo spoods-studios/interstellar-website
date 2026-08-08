@@ -18,6 +18,16 @@ Decision Log instead.
 `draft-devblog` → promote pipeline — never move, rename, or restyle their
 `.md` files; the site layer renders them as-is (VOICE.md is locked, studio-side).
 
+Once a devlog, technical, or roadmap page has deployed, its URL is permanent —
+Discord embeds, RSS guids, and studio-vault references all pin these URLs, so a
+rename without a stub breaks links already published to readers, and unlike a
+broken build nothing tells you it happened (the only trace is the analytics
+dashboard counting the 404 page at the dead URL's own path). If a promoted file
+must be renamed anyway, add the old path to `SLUG_REDIRECTS` in
+`astro.config.mjs` in the same commit as the rename: base-free key, destination
+composed from `NORMALIZED_BASE` (Astro emits string destinations verbatim, so a
+base-less destination redirects readers to a path that does not exist).
+
 ## Gate Tier
 t3 — standard review/checklist; see `studio/vault/project/gate-tiers.md` for
 what that requires at phase/milestone close.
