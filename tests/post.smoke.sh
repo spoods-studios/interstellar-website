@@ -8,8 +8,8 @@ cd "$(dirname "$0")/.."
 echo "== Build =="
 npm run build
 
-echo "== All nine announcements built =="
-test "$(find dist/devlog -name index.html | wc -l)" -eq 9
+echo "== All ten announcements built =="
+test "$(find dist/devlog -name index.html | wc -l)" -eq 10
 
 echo "== Manifesto and a full-frontmatter post both exist =="
 test -f dist/devlog/2026-04-07-why-im-building-a-hyperrealistic-space-sim/index.html
@@ -31,7 +31,7 @@ test "$(grep -o 'Back to devblog' dist/devlog/2026-06-05-a-moon-that-actually-or
 
 echo "== Neighbour navigation: oldest has next-only, newest has previous-only =="
 OLDEST=dist/devlog/2026-04-07-why-im-building-a-hyperrealistic-space-sim/index.html
-NEWEST=dist/devlog/2026-07-13-making-mercury-precess/index.html
+NEWEST=dist/devlog/2026-07-30-first-burn/index.html
 grep -q 'class="post-nav"' "$OLDEST"
 if grep -o 'class="post-nav">[^Z]*' "$OLDEST" | grep -q '&larr;'; then
   echo "FAIL: oldest post has a previous link"
