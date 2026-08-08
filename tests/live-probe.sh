@@ -8,8 +8,8 @@
 # of freshness: the failure mode this probe exists to catch is a perfectly
 # valid 200 serving a stale CDN copy of the previous deploy (04-RESEARCH
 # Pitfall 8). For the same reason the retry loop is hand-written rather than
-# `curl --retry`, which only retries transport and 5xx errors -- a stale 200
-# would sail straight through it.
+# delegated to curl's built-in retry flag, which only retries transport and
+# 5xx errors -- a stale 200 would sail straight through it.
 #
 # Retry budget is environment-tunable so CI and local runs share one script:
 #   PROBE_ATTEMPTS (default 12) x PROBE_DELAY (default 15s) ~= a 3-minute
