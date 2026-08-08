@@ -294,8 +294,8 @@ echo "== DIST-01: content fidelity -- absolutized images, no second-parse artifa
 # assertion below targets that escaped form; a pattern written against the raw
 # quote would pass vacuously forever.
 HERO_URLS=$(grep -o "${SITE}[^&\"]*_astro/[^&\"]*\.webp" dist/rss.xml | wc -l)
-if [ "$HERO_URLS" -ne 2 ]; then
-  echo "FAIL: expected 2 absolute hero image URLs in the feed, found $HERO_URLS"
+if [ "$HERO_URLS" -ne 3 ]; then
+  echo "FAIL: expected 3 absolute hero image URLs in the feed, found $HERO_URLS"
   exit 1
 fi
 # A root-relative src is broken in every reader; the pattern is built from the
