@@ -59,13 +59,20 @@ export const GOATCOUNTER_PLACEHOLDER = 'REPLACE_ME';
 // block here would freeze the pipeline until an account exists. A placeholder
 // or malformed code still throws, so the two adjacent states never collapse.
 // Called bare at astro.config.mjs top level and from BaseLayout.astro.
+// The warn is memoized per process: BaseLayout calls this once per rendered
+// page, and an unmemoized warn repeats ~100x and interleaves with Astro's
+// page listing — burying the one line D-61 wants seen.
+let warnedGoatcounterUnset = false;
 export function assertGoatcounterConfigured() {
   const code = typeof GOATCOUNTER_CODE === 'string' ? GOATCOUNTER_CODE.trim() : '';
   if (code === '') {
-    console.warn(
-      'GOATCOUNTER_CODE is unset — the site builds and deploys WITHOUT analytics. ' +
-        'Set it in src/lib/site.mjs after creating the GoatCounter account (ANLT-01).'
-    );
+    if (!warnedGoatcounterUnset) {
+      warnedGoatcounterUnset = true;
+      console.warn(
+        'GOATCOUNTER_CODE is unset — the site builds and deploys WITHOUT analytics. ' +
+          'Set it in src/lib/site.mjs after creating the GoatCounter account (ANLT-01).'
+      );
+    }
     return null;
   }
   if (code === GOATCOUNTER_PLACEHOLDER || !/^[a-z0-9-]+$/.test(code)) {
