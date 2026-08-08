@@ -38,7 +38,9 @@ if [ "$#" -lt 2 ] || [ -z "$1" ] || [ -z "$2" ]; then
   exit 2
 fi
 
-BASE_URL="$1"
+# Normalized rather than trusted: every route leg concatenates onto this, so
+# a slash-less base would fail with errors naming the routes, not the cause.
+BASE_URL="${1%/}/"
 EXPECTED_SHA="$2"
 # Route arguments are optional and base-free (appended to BASE_URL). The
 # defaults name the routes the site currently ships, so a future rename
