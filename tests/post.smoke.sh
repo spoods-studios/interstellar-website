@@ -41,13 +41,18 @@ echo "== Neighbour navigation: oldest has next-only, newest has previous-only ==
 OLDEST=dist/devlog/2026-04-07-why-im-building-a-hyperrealistic-space-sim/index.html
 NEWEST=dist/devlog/2026-07-30-first-burn/index.html
 grep -q 'class="post-nav"' "$OLDEST"
-if grep -o 'class="post-nav">[^Z]*' "$OLDEST" | grep -q '&larr;'; then
+# Bound the nav window at its own closing tag (cut at the first </nav>), not
+# at an arbitrary content byte -- same anchoring as the breadcrumbs extraction
+# in technical.smoke.sh.
+OLDEST_NAV=$(grep -o 'class="post-nav">.*' "$OLDEST" | sed 's|</nav>.*|</nav>|')
+if grep -q '&larr;' <<<"$OLDEST_NAV"; then
   echo "FAIL: oldest post has a previous link"
   exit 1
 fi
 grep -q '&rarr;' "$OLDEST"
 grep -q '&larr;' "$NEWEST"
-if grep -o 'class="post-nav">[^Z]*' "$NEWEST" | grep -q '&rarr;'; then
+NEWEST_NAV=$(grep -o 'class="post-nav">.*' "$NEWEST" | sed 's|</nav>.*|</nav>|')
+if grep -q '&rarr;' <<<"$NEWEST_NAV"; then
   echo "FAIL: newest post has a next link"
   exit 1
 fi
