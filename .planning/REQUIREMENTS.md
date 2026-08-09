@@ -29,7 +29,7 @@ plus research-promoted table stakes. Target: live at engine M1.1 close.
 
 ### Analytics
 
-- [ ] **ANLT-01**: Cookieless privacy-respecting pageview analytics (GoatCounter-class) on all pages; no consent banner needed because nothing needs consent
+- [ ] **ANLT-01**: Cookieless privacy-respecting pageview analytics (GoatCounter-class) on all pages; no consent banner needed because nothing needs consent — *mechanism shipped and test-proven in both states (Phase 4, D-61); live "pageviews recorded" criterion deferred until GoatCounter signup (see STATE.md Deferred Verification)*
 
 ## v2 Requirements (deferred)
 
@@ -61,7 +61,7 @@ plus research-promoted table stakes. Target: live at engine M1.1 close.
 | DIST-01 | Phase 3 | Complete |
 | DIST-02 | Phase 3 | Complete |
 | DIST-03 | Phase 3 | Complete |
-| ANLT-01 | Phase 4 | Pending |
+| ANLT-01 | Phase 4 | Deferred (live cert — GoatCounter signup) |
 | CONT-05 | Phase 4 | Complete |
 | CONT-06 | Phase 4 | Complete |
 | SITE-03 | Phase 4 | Complete |

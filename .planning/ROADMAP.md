@@ -25,7 +25,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Stack & Scaffolding** - Astro pipeline deploys to GitHub Pages with a config-driven URL and permissive devlog ingestion (completed 2026-07-14)
 - [x] **Phase 2: Content Rendering & Templating** - Full archive, technical deep-dive series, and How It's Made + Roadmap pages render with baseline polish, VOICE untouched (completed 2026-07-22)
 - [ ] **Phase 3: RSS, OpenGraph & Discord Distribution** - Rich Discord embeds, a clean RSS feed, and a prominent Discord CTA on every page
-- [ ] **Phase 4: Analytics, Launch Content & Deploy Hardening** - Cookieless analytics, the M1.1 launch post live, and a deploy safe against silent failure
+- [x] **Phase 4: Analytics, Launch Content & Deploy Hardening** - Cookieless analytics, the M1.1 launch post live, and a deploy safe against silent failure (completed 2026-08-09)
 
 ## Phase Details
 
@@ -171,4 +171,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Stack & Scaffolding | 2/2 | Complete    | 2026-07-14 |
 | 2. Content Rendering & Templating | 8/8 | Complete   | 2026-07-22 |
 | 3. RSS, OpenGraph & Discord Distribution | 5/6 | In Progress|  |
-| 4. Analytics, Launch Content & Deploy Hardening | 5/5 | In Progress|  |
+| 4. Analytics, Launch Content & Deploy Hardening | 5/5 | Complete    | 2026-08-09 |
