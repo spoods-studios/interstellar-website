@@ -141,6 +141,12 @@ Items acknowledged and carried forward from previous milestone close:
 | Phase | State | Resume |
 |-------|-------|--------|
 | 3 | verification_deferred_human | /gsd-verify-work 3 |
+| 4 (ANLT-01 only) | verification_deferred_human | Sign up at goatcounter.com → set GOATCOUNTER_CODE in src/lib/site.mjs → push → confirm dashboard records pageviews (incl. 404s per D-62) |
+
+**Phase 4 note (2026-08-09):** phase verification PASSED (30/31; user approved). The single
+deferred item is ANLT-01's live "pageviews recorded" criterion — deferred by design (D-61,
+goatcounter.com unreachable during discuss). Everything else is live-verified: deploy run
+31280806927 green through the new smoke job, launch post live, redirect stub live.
 
 **Why deferred (2026-07-22):** GitHub Actions entered `degraded_performance` and Pages deploy run
 `29959774598` sat queued for 15+ minutes (this repo's deploys normally finish in ~40s). Phase 3's
