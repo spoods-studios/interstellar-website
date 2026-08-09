@@ -23,18 +23,26 @@ M1.1 close.
       Actions deploy live at spoods-studios.github.io/interstellar-website;
       URL/base config-driven solely in `astro.config.mjs`)
 
+### Validated (continued)
+
+- [x] Devblog archive: manifesto + M0.1–M0.8 + M1.1 posts rendered from the
+      studio drafts, VOICE.md canon preserved byte-for-byte — Phases 2 & 4
+- [x] "How It's Made" AI-transparency page — Phase 2
+- [x] Roadmap page mirroring the Discord #roadmap pinned overview (+ 9
+      milestone detail pages) — Phases 2 & 4
+- [x] M1.1 devblog post "First Burn" published as the launch post
+      (`/devlog/2026-07-30-first-burn/`, live 2026-08-08) — Phase 4
+- [x] Prominent Discord invite CTA on every page — Phase 3
+- [x] RSS feed for the devblog — Phase 3
+- [x] Privacy-respecting analytics mechanism (GoatCounter, cookieless,
+      D-61 gated) — Phase 4; live pageview recording deferred until the
+      GoatCounter account exists (STATE.md Deferred Verification)
+
 ### Active
 
-- [ ] Devblog archive: manifesto + all M0.1–M0.8 posts rendered from the
-      existing `.md` drafts (studio `vault/devlog/drafts/`), VOICE.md canon
-      preserved
-- [ ] "How It's Made" AI-transparency page (from `how-its-made.md` draft —
-      obligation `ai-transparency-post`, D-G honesty constraints)
-- [ ] Roadmap page mirroring the Discord #roadmap pinned overview
-- [ ] M1.1 devblog post published as the launch post
-- [ ] Prominent Discord invite CTA (Discord-first audience building, D-F)
-- [ ] RSS feed for the devblog
-- [ ] Privacy-respecting analytics (no cookies — Plausible/GoatCounter class)
+- [ ] ANLT-01 live certification: GoatCounter signup → set `GOATCOUNTER_CODE`
+      → push → confirm dashboard (only remaining v1 work besides Phase 3's
+      deferred live checks)
 
 ### Out of Scope
 
@@ -86,9 +94,10 @@ M1.1 close.
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| GitHub Pages hosting, domain TBD | Free, zero-ops, repo already on GitHub; custom domain attaches later without rework | — Pending |
-| v1 includes Discord CTA + RSS + privacy analytics beyond the four D-H pieces | Discord-first growth (D-F), devblog readers expect RSS, measure without tracking | — Pending |
-| Static-site tooling decided in-phase | M1.1-window decision per D-H; research compares established options | — Pending |
+| GitHub Pages hosting, domain TBD | Free, zero-ops, repo already on GitHub; custom domain attaches later without rework | ✓ Live at spoods-studios.github.io/interstellar-website |
+| v1 includes Discord CTA + RSS + privacy analytics beyond the four D-H pieces | Discord-first growth (D-F), devblog readers expect RSS, measure without tracking | ✓ Shipped (analytics live-cert pending signup) |
+| Static-site tooling decided in-phase | M1.1-window decision per D-H; research compares established options | ✓ Astro 7 + withastro/action, held through v1 |
+| D-60..D-68 (Phase 4): GoatCounter gated optional-if-unset, full M1.1 tree promote, Astro `redirects` stubs + slug norm, CI smoke job on commit-SHA stamp | Captured in 04-CONTEXT.md; keeps deploys green while signup pending, launch content complete, URLs permanent, silent-failure window closed | ✓ Implemented Phase 4 |
 
 ## Evolution
 
@@ -108,4 +117,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-14 after Phase 1 completion (Stack & Scaffolding — Astro + Pages deploy pipeline live)*
+*Last updated: 2026-08-09 after Phase 4 completion (Analytics, Launch Content & Deploy Hardening — launch post live, smoke-checked deploys, v1 requirements complete except deferred live certs)*

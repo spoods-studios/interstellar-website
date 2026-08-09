@@ -5,8 +5,8 @@ milestone_name: milestone
 current_phase: 3
 current_phase_name: RSS, OpenGraph & Discord Distribution
 status: planning
-stopped_at: Phase 4 context gathered
-last_updated: "2026-08-09T10:19:21.729Z"
+stopped_at: Phase 4 complete; autonomous stopped — deferred verifications pending (phase 3, ANLT-01)
+last_updated: "2026-08-09T10:21:01.269Z"
 last_activity: 2026-08-09
 last_activity_desc: Phase 4 complete, transitioned to Phase 3
 progress:
@@ -23,7 +23,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-13)
 
 **Core value:** Every devblog post has a permanent, linkable home before the audience ramp starts — if everything else slips, the archive + launch post must be live at M1.1 close.
-**Current focus:** Phase 4 — Analytics, Launch Content & Deploy Hardening
+**Current focus:** Deferred verifications only — /gsd-verify-work 3 + GoatCounter signup; then milestone close.
 
 ## Current Position
 
@@ -122,9 +122,8 @@ None yet.
 
 [Issues that affect future work]
 
-- Timeline: the whole roadmap must fit inside the engine M1.1 window — the site must not become the long pole.
-- Phase 1 planning: verify current Astro Content Collections API for an external-path glob loader + optional/fallback fields (research example is illustrative). Also decide manifesto frontmatter-backfill vs. filename-fallback only.
-- Phase 3 planning: decide OpenGraph image strategy (static per-post asset vs. build-time banner) within the D-G "no generative AI imagery" constraint.
+- Studio repo carries unpushed commits from Phase 4 (aee1905, 10fe002, 54f30e9 — transcription refresh + two Rule-3 content fixes: quoted discord_post_id, upscaled M1.1 hero). Review + push studio-side when convenient.
+- (Resolved 2026-08-09: timeline blocker — site launched inside the M1.1 window; Phase 1 loader and Phase 3 OG-strategy planning concerns closed in their phases.)
 
 ## Deferred Items
 
@@ -172,6 +171,6 @@ must skip Task 1 rather than repeating the vault edit.
 
 ## Session Continuity
 
-Last session: 2026-08-08T20:04:16.749Z
-Stopped at: Phase 4 context gathered
-Resume file: .planning/phases/04-analytics-launch-content-deploy-hardening/04-CONTEXT.md
+Last session: 2026-08-09T10:21:01.261Z
+Stopped at: Phase 4 complete; autonomous stopped — deferred verifications pending (phase 3, ANLT-01)
+Resume file: 
