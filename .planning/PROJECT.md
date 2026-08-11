@@ -41,8 +41,9 @@ M1.1 close.
 ### Active
 
 - [ ] ANLT-01 live certification: GoatCounter signup → set `GOATCOUNTER_CODE`
-      → push → confirm dashboard (only remaining v1 work besides Phase 3's
-      deferred live checks)
+      → push → confirm dashboard (the only remaining v1 work — Phase 3's
+      deferred live checks closed 2026-08-11 with 03-06: deploy freshness
+      verified, Discord embeds + W3C validation human-approved)
 
 ### Out of Scope
 
@@ -117,4 +118,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-09 after Phase 4 completion (Analytics, Launch Content & Deploy Hardening — launch post live, smoke-checked deploys, v1 requirements complete except deferred live certs)*
+*Last updated: 2026-08-11 after Phase 3 completion (RSS, OpenGraph & Discord Distribution — 6/6 plans, verification passed 4/4, security 24/24 closed; all phases complete, only ANLT-01 live certification remains before milestone close)*
