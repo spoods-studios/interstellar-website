@@ -1,9 +1,9 @@
 ---
 phase: 3
 slug: rss-opengraph-discord-distribution
-status: draft
+status: verified
 # threats_open = count of OPEN threats at or above workflow.security_block_on severity (high)
-threats_open: 1
+threats_open: 0
 asvs_level: 1
 created: 2026-08-11
 ---
@@ -56,10 +56,10 @@ GitHub Pages. Content is git-tracked via the studio-side promote pipeline.
 | T-03-15 | Tampering | Silent embed blanking passing presence greps | high | mitigate | `og:image` resolved to a real dist/ file; mutation check 2 exits 1 | closed |
 | T-03-16 | DoS | Network-dependent local assertion | medium | mitigate | Zero network clients in harness (grep 0 for curl/wget/validator.w3.org) | closed |
 | T-03-17 | Repudiation | Vacuous harness | high | mitigate | Four mutation checks with recorded non-zero exits in 03-05 SUMMARY | closed |
-| T-03-18 | Tampering | Cross-repo writes into `../studio` (Plan 03-06) | high | mitigate | Three literal-matched single-line replacements + numstat assertion — **deferred: plan 03-06 not executed** | open |
-| T-03-19 | Spoofing | Vault invite diverging from site constant (Plan 03-06) | medium | mitigate | Byte-identical comparison against module export — **deferred: plan 03-06 not executed** | open — below high threshold (non-blocking) |
+| T-03-18 | Tampering | Cross-repo writes into `../studio` (Plan 03-06) | high | mitigate | Verified 2026-08-11: `git -C ../studio show 92d9015 --numstat` = exactly 3 files × (1 insertion, 1 deletion), commit on studio `main`; zero `studio/` paths in all website-repo history | closed |
+| T-03-19 | Spoofing | Vault invite diverging from site constant (Plan 03-06) | medium | mitigate | Verified 2026-08-11: vault invite line byte-identical to `src/lib/site.mjs` `DISCORD_INVITE_URL` (live comparison) | closed |
 | T-03-20 | Info disclosure | Network probes from automated task (Plan 03-06) | low | accept | Public static assets only, no credential | closed |
-| T-03-21 | Repudiation | Stale deployment certifying wrong build (Plan 03-06) | medium | mitigate | Deploy-run polling to `success` + live feed item-count re-probe — **deferred: plan 03-06 not executed** | open — below high threshold (non-blocking) |
+| T-03-21 | Repudiation | Stale deployment certifying wrong build (Plan 03-06) | medium | mitigate | Verified 2026-08-11: deploy run 31501670084 conclusion=success (re-confirmed via `gh run view`); live `rss.xml` item count (10) matches local build (10), re-probed | closed |
 | T-03-22 | DoS | Harness depending on third-party validator | low | mitigate | W3C run stays a human step; offline half automated in 03-05 (verified) | closed |
 
 *Status: open · closed · open — below high threshold (non-blocking)*
@@ -71,11 +71,10 @@ GitHub Pages. Content is git-tracked via the studio-side promote pipeline.
 ## Deferred Threats (Plan 03-06)
 
 T-03-18, T-03-19 and T-03-21 guard actions that only exist inside Plan 03-06 (studio-vault
-invite recording, cross-repo commit hygiene, deploy-freshness polling). The plan is
-`autonomous: false` and has no SUMMARY — the guarded components do not exist yet, so there is
-nothing to verify. Decision (user, 2026-08-11): defer verification to 03-06 execution; the
-mitigations are baked into that plan's own acceptance criteria. Re-run `/gsd-secure-phase 3`
-after 03-06 executes to close them.
+invite recording, cross-repo commit hygiene, deploy-freshness polling). Deferral resolved:
+Plan 03-06 executed 2026-08-11 (SUMMARY committed as `d0ed454`) and the security auditor
+independently re-verified all three mitigations against git and live-site evidence the same
+day — see the threat register rows and the audit trail entry below. No threats remain open.
 
 ---
 
@@ -96,6 +95,7 @@ after 03-06 executes to close them.
 | Audit Date | Threats Total | Closed | Open | Run By |
 |------------|---------------|--------|------|--------|
 | 2026-08-11 | 24 | 21 | 3 (1 blocking; 3 deferred to Plan 03-06) | secure-phase L1 orchestrator audit |
+| 2026-08-11 | 24 | 24 | 0 | gsd-security-auditor (post-03-06 re-verification, ASVS L1) |
 
 ---
 
@@ -103,7 +103,7 @@ after 03-06 executes to close them.
 
 - [x] All threats have a disposition (mitigate / accept / transfer)
 - [x] Accepted risks documented in Accepted Risks Log
-- [ ] `threats_open: 0` confirmed — 1 blocking threat (T-03-18) deferred to Plan 03-06
-- [ ] `status: verified` set in frontmatter
+- [x] `threats_open: 0` confirmed — T-03-18/19/21 closed by post-03-06 auditor re-verification
+- [x] `status: verified` set in frontmatter
 
-**Approval:** pending — re-run `/gsd-secure-phase 3` after Plan 03-06 executes
+**Approval:** verified 2026-08-11 — gsd-security-auditor SECURED verdict (24/24 closed)
