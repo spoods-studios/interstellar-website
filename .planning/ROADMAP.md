@@ -93,7 +93,6 @@ Decimal phases appear between their surrounding integers in numeric order.
 ### Phase 3: RSS, OpenGraph & Discord Distribution
 
 **Goal**: Shared links produce rich Discord embeds, readers can subscribe by RSS, and every page routes to Discord — making the Discord-first distribution strategy actually work.
-**Mode:** mvp
 **Depends on**: Phase 2
 **Requirements**: DIST-01, DIST-02, DIST-03
 **Success Criteria** (what must be TRUE):
