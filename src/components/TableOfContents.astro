@@ -1,7 +1,9 @@
 ---
-// D-42, UI-SPEC "TOC placement and depth": one markup tree, presentation
-// switched by global.css's existing .toc rules -- sticky sidebar >=640px,
-// native <details>/<summary> disclosure below it. Zero client JS either way.
+// D-42, UI-SPEC "TOC placement and depth": one markup tree, a native
+// <details>/<summary> disclosure inline above the body at every width. The
+// spec's sticky right-hand rail is NOT implemented: the TOC is an in-flow
+// child of the 65ch column, so `position: sticky` made it scroll over the
+// post text (no rail, no background) instead of beside it. Zero client JS.
 import { buildToc, type MarkdownHeading } from '../lib/toc';
 
 export interface Props {

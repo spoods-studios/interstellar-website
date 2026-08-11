@@ -97,6 +97,10 @@ code {
     Menlo, monospace;
 }
 
+.toc {
+  margin-block: 24px;
+}
+
 .toc summary {
   cursor: pointer;
   font-weight: 600;
@@ -118,10 +122,5 @@ code {
 
   main {
     padding-block: 64px;
-  }
-
-  .toc {
-    position: sticky;
-    top: 32px;
   }
 }
