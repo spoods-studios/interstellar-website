@@ -80,3 +80,21 @@ byte-for-byte into repo-root `roadmap/`, filenames unchanged (D-38).
 This manifest covers Phase 2 Plan 01 only: everything for closed milestones
 M0.1–M0.8 (D-43). M1.1's announcement, 5 deep-dives, and `roadmap/M1.1.md`
 land together in Phase 4 when that milestone actually closes (D-44).
+
+## M1.2 promote (2026-08-11, engine milestone close)
+
+Promoted at the engine M1.2 `/complete-milestone` close, same rules as above
+(byte-for-byte, D-33; no frontmatter or body edits):
+
+| Source | Destination | Files |
+|---|---|---|
+| `../studio/vault/devlog/technical/m1.2/` | `technical/m1.2/` | 10 (phases 55, 55.1, 55.2, 56, 57, 57.1, 58, 59, 60, 61) |
+
+Devlog additions landed separately (authored, not copied):
+`devlog/2026-08-11-three-small-fixes-before-closing-the-books.md` (M1.2
+debt-fix addendum) and the M1.2 milestone announcement (pending draft
+acceptance at time of this entry — see git history for its landing commit).
+
+Still pending promote: `roadmap/M1.2.md` — its source
+(`../studio/vault/project/roadmap-detail/M1.2.md`) is a studio close-side
+artifact not yet written at the time of this entry.
