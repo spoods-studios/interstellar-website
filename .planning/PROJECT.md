@@ -3,10 +3,34 @@
 ## What This Is
 
 The official Interstellar Engine website — the permanent, searchable home of the
-devblog and the public face of the project. Launches at engine milestone M1.1
-close as the canonical devblog archive (manifesto + M0.1–M0.8 posts), the "How
-It's Made" AI-transparency page, and a roadmap page; from launch, Discord
-#devlog carries each post's opening + link while the full post lives here.
+devblog and the public face of the project. **Live since 2026-08-08** at
+spoods-studios.github.io/interstellar-website as the canonical devblog archive
+(manifesto + M0.1–M0.8 + the M1.1 "First Burn" launch post), the 55-entry
+technical deep-dive series, the roadmap tree, and the "How It's Made"
+AI-transparency page; Discord #devlog carries each post's opening + link while
+the full post lives here, and readers can subscribe by RSS.
+
+## Current State (v1.0 shipped 2026-08-11)
+
+- Astro 7 static site, 99 pages, deployed to GitHub Pages on every push to
+  `main` with a post-deploy live-probe smoke job (build-sha freshness, feed,
+  launch post, 404-under-base, redirect stub).
+- 3,776 LOC site + test code; `npm test` runs the full smoke harness green.
+- Content pipeline: studio promote drops locked `.md` into `devlog/`,
+  `technical/`, `roadmap/`, `pages/`; site renders byte-faithfully (VOICE
+  locked), loud-fails on schema violations.
+- Distribution: drift-proof RSS, OG/Twitter cards with hero images, Discord
+  CTA on every page.
+- Open item: ANLT-01 live cert (GoatCounter signup → `GOATCOUNTER_CODE` →
+  push → confirm dashboard). Mechanism shipped gated, D-61.
+
+## Next Milestone Goals
+
+Not yet defined — site enters low-attention steady state. Candidate scope for
+v2 (from deferred pool): dark mode + syntax theme pairing (SITE-05), KaTeX for
+the M1.3+ rendering series (CONT-07), custom domain (DIST-04), search/tags if
+the corpus outgrows structural navigation (CONT-08). Trigger: engine milestone
+needs or corpus growth, via `/gsd-new-milestone`.
 
 ## Core Value
 
@@ -98,6 +122,7 @@ M1.1 close.
 | GitHub Pages hosting, domain TBD | Free, zero-ops, repo already on GitHub; custom domain attaches later without rework | ✓ Live at spoods-studios.github.io/interstellar-website |
 | v1 includes Discord CTA + RSS + privacy analytics beyond the four D-H pieces | Discord-first growth (D-F), devblog readers expect RSS, measure without tracking | ✓ Shipped (analytics live-cert pending signup) |
 | Static-site tooling decided in-phase | M1.1-window decision per D-H; research compares established options | ✓ Astro 7 + withastro/action, held through v1 |
+| Phase 3 distribution spine (D-44..D-57): shared-module RSS (no second pipeline), Container-API full-HTML feed items, D-48 loud-fail hero lookup, D-54 invite build guard | Archive/feed structurally cannot drift; broken hero refs stop the build instead of degrading; invite is one-way-published so byte-match enforced | ✓ Shipped; W3C zero errors, embeds human-approved |
 | D-60..D-68 (Phase 4): GoatCounter gated optional-if-unset, full M1.1 tree promote, Astro `redirects` stubs + slug norm, CI smoke job on commit-SHA stamp | Captured in 04-CONTEXT.md; keeps deploys green while signup pending, launch content complete, URLs permanent, silent-failure window closed | ✓ Implemented Phase 4 |
 
 ## Evolution
@@ -118,4 +143,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-11 after Phase 3 completion (RSS, OpenGraph & Discord Distribution — 6/6 plans, verification passed 4/4, security 24/24 closed; all phases complete, only ANLT-01 live certification remains before milestone close)*
+*Last updated: 2026-08-11 after v1.0 milestone*
