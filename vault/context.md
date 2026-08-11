@@ -1,18 +1,24 @@
 # interstellar-website — context
 
 **Repo:** spoods-studios/interstellar-website
-**Status:** dormant — scaffold
-**Activation milestone:** Near-term / EA launch (low-volume now)
-**Work-type:** non-code
+**Status:** active — steady-state content ops (v1.0 shipped 2026-08-11)
+**Activation milestone:** m1.x website slice (D-H) — CLOSED at v1.0
+**Work-type:** code + content
 
 ## Purpose
-Official website, devblog, press kit, and community hub — the public publish target for studio content. NOTE: treat as an EMPTY scaffold; the one 'real' devlog post present was a misupload.
+Official website, devblog, press kit, and community hub — the permanent,
+linkable home of every devblog post and the public face of the project.
+Astro 7 static site, live on GitHub Pages, deploys on every push to `main`.
 
-## Activates when
-Around the Early-Access launch; activity stays low-volume and manual-by-design until then.
+## Current mode
+Publish target for the rest of Era 1: engine devlogs dual-post here per
+studio D-Z (per-phase technical deep-dives → `technical/m{X.Y}/`, milestone
+announcements → `devlog/`), each accepted by the user before posting. No site
+build-out milestone is scheduled until **Era 2** (press kit / Steam launch
+campaign). Known accepted gap: ANLT-01 GoatCounter live-cert deferred (D-61).
 
-## Out of scope until activation
-No site build, devblog content, or press kit is authored here yet; the misuploaded devlog post is not canonical content.
-
-> Seeded from the studio PRD ecosystem map (D-11). Full conventions + flow land at
-> activation; this file exists so recall returns TRUE context immediately, never empty.
+## History
+Activated 2026-07-13 (m1.x open, D-I); v1.0 built over 4 GSD phases and
+closed 2026-08-11 — see `.planning/MILESTONES.md` and RUNBOOK.md for the
+delivered scope and publish invariants (permanent URLs, SLUG_REDIRECTS,
+smoke-job discipline).

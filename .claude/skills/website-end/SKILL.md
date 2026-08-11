@@ -70,6 +70,21 @@ git commit -m "<type>: <summary>"
 
 Do **not** push. Note the unpushed state in the final report.
 
+### Step 4.5 — Stamp the org status board (studio D-AA, 2026-08-11)
+
+Update this repo's row on the org status board so the studio vault never
+drifts from live repo state:
+
+```bash
+python3 ../studio/tools/stamp-repo-status.py "$(basename "$(git rev-parse --show-toplevel)")" \
+  --status "<status>" --milestone "<milestone/activation note>" --by <this-skill-name>
+```
+
+Keep the existing row's wording (read `../studio/vault/project/repo-status.md`)
+unless this session changed the repo's state — activation, milestone open/close,
+status shift. The script fills branch + date and commits ONLY the board file to
+the studio repo. Skipped on `--discard`.
+
 ### Step 5 — Report
 
 ```
