@@ -1,6 +1,6 @@
 ---
 title: Roadmap
-updated: 2026-08-08
+updated: 2026-08-11
 status: published
 ---
 
@@ -39,6 +39,7 @@ the Technical section explains the whole system.
 - **M1.1 Spacecraft Control** ✅ — 6DOF craft, real thrust + fuel
   (Tsiolkovsky), RCS, deterministic input, debug HUD; first playable build
   (21 phases incl. gate fixes)
-- **M1.2 Maneuver Nodes & Trajectory Prediction** 🔨 — next:
-  click-to-place nodes, predicted trajectories, plus the fine-time-step
-  work that unlocks 1× launches
+- **M1.2 Maneuver Nodes & Trajectory Prediction** ✅ — click-to-place
+  nodes with six draggable handles, a predicted trajectory that replays
+  the flown physics, a mouse-interactive map view, and the craft
+  subcycling that unlocks 1× launches (31 phases incl. gate + debt fixes)
