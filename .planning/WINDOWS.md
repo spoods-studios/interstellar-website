@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 4
+open_count: 5
 waived_count: 0
 fixed_count: 0
-total_count: 4
-last_updated: 2026-08-08T21:39:24.515Z
+total_count: 5
+last_updated: 2026-08-12T14:47:35.592Z
 ---
 
 # Broken Windows Ledger
@@ -19,6 +19,7 @@ last_updated: 2026-08-08T21:39:24.515Z
 | 2 | 3 | deviation | src/pages/rss.xml.ts |  | absolutize()'s a/href branch is unexercised by real content (zero anchors in all 9 devlog bodies); gated by a live negative assertion in tests/distribution.smoke.sh rather than a fixture | open |  | 2026-07-22T21:30:27.076Z |  |
 | 3 | 4 | deviation | assets/m1.1-hero-first-burn.png |  | M1.1 hero upscaled 1139x1068 -> 1200x1125 (Lanczos, studio-side commit 54f30e9) to clear the OG large-embed floor; author may prefer regenerating the matplotlib plot at native >=1200 width | open |  | 2026-08-08T21:19:49.821Z |  |
 | 4 | 04 | unmet-truth | src/lib/site.mjs |  | ANLT-01 live certification deferred (D-61): pageviews-recorded cannot be certified until the developer signs up, sets GOATCOUNTER_CODE, pushes, and confirms the dashboard | open |  | 2026-08-08T21:39:24.515Z |  |
+| 5 | quick-260812-eot | unrun-verify | src/styles/global.css |  | Task 1 human-check (npm run preview visual pass for hero image at desktop/sub-640px widths) not run -- no browser tool available in executor context; substituted automated build-artifact grep proving the CSS rule + intrinsic ratio are present | open |  | 2026-08-12T14:47:35.592Z |  |
 
 ````json
 [
@@ -68,6 +69,18 @@ last_updated: 2026-08-08T21:39:24.515Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-08T21:39:24.515Z",
+    "resolved_at": null
+  },
+  {
+    "id": 5,
+    "kind": "unrun-verify",
+    "phase": "quick-260812-eot",
+    "file": "src/styles/global.css",
+    "line": null,
+    "description": "Task 1 human-check (npm run preview visual pass for hero image at desktop/sub-640px widths) not run -- no browser tool available in executor context; substituted automated build-artifact grep proving the CSS rule + intrinsic ratio are present",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-12T14:47:35.592Z",
     "resolved_at": null
   }
 ]
