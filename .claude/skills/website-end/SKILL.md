@@ -85,6 +85,15 @@ unless this session changed the repo's state — activation, milestone open/clos
 status shift. The script fills branch + date and commits ONLY the board file to
 the studio repo. Skipped on `--discard`.
 
+### Step 4.6 — Coupled-phase owed state (Session Pairing Protocol — D-AH/D-AI)
+
+If this session did phase work on a phase declared in an active org
+manifest's "Coupled phases" table: check the coordination file
+(`.planning/research/<PEER>-COORDINATION.md`) for checkpoint payloads
+promised this session but not yet landed there. Anything owed gets written
+now or named in the session log's `Next:` line — never left only in peer
+message history. Skip silently when no coupling or nothing owed.
+
 ### Step 5 — Report
 
 ```
