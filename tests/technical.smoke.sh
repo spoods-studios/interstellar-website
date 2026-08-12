@@ -9,10 +9,11 @@ cd "$(dirname "$0")/.."
 echo "== Build =="
 npm run build
 
-echo "== All 65 deep-dives plus the legend built (66 technical pages) =="
+echo "== All deep-dives plus the legend built =="
 # Milestone glob widened off the m0 series (04-02): an m0-anchored path would
 # keep passing while silently ignoring every other milestone directory.
-test "$(find dist/technical -path 'dist/technical/m*/phase-*' -name index.html | wc -l)" -eq 65
+EXPECTED_DEEPDIVES=$(node tests/helpers/content-expectations.mjs technical_deepdive_count)
+test "$(find dist/technical -path 'dist/technical/m*/phase-*' -name index.html | wc -l)" -eq "$EXPECTED_DEEPDIVES"
 test -f dist/technical/how-to-read/index.html
 
 echo "== Spot-check decimal-numbered phases across the corpus, including m1.1 =="
@@ -61,10 +62,10 @@ echo "$BREADCRUMBS" | grep -q 'roadmap/m0.3'
 echo "== No hardcoded host/base string under src/ (T-02-07) =="
 ! grep -rIn -e 'github\.io' -e '/interstellar-website' src/
 
-echo "== D-40: full index links all 65 deep-dives, links the legend, and carries a data-driven era heading =="
+echo "== D-40: full index links every deep-dive, links the legend, and carries a data-driven era heading =="
 test -f dist/technical/index.html
 # Href regex widened off the m0 anchor (04-02) so a new milestone's entries count.
-test "$(grep -o 'href="[^"]*technical/m[0-9]*\.[0-9]*\(\.[0-9]*\)\?/phase-[^"]*"' dist/technical/index.html | wc -l)" -eq 65
+test "$(grep -o 'href="[^"]*technical/m[0-9]*\.[0-9]*\(\.[0-9]*\)\?/phase-[^"]*"' dist/technical/index.html | wc -l)" -eq "$EXPECTED_DEEPDIVES"
 grep -q 'technical/how-to-read/' dist/technical/index.html
 grep -q 'Era 0 (engine foundations)' dist/technical/index.html
 

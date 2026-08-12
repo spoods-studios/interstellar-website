@@ -30,12 +30,16 @@ ROADMAP_COUNT=$(find dist/roadmap -mindepth 2 -maxdepth 2 -name index.html | wc 
 PAGES_COUNT=0
 test -f dist/how-its-made/index.html && PAGES_COUNT=$((PAGES_COUNT + 1))
 test -f dist/roadmap/index.html && PAGES_COUNT=$((PAGES_COUNT + 1))
+EXPECTED_DEVLOG=$(node tests/helpers/content-expectations.mjs devlog_count)
+EXPECTED_TECHNICAL=$(node tests/helpers/content-expectations.mjs technical_page_count)
+EXPECTED_ROADMAP=$(node tests/helpers/content-expectations.mjs roadmap_count)
+EXPECTED_PAGES=$(node tests/helpers/content-expectations.mjs pages_count)
 echo "devlog:$DEVLOG_COUNT technical:$TECHNICAL_COUNT roadmap:$ROADMAP_COUNT pages:$PAGES_COUNT"
-test "$DEVLOG_COUNT" -eq 10
-test "$TECHNICAL_COUNT" -eq 66
-test "$ROADMAP_COUNT" -eq 9
-test "$PAGES_COUNT" -eq 2
-echo "counts OK (devlog 10 / technical 66 / roadmap 9 / pages 2)"
+test "$DEVLOG_COUNT" -eq "$EXPECTED_DEVLOG"
+test "$TECHNICAL_COUNT" -eq "$EXPECTED_TECHNICAL"
+test "$ROADMAP_COUNT" -eq "$EXPECTED_ROADMAP"
+test "$PAGES_COUNT" -eq "$EXPECTED_PAGES"
+echo "counts OK (devlog $EXPECTED_DEVLOG / technical $EXPECTED_TECHNICAL / roadmap $EXPECTED_ROADMAP / pages $EXPECTED_PAGES)"
 
 echo "== Negative check (D-33): malformed technical/ filename fails the build loudly =="
 MARKER="technical/m0.1/not-a-conforming-name.md"
