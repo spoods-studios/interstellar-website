@@ -47,16 +47,20 @@ echo "== Roadmap overview and How It's Made standalone pages both build =="
 test -f dist/roadmap/index.html
 test -f dist/how-its-made/index.html
 
-echo "== Overview carries exactly 9 generated milestone links, including the M1.1 detail link =="
+echo "== Overview carries a generated milestone link per roadmap entry, including the M1.1 detail link =="
 OVERVIEW="dist/roadmap/index.html"
 # Href regex widened off the m0 anchor (04-02) so a new milestone's link counts.
-test "$(grep -o 'href="[^"]*roadmap/m[0-9]*\.[0-9]*/"' "$OVERVIEW" | sort -u | wc -l)" -eq 9
+EXPECTED_ROADMAP_LINKS=$(node tests/helpers/content-expectations.mjs roadmap_count)
+test "$(grep -o 'href="[^"]*roadmap/m[0-9]*\.[0-9]*/"' "$OVERVIEW" | sort -u | wc -l)" -eq "$EXPECTED_ROADMAP_LINKS"
 # Inverted from the pre-promote negative (04-02): src/pages/roadmap/index.astro
 # generates one link per visible roadmap collection entry, so once roadmap/M1.1.md
 # is promoted this link is required, not forbidden.
 grep -q 'roadmap/m1\.1' "$OVERVIEW"
 
-echo "== Overview carries the authored era-arc prose, presents M1.1 as closed, and names M1.2 as next =="
+echo "== Overview carries the authored era-arc prose and presents every promoted milestone as closed =="
+# Only completed milestones are ever promoted into roadmap/ -- unlike a
+# fixed "M1.2 is next" pin (which goes stale the moment M1.2 itself ships),
+# this holds for every row regardless of how many milestones land.
 grep -q 'Era 0' "$OVERVIEW"
 grep -q 'Era 1' "$OVERVIEW"
 M11_ROW=$(grep -o '<strong>M1.1 Spacecraft Control</strong>[^<]*' "$OVERVIEW" | head -1)
@@ -65,8 +69,16 @@ if echo "$M11_ROW" | grep -qi 'in progress'; then
   echo "FAIL: overview still presents M1.1 as in progress"
   exit 1
 fi
-M12_ROW=$(grep -o '<strong>M1.2[^<]*</strong>[^<]*' "$OVERVIEW" | head -1)
-echo "$M12_ROW" | grep -qi 'next'
+while IFS= read -r ROW; do
+  if ! echo "$ROW" | grep -q '✅'; then
+    echo "FAIL: a promoted roadmap row is not marked closed: $ROW"
+    exit 1
+  fi
+  if echo "$ROW" | grep -qi 'in progress'; then
+    echo "FAIL: a promoted roadmap row still presents as in progress: $ROW"
+    exit 1
+  fi
+done < <(grep -o '<strong>M[0-9][^<]*</strong>[^<]*' "$OVERVIEW")
 
 echo "== How It's Made page carries its title and a last-updated meta line =="
 HIM="dist/how-its-made/index.html"

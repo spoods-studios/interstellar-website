@@ -187,12 +187,27 @@ function deriveOgImageCount(devlogEntries) {
   return basenames.size + 1; // +1 for the default card, used by heroless entries
 }
 
+// Distinct from og_image_count: the RSS feed embeds one absolute hero image
+// URL per devlog entry that carries a body image, regardless of whether two
+// entries happen to share the same source image -- so this counts entries,
+// not distinct basenames.
+function deriveDevlogHeroCount(devlogEntries) {
+  const dir = path.join(ROOT, 'devlog');
+  let count = 0;
+  for (const entry of devlogEntries) {
+    const { body } = readFrontmatter(path.join(dir, `${entry.id}.md`));
+    if (firstBodyImageBasename(body)) count++;
+  }
+  return count;
+}
+
 function deriveAll() {
   const devlogEntries = deriveDevlogEntries();
   const technical = deriveTechnical();
   const roadmapCount = deriveRoadmapCount();
   const pagesCount = derivePagesCount();
   const ogImageCount = deriveOgImageCount(devlogEntries);
+  const devlogHeroCount = deriveDevlogHeroCount(devlogEntries);
 
   const technicalPageCount = technical.deepdiveCount + technical.legendCount;
 
@@ -226,6 +241,7 @@ function deriveAll() {
     pages_count: pagesCount,
     site_page_count: sitePageCount,
     og_image_count: ogImageCount,
+    devlog_hero_count: devlogHeroCount,
     newest_devlog_id: devlogEntries[0].id,
     oldest_devlog_id: devlogEntries[devlogEntries.length - 1].id,
   };

@@ -125,12 +125,13 @@ if grep -rq 'og:title" content="[^"]*— Interstellar Engine"' dist --include='*
 fi
 echo "og:title de-duplication OK"
 
-echo "== DIST-02: exactly four distinct card images site-wide, all at or above the embed threshold =="
+echo "== DIST-02: exactly the derived number of distinct card images site-wide, all at or above the embed threshold =="
+EXPECTED_IMAGE_COUNT=$(node tests/helpers/content-expectations.mjs og_image_count)
 DISTINCT_IMAGES=$(grep -rho '<meta property="og:image" content="[^"]*"' dist --include='*.html' \
   | sed -E 's/.*content="([^"]*)".*/\1/' | sort -u)
 DISTINCT_IMAGE_COUNT=$(printf '%s\n' "$DISTINCT_IMAGES" | wc -l)
-if [ "$DISTINCT_IMAGE_COUNT" -ne 4 ]; then
-  echo "FAIL: expected 4 distinct og:image values (default card + 3 hero plots), found $DISTINCT_IMAGE_COUNT"
+if [ "$DISTINCT_IMAGE_COUNT" -ne "$EXPECTED_IMAGE_COUNT" ]; then
+  echo "FAIL: expected $EXPECTED_IMAGE_COUNT distinct og:image values (default card + per-post heroes), found $DISTINCT_IMAGE_COUNT"
   printf '%s\n' "$DISTINCT_IMAGES"
   exit 1
 fi
@@ -305,9 +306,10 @@ echo "== DIST-01: content fidelity -- absolutized images, no second-parse artifa
 # block, so the rendered attributes read `src=&quot;https://…&quot;`. Every
 # assertion below targets that escaped form; a pattern written against the raw
 # quote would pass vacuously forever.
+EXPECTED_HERO_URLS=$(node tests/helpers/content-expectations.mjs devlog_hero_count)
 HERO_URLS=$(grep -o "${SITE}[^&\"]*_astro/[^&\"]*\.webp" dist/rss.xml | wc -l)
-if [ "$HERO_URLS" -ne 3 ]; then
-  echo "FAIL: expected 3 absolute hero image URLs in the feed, found $HERO_URLS"
+if [ "$HERO_URLS" -ne "$EXPECTED_HERO_URLS" ]; then
+  echo "FAIL: expected $EXPECTED_HERO_URLS absolute hero image URLs in the feed, found $HERO_URLS"
   exit 1
 fi
 # A root-relative src is broken in every reader; the pattern is built from the
