@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-08-11 after v1.0 milestone)
 Phase: Milestone v1.0 complete
 Plan: —
 Status: Awaiting next milestone
-Last activity: 2026-08-12 — Completed quick task 260812-eot: hero image overflow + addendum ordering fixes
+Last activity: 2026-08-12 — Completed quick task 260812-f3f: smoke tests derive corpus counts dynamically (suite green)
 
 v1.0 archives: `milestones/v1.0-ROADMAP.md`, `milestones/v1.0-REQUIREMENTS.md`,
 `milestones/v1.0-MILESTONE-AUDIT.md`, phase dirs under `milestones/v1.0-phases/`.
@@ -54,6 +54,7 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 260812-eaw | Fix broken YAML frontmatter in devlog/2026-08-11-the-line-you-fly.md (unquoted colon in hero_visual broke Astro build; 3 failed Pages deploys left live site missing the M1.2 announcement + roadmap doc → "Unmapped era" on technical index) | 2026-08-12 | 092eca9 | [260812-eaw-fix-broken-yaml-frontmatter-in-devlog-20](./quick/260812-eaw-fix-broken-yaml-frontmatter-in-devlog-20/) |
 | 260812-eot | Fix hero visual overflow (img max-width in global.css) and same-date addendum ordering (milestone-addendum tag tie-break in entry sort) | 2026-08-12 | d5cf729 | [260812-eot-fix-hero-visual-overflow-and-devlog-adde](./quick/260812-eot-fix-hero-visual-overflow-and-devlog-adde/) |
+| 260812-f3f | Future-proof smoke tests: tests/helpers/content-expectations.mjs derives corpus counts + newest-post identity from source tree; 7 harnesses rewired off hardcoded literals | 2026-08-12 | 632f684 | [260812-f3f-future-proof-smoke-test-counts-and-newes](./quick/260812-f3f-future-proof-smoke-test-counts-and-newes/) |
 
 ## Deferred Items
 
