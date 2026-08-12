@@ -295,6 +295,53 @@ console.log('== entry-order ==');
   assert.deepEqual([y, x].sort(compareNewestFirst).map((e) => e.id), ['alpha', 'beta']);
 
   assert.equal(compareNewestFirst(x, x), 0);
+
+  // Same date, one flagged as an addendum: the addendum sorts first,
+  // independent of input order (Array.sort is only stable w.r.t. input order).
+  const addendum = { id: 'zzz-addendum', date: d('2026-08-11'), isAddendum: true };
+  const announcement = { id: 'aaa-announcement', date: d('2026-08-11'), isAddendum: false };
+  assert.deepEqual(
+    [addendum, announcement].sort(compareNewestFirst).map((e) => e.id),
+    ['zzz-addendum', 'aaa-announcement']
+  );
+  assert.deepEqual(
+    [announcement, addendum].sort(compareNewestFirst).map((e) => e.id),
+    ['zzz-addendum', 'aaa-announcement']
+  );
+
+  // Same date, neither flagged: id-ascending tie-break still decides (regression
+  // guard for the nine untagged posts).
+  const p = { id: 'p', date: d('2026-05-05') };
+  const q = { id: 'q', date: d('2026-05-05') };
+  assert.deepEqual([p, q].sort(compareNewestFirst).map((e) => e.id), ['p', 'q']);
+  assert.deepEqual([q, p].sort(compareNewestFirst).map((e) => e.id), ['p', 'q']);
+
+  // Same date, both flagged: id-ascending decides.
+  const r = { id: 'r', date: d('2026-05-05'), isAddendum: true };
+  const s = { id: 's', date: d('2026-05-05'), isAddendum: true };
+  assert.deepEqual([r, s].sort(compareNewestFirst).map((e) => e.id), ['r', 's']);
+  assert.deepEqual([s, r].sort(compareNewestFirst).map((e) => e.id), ['r', 's']);
+
+  // Different dates, the OLDER entry flagged as an addendum: the newer entry
+  // still sorts first -- the flag must never override the date comparison.
+  const older = { id: 'older', date: d('2026-01-01'), isAddendum: true };
+  const newer = { id: 'newer', date: d('2026-07-13'), isAddendum: false };
+  assert.deepEqual(
+    [older, newer].sort(compareNewestFirst).map((e) => e.id),
+    ['newer', 'older']
+  );
+
+  // Real-world pin: the actual M1.2 pair, same date, the addendum flagged.
+  const theLineYouFly = { id: '2026-08-11-the-line-you-fly', date: d('2026-08-11'), isAddendum: false };
+  const threeSmallFixes = {
+    id: '2026-08-11-three-small-fixes-before-closing-the-books',
+    date: d('2026-08-11'),
+    isAddendum: true,
+  };
+  assert.deepEqual(
+    [theLineYouFly, threeSmallFixes].sort(compareNewestFirst).map((e) => e.id),
+    ['2026-08-11-three-small-fixes-before-closing-the-books', '2026-08-11-the-line-you-fly']
+  );
 }
 console.log('entry-order OK');
 
