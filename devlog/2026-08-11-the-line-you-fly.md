@@ -6,7 +6,7 @@ status: published   # draft | published
 discord_post_id: "1536788055954825337"
 audience: devlog
 tags: [milestone, maneuver-nodes, trajectory-prediction, map-view, orbital-elements, flight-planning]
-hero_visual: assets/m1.2-hero-predicted-vs-flown.png — predicted trajectory vs flown burn, real engine output (PRED-04 family-6 harness against libinterstellar: DE441 Sun/Earth/Moon seed, e=0.15 orbit at 400 km periapsis, 669.43 m/s prograde-axis burn over 600 s, 6,300 s span; 300 s physics step, 1,024-substep preview tier vs 16,384-substep flight tier — all shipped values, no smoothing; max predicted-vs-flown separation 1.67e-2 m ≈ 17 mm; harness → CSV → matplotlib)
+hero_visual: "assets/m1.2-hero-predicted-vs-flown.png — predicted trajectory vs flown burn, real engine output (PRED-04 family-6 harness against libinterstellar: DE441 Sun/Earth/Moon seed, e=0.15 orbit at 400 km periapsis, 669.43 m/s prograde-axis burn over 600 s, 6,300 s span; 300 s physics step, 1,024-substep preview tier vs 16,384-substep flight tier — all shipped values, no smoothing; max predicted-vs-flown separation 1.67e-2 m ≈ 17 mm; harness → CSV → matplotlib)"
 ---
 
 # The Line You Fly
