@@ -10,6 +10,12 @@ import { compareNewestFirst } from './entry-order';
 
 const FILENAME_DATE_RE = /^(\d{4}-\d{2}-\d{2})/;
 
+const ADDENDUM_TAG = 'milestone-addendum';
+
+export function isAddendum(entry: CollectionEntry<'devlog'>): boolean {
+  return (entry.data.tags ?? []).includes(ADDENDUM_TAG);
+}
+
 export function entryDate(entry: CollectionEntry<'devlog'>): Date {
   if (entry.data.date) return entry.data.date;
   const match = entry.id.match(FILENAME_DATE_RE);
@@ -28,8 +34,8 @@ export function sortEntriesNewestFirst(
 ): CollectionEntry<'devlog'>[] {
   return [...entries].sort((a, b) =>
     compareNewestFirst(
-      { id: a.id, date: entryDate(a) },
-      { id: b.id, date: entryDate(b) }
+      { id: a.id, date: entryDate(a), isAddendum: isAddendum(a) },
+      { id: b.id, date: entryDate(b), isAddendum: isAddendum(b) }
     )
   );
 }

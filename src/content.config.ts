@@ -33,6 +33,7 @@ const devlog = defineCollection({
     discord_post_id: z.string().optional(),
     audience: z.string().optional(),
     hero_visual: z.string().optional(),
+    tags: z.array(z.string()).optional(),
   }),
 });
 
