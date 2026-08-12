@@ -1,19 +1,19 @@
 ---
 title: Roadmap
-updated: 2026-08-11
+updated: 2026-08-12
 status: published
 ---
 
 # Roadmap
 
-The engine is being built one milestone at a time, and this page tracks the
+The engine is being built one milestone at a time. This page tracks the
 arc: Era 0 — engine foundations (done) → Era 1 — first gameplay (in
 progress) → Era 2 — Early Access MVP → Era 3+ — career & story.
 
-Every milestone gets its own devblog announcement here, and every phase
-inside it gets a technical deep-dive in the Technical section. Confused by
-tags like `WIN-01` or `[Rule 3]` in the deep-dives? The How to Read page in
-the Technical section explains the whole system.
+Every milestone gets its own devblog announcement here. Every phase
+inside it gets a technical deep-dive in the Technical section. New to
+the era/milestone/phase hierarchy? The How to Read page in the
+Technical section explains it.
 
 ## Era 0 — engine foundations ✅
 
@@ -22,9 +22,9 @@ the Technical section explains the whole system.
 - **M0.2 Coordinate System** ✅ — int64 mm storage → float64 physics →
   float32 camera-relative rendering (6 phases)
 - **M0.3 Basic Orbit** ✅ — force model, symplectic integrator core, JPL
-  validation, math-lock, first review gate (8 phases)
+  validation (8 phases)
 - **M0.4 Multi-Body** ✅ — direct n-body, close-encounter detection, system
-  energy, CI hardening (14 phases incl. gate fixes)
+  energy, CI hardening (14 phases)
 - **M0.5 Gravity Performance** ✅ — deterministic Kepler solver,
   fixed-accuracy benchmarks (7 phases)
 - **M0.6 Wisdom-Holman** ✅ — barycentric WH integrator tier, warp
@@ -38,8 +38,8 @@ the Technical section explains the whole system.
 
 - **M1.1 Spacecraft Control** ✅ — 6DOF craft, real thrust + fuel
   (Tsiolkovsky), RCS, deterministic input, debug HUD; first playable build
-  (21 phases incl. gate fixes)
+  (21 phases)
 - **M1.2 Maneuver Nodes & Trajectory Prediction** ✅ — click-to-place
   nodes with six draggable handles, a predicted trajectory that replays
   the flown physics, a mouse-interactive map view, and the craft
-  subcycling that unlocks 1× launches (31 phases incl. gate + debt fixes)
+  subcycling that unlocks 1× launches (31 phases)
