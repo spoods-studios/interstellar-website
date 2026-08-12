@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-08-11 after v1.0 milestone)
 Phase: Milestone v1.0 complete
 Plan: —
 Status: Awaiting next milestone
-Last activity: 2026-08-11 — Milestone v1.0 completed and archived
+Last activity: 2026-08-12 — Completed quick task 260812-eaw: hero_visual YAML hotfix (deploy unblocked)
 
 v1.0 archives: `milestones/v1.0-ROADMAP.md`, `milestones/v1.0-REQUIREMENTS.md`,
 `milestones/v1.0-MILESTONE-AUDIT.md`, phase dirs under `milestones/v1.0-phases/`.
@@ -47,6 +47,12 @@ None yet.
 ### Blockers/Concerns
 
 - Studio repo carries unpushed commits from Phase 4 (aee1905, 10fe002, 54f30e9 — transcription refresh + two Rule-3 content fixes: quoted discord_post_id, upscaled M1.1 hero). Review + push studio-side when convenient.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260812-eaw | Fix broken YAML frontmatter in devlog/2026-08-11-the-line-you-fly.md (unquoted colon in hero_visual broke Astro build; 3 failed Pages deploys left live site missing the M1.2 announcement + roadmap doc → "Unmapped era" on technical index) | 2026-08-12 | 092eca9 | [260812-eaw-fix-broken-yaml-frontmatter-in-devlog-20](./quick/260812-eaw-fix-broken-yaml-frontmatter-in-devlog-20/) |
 
 ## Deferred Items
 
