@@ -46,7 +46,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- Studio repo carries unpushed commits from Phase 4 (aee1905, 10fe002, 54f30e9 — transcription refresh + two Rule-3 content fixes: quoted discord_post_id, upscaled M1.1 hero). Review + push studio-side when convenient.
+- None.
 
 ### Quick Tasks Completed
 
