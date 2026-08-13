@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 
-import { parsePhaseNumber, sortByPhaseNumber } from '../src/lib/phase-sort.ts';
+import { parsePhaseNumber, sortByPhaseNumber, phaseLabel } from '../src/lib/phase-sort.ts';
 import { normalizeMilestone, milestoneSortKey } from '../src/lib/milestone-key.ts';
 import { titleFromH1 } from '../src/lib/title-from-h1.ts';
 import { assertNonEmpty, isVisible } from '../src/lib/content-guards.ts';
@@ -26,6 +26,28 @@ console.log('== phase-sort ==');
 assert.equal(parsePhaseNumber('m0.3/phase-14.5-swapchain-acquire-fix'), 14.5);
 assert.equal(parsePhaseNumber('m0.1/phase-01-window-surface'), 1);
 assert.throws(() => parsePhaseNumber('how-to-read'), /how-to-read/);
+// D-AJ (studio): sibling-repo entries — repo prefix, per-repo numbering, ranges.
+assert.equal(parsePhaseNumber('m1.3/assets-phase-3-packaging-adapter'), 3);
+assert.equal(parsePhaseNumber('m1.3/assets-phases-1-3-terrain-pipeline'), 1);
+assert.equal(phaseLabel('m0.1/phase-01-window-surface'), 'Phase 1');
+assert.equal(phaseLabel('m0.3/phase-14.5-swapchain-acquire-fix'), 'Phase 14.5');
+assert.equal(phaseLabel('m1.3/assets-phase-3-packaging-adapter'), 'Assets Phase 3');
+assert.equal(phaseLabel('m1.3/assets-phases-1-3-terrain-pipeline'), 'Assets Phases 1–3');
+assert.equal(phaseLabel('m1.1/phase-53-two-phase-commit'), 'Phase 53');
+assert.throws(() => phaseLabel('how-to-read'), /how-to-read/);
+{
+  const ids = [
+    'm1.3/assets-phases-1-3-terrain-pipeline',
+    'm1.3/phase-64-srtm-ingest-tile-contract',
+    'm1.3/phase-62-camera-depth-foundation',
+  ].map((id) => ({ id }));
+  const sorted = sortByPhaseNumber(ids).map((e) => e.id);
+  assert.deepEqual(sorted, [
+    'm1.3/phase-62-camera-depth-foundation',
+    'm1.3/phase-64-srtm-ingest-tile-contract',
+    'm1.3/assets-phases-1-3-terrain-pipeline',
+  ]);
+}
 {
   const ids = [
     'm0.x/phase-17-slug',

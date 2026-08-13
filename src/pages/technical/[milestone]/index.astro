@@ -4,7 +4,7 @@
 import { getCollection } from 'astro:content';
 import { assertNonEmpty, isVisible } from '../../../lib/content-guards';
 import { titleFromH1 } from '../../../lib/title-from-h1';
-import { sortByPhaseNumber, parsePhaseNumber } from '../../../lib/phase-sort';
+import { sortByPhaseNumber, phaseLabel } from '../../../lib/phase-sort';
 import { normalizeMilestone } from '../../../lib/milestone-key';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 
@@ -46,7 +46,7 @@ const milestoneDisplay = roadmapEntry
   <ul>
     {entries.map((entry) => (
       <li>
-        Phase {parsePhaseNumber(entry.id)}:{' '}
+        {phaseLabel(entry.id)}:{' '}
         <a href={`${base}technical/${entry.id}/`}>{titleFromH1(entry.body, entry.id)}</a>
       </li>
     ))}

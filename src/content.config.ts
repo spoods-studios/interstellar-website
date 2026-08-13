@@ -37,7 +37,10 @@ const devlog = defineCollection({
   }),
 });
 
-const TECHNICAL_RE = /^(m\d+(?:\.\d+)?)\/phase-(\d+(?:\.\d+)?)-(.+)\.md$/;
+// D-AJ (studio): sibling-repo deep-dives share the milestone dir with a repo
+// prefix and per-repo numbering — assets-phase-3-slug.md, and combined ranges
+// assets-phases-1-3-slug.md. Engine entries stay unprefixed.
+const TECHNICAL_RE = /^(m\d+(?:\.\d+)?)\/(?:[a-z][a-z0-9]*(?:-[a-z0-9]+)*-)?phases?-\d+(?:\.\d+)?(?:-\d+(?:\.\d+)?)?-.+\.md$/;
 
 const technical = defineCollection({
   loader: glob({
@@ -46,16 +49,14 @@ const technical = defineCollection({
     base: './technical',
     generateId: ({ entry }) => {
       if (entry === '_how-to-read.md') return 'how-to-read'; // D-32
-      const match = entry.match(TECHNICAL_RE);
-      if (!match) {
+      if (!TECHNICAL_RE.test(entry)) {
         // D-33: loud failure naming the offending file — this tree has no
         // frontmatter to fall back on.
         throw new Error(
-          `technical/${entry}: filename must match m0.X/phase-NN[.N]-slug.md (D-33 — no frontmatter fallback exists for this tree)`
+          `technical/${entry}: filename must match m{X.Y}/[repo-]phase(s)-NN[.N][-MM]-slug.md (D-33/D-AJ — no frontmatter fallback exists for this tree)`
         );
       }
-      const [, milestone, phaseNum, slug] = match;
-      return `${milestone}/phase-${phaseNum}-${slug}`; // preserves D-32's URL shape directly
+      return entry.slice(0, -3); // strip .md — preserves D-32's URL shape directly
     },
   }),
   // D-33/D-30: no frontmatter fields beyond `status` -- schema still rejects
