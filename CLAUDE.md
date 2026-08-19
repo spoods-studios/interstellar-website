@@ -14,8 +14,8 @@ repos). Activated 2026-07-13 under org-milestone m1.x.
 Decision Log instead.
 
 ## Content
-`devlog/`, `technical/`, `roadmap/`, and `pages/` are drop targets for studio's
-`draft-devblog` → promote pipeline — never move, rename, or restyle their
+`devlog/`, `technical/`, `roadmap/`, and `pages/` are drop targets for the
+studio devlog draft → promote pipeline (drafted in-repo per D-AJ) — never move, rename, or restyle their
 `.md` files; the site layer renders them as-is (VOICE.md is locked, studio-side).
 
 Once a devlog, technical, or roadmap page has deployed, its URL is permanent —
