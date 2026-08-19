@@ -1,13 +1,13 @@
 ---
 name: website-start
-description: Session-resume skill for the Official website, devblog, press kit, and community hub repo (active — v1.0 live). Auto-fires on the first user turn in this repo. Reads vault/context.md + vault/conventions.md, checks vault/decisions/ for recent entries, surfaces git status and GSD phase state, and prints a compact briefing.
+description: Session-resume skill for the Official website, devblog, press kit, and community hub repo (dormant stub). Auto-fires on the first user turn in this repo. Reads vault/context.md + vault/conventions.md, checks vault/decisions/ for recent entries, surfaces git status and GSD phase state, and prints a compact briefing.
 argument-hint: ""
 allowed-tools: Read, Bash, Grep, Glob
 ---
 
 # /website-start — Resume session
 
-Lean session-resume briefing for this active content-ops repo. No engine-style heavy
+Lean session-resume briefing for a dormant stub repo. No engine-style heavy
 machinery here (no brain-state-stamp, no STATUS.md, no math-lock) — the
 briefing is built fresh each time from the vault + git state.
 
@@ -56,11 +56,21 @@ test -f .planning/STATE.md && cat .planning/STATE.md
 If present, print milestone/phase/status from frontmatter. Skip silently
 if absent — most of these repos have no GSD state yet (pre-activation).
 
-### Step 6 — Obligations
+### Step 6 — Obligations (cheap, optional)
 
-Standing brain-wide obligations arrive via the `SessionStart` hook
-(`brain-obligations-surface`) — it has already printed before this skill
-fires. Do not re-run it.
+```bash
+grep -l "^status: active$" ../studio/vault/project/milestones/*/manifest.md 2>/dev/null
+```
+
+No active org-milestone → skip this step silently, no line in the briefing.
+
+If one or more are active: for each, read its `obligation_spec:` frontmatter
+field and open `../studio/vault/obligations/{that file}`, then check
+`../studio/vault/obligations/*.md` whose `milestone` glob matches this
+manifest's milestone and whose `repos` (if set) includes this repo. List any
+with `status` not `done` as a one-line `Obligations:` addition to the
+briefing (slug + title). Skip silently on any read failure — this is a
+courtesy surface, not a gate.
 
 ### Step 6b — Coupled phases (Session Pairing Protocol — D-AH)
 
@@ -83,6 +93,7 @@ Branch: <name> (<clean | N dirty>)
 Last commits: <1-line interpretation of last 3>
 Recent decision: <newest vault/decisions/ title + date, or "none">
 GSD: <milestone/phase/status, or "no active plan">
+Obligations: <unmet obligation slugs + titles for this repo; omit line if none/no active org-milestone>
 Coupled: <peer repo · phase — both sessions live for shaping steps; omit line if none>
 Ready to: <1-3 suggestions from RUNBOOK.md's "What do I do next?" table + context.md's "Activates when" + dirty files>
 ```

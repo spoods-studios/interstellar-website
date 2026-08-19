@@ -8,8 +8,9 @@ allowed-tools: Read, Bash, Grep, Glob, Write, Edit
 # /website-end — Close session
 
 Lean session-close for a dormant stub repo. No stamp file, no STATUS.md
-bump, no devlog pipeline — just a session log entry, an optional decision
-capture, and a commit.
+bump — just a session log entry, an optional decision capture, and a commit.
+(Devlog publishing is NOT here: it lives in /website-implement
+post-flight step 3e — studio Decision Log D-AJ.)
 
 ## When to invoke
 
@@ -100,6 +101,7 @@ message history. Skip silently when no coupling or nothing owed.
 Session log: vault/learnings/sessions.md — 1 entry added
 Decision: <vault/decisions/<file>.md written, or "none">
 Commit: <sha> "<message>" — unpushed (no push per policy)
+Coupled: <owed payloads landed / named in Next, or omit line>
 ```
 
 ## Rules
