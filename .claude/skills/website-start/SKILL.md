@@ -1,6 +1,6 @@
 ---
 name: website-start
-description: Session-resume skill for the Official website, devblog, press kit, and community hub repo (dormant stub). Auto-fires on the first user turn in this repo. Reads vault/context.md + vault/conventions.md, checks vault/decisions/ for recent entries, surfaces git status and GSD phase state, and prints a compact briefing.
+description: Session-resume skill for the Official website, devblog, press kit, and community hub repo (active — v1.0 live). Auto-fires on the first user turn in this repo. Reads vault/context.md + vault/conventions.md, checks vault/decisions/ for recent entries, surfaces git status and GSD phase state, and prints a compact briefing.
 argument-hint: ""
 allowed-tools: Read, Bash, Grep, Glob
 ---
