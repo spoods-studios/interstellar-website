@@ -23,11 +23,36 @@
 # Actions secret names and rejects a create with `400 invalid secret name`. The host file that
 # holds the value still keys it as GITHUB_MIRROR_PAT; only the forge-side name is constrained.
 #
-# WHAT "VERIFIED" MEANS IN THIS REPOSITORY. There is no build system here, so the verify job is
-# not a compile. It is a full-depth checkout, the release-vocabulary guard, and an assertion that
-# the tagged commit is reachable from the default branch -- the strongest check this repository
-# admits, and the precondition D-12's fast-forward depends on. `interstellar-engine` is the one
-# repository of the twelve whose verify job runs a real build and test suite.
+# WHAT "VERIFIED" MEANS IN THIS REPOSITORY, AND WHAT IT DOES NOT. This repository DOES have a
+# build system. It tracks `astro.config.mjs`, `tsconfig.json`, `package-lock.json`, `src/`,
+# `tests/`, and a `package.json` carrying `"build": "astro build"` and
+# `"test": "bash tests/run-all.sh"`. The verify job below runs NONE of it: verification here is
+# a full-depth checkout, the release-vocabulary guard and an ancestry assertion, and that is all.
+# An earlier revision of this header said "there is no build system here". That was false, and
+# it was load-bearing -- it read as the justification for not running one.
+#
+# THE GAP IS ACCEPTED RISK, RECORDED RATHER THAN PAPERED OVER, and the reason is the runner. The
+# `linux-engine` label binds to an immutable C++/Vulkan toolchain image that ships Node v20.19.2
+# and NO npm (corepack only), while `astro@7.0.9` declares `engines.node >= 22.12.0`. So
+# `npm ci && npm run build && npm test` cannot run on this runner at all. Making it run means
+# rebuilding the runner's toolchain image, which is an infrastructure change and not this file's
+# to make.
+#
+# WHAT THAT COSTS, STATED PLAINLY. This is the one repository of the twelve that mirrors EVERY
+# push to `main` (the `site-push-mirror` exception, argued at the trigger below), and GitHub's
+# `.github/workflows/deploy.yml` publishes GitHub Pages on every such push with no path filter.
+# A commit that does not compile under Astro, or that compiles but fails `tests/run-all.sh`,
+# therefore reaches the live public site's deploy pipeline unbuilt and untested. The failure
+# surfaces on github.com AFTER the content has left this box, not here before it does.
+#
+# WHAT THE FIX LOOKS LIKE WHEN THE RUNNER CAN CARRY IT: a SEPARATE validation job that is
+# deliberately NOT in the mirror job's `needs:`. It must be able to report red without
+# withholding the publication the `site-push-mirror` exception exists to guarantee; putting the
+# build in `verify` instead would convert an accepted operator policy into a blocking gate,
+# which is a different decision from the one this file records.
+#
+# `interstellar-engine` is the one repository of the twelve whose verify job runs a real build
+# and test suite.
 
 name: Release mirror
 
