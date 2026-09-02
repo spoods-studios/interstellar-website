@@ -167,9 +167,14 @@ jobs:
         # implementation detail of the action rather than a guarantee.
         run: |
           set -eu
+          # Peeled the same way the mirror job peels it, so both jobs name the SAME object. On
+          # an annotated or signed tag, HEAD and ${GITHUB_SHA} are different objects; asserting
+          # the ancestry of one while pushing the other is exactly how a verified commit stops
+          # being the published one.
+          sha=$(git rev-parse --verify "HEAD^{commit}")
           git fetch --quiet --no-tags origin +refs/heads/main:refs/remotes/origin/main
-          git merge-base --is-ancestor HEAD refs/remotes/origin/main
-          echo "HEAD is reachable from origin/main -- the fast-forward is legitimate"
+          git merge-base --is-ancestor "$sha" refs/remotes/origin/main
+          echo "$sha is reachable from origin/main -- the fast-forward is legitimate"
 
   mirror:
     # THE GATE, and it is a scheduling fact rather than a check. `needs: verify` means the runner
@@ -205,14 +210,32 @@ jobs:
         # transforms it -- base64, splitting it across variables -- is what defeats the mask.
         run: |
           set -eu
+          # WHY NOT ${GITHUB_SHA}. On a tag push Forgejo derives `github.sha` from the payload's
+          # `after` field, which is the new value of the REF -- and for an ANNOTATED or signed
+          # tag that is the tag OBJECT, not the commit it points at. A branch ref must resolve
+          # to a commit, so pushing it into refs/heads/main is rejected outright, and rejected
+          # only AFTER the tag itself has already been published to the public repository. The
+          # live mirror proof (05-07) used a lightweight tag, where the tag ref value and the
+          # commit are the same object, so it never exercised this. Peel explicitly instead,
+          # and peel the same object the verify job asserted the ancestry of.
+          sha=$(git rev-parse --verify "HEAD^{commit}")
+          # ONE ATOMIC PUSH, NOT TWO. Two invocations publish the tag first and fast-forward
+          # `main` second, so any failure between them -- a transient fault reaching github.com,
+          # a GitHub `main` that has diverged, the tag-object rejection above -- leaves a
+          # release tag on the public repository whose commit is not on `main`. There is no
+          # rollback: `set -eu` aborts with the tag already published, and a re-run re-attempts
+          # the same failing second push forever. `--atomic` makes the remote apply both ref
+          # updates in one transaction or neither.
           case "${GITHUB_REF}" in
             refs/tags/*)
               tag="${GITHUB_REF#refs/tags/}"
+              git push --atomic "https://x-access-token:${MIRROR_PAT}@github.com/${GITHUB_REPOSITORY}.git" \
+                "refs/tags/${tag}" "${sha}:refs/heads/main"
+              echo "pushed tag ${tag} and fast-forwarded github main to ${sha}"
+              ;;
+            *)
               git push "https://x-access-token:${MIRROR_PAT}@github.com/${GITHUB_REPOSITORY}.git" \
-                "refs/tags/${tag}"
-              echo "pushed tag ${tag}"
+                "${sha}:refs/heads/main"
+              echo "fast-forwarded github main to ${sha}"
               ;;
           esac
-          git push "https://x-access-token:${MIRROR_PAT}@github.com/${GITHUB_REPOSITORY}.git" \
-            "${GITHUB_SHA}:refs/heads/main"
-          echo "fast-forwarded github main to ${GITHUB_SHA}"
