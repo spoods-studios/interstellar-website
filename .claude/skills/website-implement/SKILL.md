@@ -105,16 +105,19 @@ checkpoint payload owed to the peer this phase is on disk in their
 coordination file (or explicitly still owed, with the peer notified). Don't
 leave owed state only in message history.
 
-**3e. Phase technical devlog — draft → user accepts → post.**
+**3e. Phase technical devlog — flagged phases only: draft → user accepts → post.**
 
-<!-- ⛔ LOCKED STEP — user decision 2026-08-13, studio Decision Log [D-AJ]
-     (extends [D-Z] org-wide). Never remove, skip, or trim this step when
-     editing this file. Removing or weakening it requires a superseding
-     studio Decision Log entry. -->
+<!-- ⛔ LOCKED STEP — user decision 2026-09-02, studio Decision Log [D-BL]
+     (supersedes [D-AJ]'s every-phase rule; [D-Z] flow unchanged). Never
+     remove, skip, or trim this step when editing this file. Removing or
+     weakening it requires a superseding studio Decision Log entry. -->
 
-Every completed phase publishes its technical deep-dive to BOTH targets —
-Discord `#technical-devlog` AND the website. The only legal skip is an
-explicit user deferral recorded in the phase SUMMARY.
+Check the phase's ROADMAP entry for a `**Devlog**: yes` line (user-set at
+milestone open, D-BL; addable mid-milestone by editing ROADMAP). No line →
+this step is complete; publish nothing. Line present → publish the deep-dive
+to BOTH targets — Discord `#technical-devlog` AND the website. The only legal
+skip for a flagged phase is an explicit user deferral recorded in the phase
+SUMMARY.
 
 1. **Draft** the deep-dive master:
    - Phase coupled to an engine milestone (Step 1b manifest):
