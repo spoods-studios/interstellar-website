@@ -13,7 +13,10 @@
 # inversion of D-02. This lane pushes EXACTLY TWO REFS and never more.
 #
 # Action references are fully-qualified URLs on purpose: a bare `actions/checkout@v5` resolves
-# against an instance-wide default actions URL that an admin can change.
+# against an instance-wide default actions URL that an admin can change. They are ALSO pinned to an
+# immutable full commit SHA, under the same rule (S-21) the GitHub lane applies: the URL fixes
+# WHERE the action resolves from, the SHA fixes WHAT it resolves to, and only both together stop a
+# moved upstream tag from executing on this runner beside the mirror PAT.
 #
 # The mirror credential is the organisation-level Actions secret `MIRROR_GITHUB_PAT`. It is NOT
 # named `GITHUB_MIRROR_PAT`: Forgejo reserves the whole `GITHUB_` and `GITEA_` prefixes for
@@ -64,7 +67,10 @@ jobs:
       qualifies: ${{ steps.gate.outputs.qualifies }}
     steps:
       - name: Check out at full depth
-        uses: https://data.forgejo.org/actions/checkout@v5
+        # S-21: immutable SHA pin. A mutable @v5 tag can silently move to new code, and that code
+        # would run on this self-hosted runner in the same workspace as the mirror PAT. Re-resolve with:
+        #   git ls-remote https://data.forgejo.org/actions/checkout refs/tags/v5
+        uses: https://data.forgejo.org/actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5.1.0
         with:
           # Full depth on purpose, in BOTH jobs. The mirror job pushes a tag object and
           # fast-forwards GitHub's `main`; a shallow clone silently cannot do either, and the
@@ -139,7 +145,10 @@ jobs:
     runs-on: linux-engine
     steps:
       - name: Check out at full depth
-        uses: https://data.forgejo.org/actions/checkout@v5
+        # S-21: immutable SHA pin. A mutable @v5 tag can silently move to new code, and that code
+        # would run on this self-hosted runner in the same workspace as the mirror PAT. Re-resolve with:
+        #   git ls-remote https://data.forgejo.org/actions/checkout refs/tags/v5
+        uses: https://data.forgejo.org/actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5.1.0
         with:
           fetch-depth: 0
 
