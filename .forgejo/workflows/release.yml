@@ -91,6 +91,20 @@ on:
     tags:
       - 'v*'
 
+# ORDERING IS NOT A PROPERTY OF THIS FILE TODAY, AND THAT IS THE PROBLEM. Mirror runs serialise
+# only because the runner registered capacity 1 -- an operational setting on the runner, not
+# anything these workflows state. Raise it, or add a second runner, and two pushes inside one
+# job's runtime mirror concurrently: the newer wins the race to GitHub's `main` and the older is
+# rejected as a non-fast-forward, leaving a permanently red run for a commit that is in fact
+# correctly published. Red history whose failures mean nothing is what degrades every real
+# failure signal beside it.
+#
+# cancel-in-progress is false on purpose, matching the reasoning the website's GitHub-side
+# deploy.yml gives for the same key: every push should still mirror, in order, not be dropped.
+concurrency:
+  group: mirror-${{ github.repository }}
+  cancel-in-progress: false
+
 jobs:
   verify:
     # The one label this runner registered.
