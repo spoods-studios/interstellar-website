@@ -243,6 +243,17 @@ jobs:
       - name: Push the verified ref to GitHub and fast-forward its main
         env:
           MIRROR_PAT: ${{ secrets.MIRROR_GITHUB_PAT }}
+          # THE DESTINATION IS PINNED, NOT DERIVED, and this literal is the one line of per-repo
+          # divergence in twelve otherwise-identical files. ${GITHUB_REPOSITORY} is the
+          # FORGE-side <org>/<repo> path; that it equals GitHub's is a naming coincidence kept by
+          # hand, and nothing used to assert it. Renaming or transferring this repository on the
+          # forge would silently aim an organisation-scoped PAT at a different GitHub path --
+          # pushing a tag and fast-forwarding `main` on the WRONG repository if that path exists,
+          # and failing with a 403/404 that reads like a token problem if it does not. A new
+          # forge repository that copied this file would likewise inherit push rights to a
+          # same-named GitHub repository without anyone having decided that. The assertion in the
+          # first line of the script below converts both into a red job that names the reason.
+          MIRROR_TARGET: spoods-studios/interstellar-website
         # EXACTLY TWO REFS leave this box: the tag (when the trigger was a tag), and a
         # fast-forward of `main`. There is no push of every ref and no forced push anywhere in
         # this file -- the sibling repositories carry dozens of `brain/*` and `gsd/*` session
@@ -258,6 +269,8 @@ jobs:
         # transforms it -- base64, splitting it across variables -- is what defeats the mask.
         run: |
           set -eu
+          test "${GITHUB_REPOSITORY}" = "${MIRROR_TARGET}" \
+            || { echo "forge path ${GITHUB_REPOSITORY} is not the mirror target ${MIRROR_TARGET}"; exit 1; }
           # WHY NOT ${GITHUB_SHA}. On a tag push Forgejo derives `github.sha` from the payload's
           # `after` field, which is the new value of the REF -- and for an ANNOTATED or signed
           # tag that is the tag OBJECT, not the commit it points at. A branch ref must resolve
@@ -277,12 +290,12 @@ jobs:
           case "${GITHUB_REF}" in
             refs/tags/*)
               tag="${GITHUB_REF#refs/tags/}"
-              git push --atomic "https://x-access-token:${MIRROR_PAT}@github.com/${GITHUB_REPOSITORY}.git" \
+              git push --atomic "https://x-access-token:${MIRROR_PAT}@github.com/${MIRROR_TARGET}.git" \
                 "refs/tags/${tag}" "${sha}:refs/heads/main"
               echo "pushed tag ${tag} and fast-forwarded github main to ${sha}"
               ;;
             *)
-              git push "https://x-access-token:${MIRROR_PAT}@github.com/${GITHUB_REPOSITORY}.git" \
+              git push "https://x-access-token:${MIRROR_PAT}@github.com/${MIRROR_TARGET}.git" \
                 "${sha}:refs/heads/main"
               echo "fast-forwarded github main to ${sha}"
               ;;
