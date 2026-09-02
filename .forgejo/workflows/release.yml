@@ -117,8 +117,43 @@ permissions:
 # correctly published. Red history whose failures mean nothing is what degrades every real
 # failure signal beside it.
 #
-# cancel-in-progress is false on purpose, matching the reasoning the website's GitHub-side
-# deploy.yml gives for the same key: every push should still mirror, in order, not be dropped.
+# cancel-in-progress is false on purpose, but here is what that key ACTUALLY guarantees, because
+# it is narrower than the claim this comment used to make ("every push should still mirror, in
+# order, not be dropped"). Under GitHub Actions concurrency semantics, `false` protects only the
+# RUNNING member of the group. The group still holds at most ONE pending run, and a newly queued
+# run CANCELS the previously pending one. So the guarantee is: an in-flight mirror is never
+# interrupted mid-push. It is NOT: no run is ever dropped.
+#
+# WHETHER FORGEJO BEHAVES THIS WAY IS UNVERIFIED, AND THAT IS RECORDED HERE RATHER THAN ASSUMED
+# AWAY. What was actually measured for this key is that the Forgejo 15.0.7 binary carries the
+# strings `concurrency_group`, `cancel-in-progress` and `RawConcurrency`. That proves the keys are
+# PARSED. It says nothing about what the scheduler does with them -- and the identical evidence
+# method was used, correctly, to conclude that `permissions:` is not modelled at all, so string
+# presence is demonstrably not proof of behaviour in this codebase. Forgejo may instead queue FIFO
+# via its blocked-run status, in which case the old wording was right by accident.
+#
+# TO SETTLE IT: push three commits to a mirroring branch inside one job's runtime and count the
+# resulting mirror runs. Three completed runs means Forgejo queues FIFO -- record that here as a
+# measured fact and the "in order, not dropped" wording becomes true. Fewer means eviction is
+# real, and the count names which push was dropped.
+#
+# THIS REPOSITORY IS THE ONE WHERE EVICTION WOULD BITE, because it is the only one with TWO
+# trigger classes sharing this single group: `main` pushes (the site-push-mirror exception) and
+# release tags. If Forgejo does evict, a pending tag run can be cancelled by the next `main` push
+# -- and this repository takes ~230 commits to `main` in 90 days, so that window is not narrow.
+# The two legs are not symmetric under a drop: the branch leg is self-healing, because the next
+# run fast-forwards GitHub's `main` to the newer commit, but a dropped TAG leg means that release
+# simply never reaches GitHub, and a cancelled run looks identical in the Actions list to the
+# vocabulary-guard skip that this file teaches the reader to expect and ignore.
+#
+# SPLITTING THE GROUP BY REF WAS CONSIDERED AND DECLINED. The obvious remedy --
+# `group: mirror-${{ github.repository }}-${{ github.ref }}`, or a tag/branch ternary -- would
+# keep a routine `main` push from evicting a pending tag run. It also reintroduces the exact
+# hazard the paragraph above added this block to prevent: BOTH trigger classes push to GitHub's
+# SAME `refs/heads/main`, so putting them in separate groups lets them race the moment runner
+# capacity rises above 1, and the loser is a permanently red run for a commit that did publish.
+# Trading a hazard measured nowhere for one reasoned out in full is not an improvement. Settle
+# the queueing discipline first; the split is only correct if eviction turns out to be real.
 concurrency:
   group: mirror-${{ github.repository }}
   cancel-in-progress: false
