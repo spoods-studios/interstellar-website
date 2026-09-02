@@ -72,10 +72,20 @@ on:
     #
     # `deploy.yml` is NOT ported and NOT modified. It stays on GitHub and GitHub keeps running
     # it; it cannot run here, because Forgejo has no Pages target, no equivalent deploy action
-    # and no GitHub OIDC issuer. This file existing is also what guarantees it does not
-    # double-run: Forgejo's workflow resolution stops at the FIRST standard workflow directory
-    # that exists, so `.forgejo/workflows/` existing makes `.github/workflows/` unreadable by
-    # the forge entirely.
+    # and no GitHub OIDC issuer. This file existing is also what stops it double-running on the
+    # forge -- but read the next paragraph before relying on that, because the rule is narrower
+    # than it reads.
+    #
+    # SHADOWING IS PER-REF, NOT PER-REPOSITORY. Forgejo's workflow resolution walks
+    # `.forgejo/workflows`, `.gitea/workflows`, `.github/workflows` and stops at the first that
+    # exists -- and it evaluates that against THE TREE OF THE PUSHED COMMIT, not against the
+    # repository. A branch whose tree carries no `.forgejo/` falls through to
+    # `.github/workflows/`, and the forge enqueues those jobs, including any `runs-on:
+    # ubuntu-latest` or `windows-latest` that a runner registered with one label
+    # (`linux-engine`) can never service. Such a job does not fail; it sits "waiting for a
+    # runner" and accumulates one permanently-pending run per push. So the guarantee holds for
+    # refs that carry this directory and for no others, and branching from a ref that predates
+    # it reintroduces the fallthrough silently.
     branches:
       - main
     tags:
