@@ -1,0 +1,174 @@
+# The GitHub mirror lane. ONE workflow, TWO jobs, and the gate is the `needs:` edge between them.
+#
+# WHY ONE WORKFLOW RATHER THAN TWO. Forgejo has no `workflow_run` event. A second workflow written
+# to watch the first never fires AND never errors -- the failure presents as "the mirror just
+# never happened", which is indistinguishable from a mirror that was never installed at all. A
+# `needs:` edge is a scheduling fact the runner enforces before it starts anything, so there is no
+# poll to race, no re-run to mis-read, and a tag whose verification failed leaves no trace on
+# github.com because the mirror job never starts rather than starting and erroring.
+#
+# WHY NOT FORGEJO'S NATIVE PUSH-MIRROR. It can filter branches but not tags, and it publishes
+# every ref. `interstellar-engine` alone carries dozens of `brain/*` and `gsd/*` session branches;
+# the native feature would put all of them on a public host on a timer, which is the exact
+# inversion of D-02. This lane pushes EXACTLY TWO REFS and never more.
+#
+# Action references are fully-qualified URLs on purpose: a bare `actions/checkout@v5` resolves
+# against an instance-wide default actions URL that an admin can change.
+#
+# The mirror credential is the organisation-level Actions secret `MIRROR_GITHUB_PAT`. It is NOT
+# named `GITHUB_MIRROR_PAT`: Forgejo reserves the whole `GITHUB_` and `GITEA_` prefixes for
+# Actions secret names and rejects a create with `400 invalid secret name`. The host file that
+# holds the value still keys it as GITHUB_MIRROR_PAT; only the forge-side name is constrained.
+#
+# WHAT "VERIFIED" MEANS IN THIS REPOSITORY. There is no build system here, so the verify job is
+# not a compile. It is a full-depth checkout, the release-vocabulary guard, and an assertion that
+# the tagged commit is reachable from the default branch -- the strongest check this repository
+# admits, and the precondition D-12's fast-forward depends on. `interstellar-engine` is the one
+# repository of the twelve whose verify job runs a real build and test suite.
+
+name: Release mirror
+
+on:
+  push:
+    # THE ONE NAMED EXCEPTION among the twelve, decided at Plan 07's checkpoint
+    # (`site-push-mirror`) and recorded against FORGE-05 in REQUIREMENTS.md. This repository
+    # additionally mirrors EVERY push to `main`, so its GitHub-Pages `deploy.yml` keeps
+    # publishing at exactly the cadence it does today.
+    #
+    # The numbers are the argument: 230 commits to `main` in the last 90 days against exactly
+    # ONE tag in this repository's entire history. Tag-gated publishing here would be a
+    # silent-staleness failure mode -- a frozen public site is indistinguishable from a site
+    # with no new content -- and `workflow_dispatch` does not rescue it, because a manual
+    # dispatch still builds from whatever commit GitHub already holds. Content that never
+    # mirrored cannot be published by dispatching it.
+    #
+    # `deploy.yml` is NOT ported and NOT modified. It stays on GitHub and GitHub keeps running
+    # it; it cannot run here, because Forgejo has no Pages target, no equivalent deploy action
+    # and no GitHub OIDC issuer. This file existing is also what guarantees it does not
+    # double-run: Forgejo's workflow resolution stops at the FIRST standard workflow directory
+    # that exists, so `.forgejo/workflows/` existing makes `.github/workflows/` unreadable by
+    # the forge entirely.
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+jobs:
+  verify:
+    # The one label this runner registered.
+    runs-on: linux-engine
+    outputs:
+      # Consumed by the mirror job's `if:`. Fail-closed: it defaults to false and the mirror runs
+      # only on the literal string `true`, so a gate step that fails to write its output BLOCKS
+      # the mirror rather than opening it.
+      qualifies: ${{ steps.gate.outputs.qualifies }}
+    steps:
+      - name: Check out at full depth
+        uses: https://data.forgejo.org/actions/checkout@v5
+        with:
+          # Full depth on purpose, in BOTH jobs. The mirror job pushes a tag object and
+          # fast-forwards GitHub's `main`; a shallow clone silently cannot do either, and the
+          # failure reads like a permissions problem rather than like a truncated clone.
+          fetch-depth: 0
+
+      - name: Gate on the release tag vocabulary
+        id: gate
+        # THE TAG VOCABULARY GUARD, and the reason it exists here rather than in the trigger.
+        # The vocabulary decided at Plan 01's checkpoint is release-only: `v<major>.<minor>` and
+        # `v<major>.<minor>.<patch>` qualify, and every suffixed form -- `-gate-passed`,
+        # `-review-draft` -- is excluded, because D-12 fast-forwards GitHub's `main` to the
+        # tagged commit and a draft tag would move the public front page to a deliberately
+        # unfinished state.
+        #
+        # That exclusion CANNOT be expressed in the `on.push.tags` glob above. Forgejo's tag
+        # globs are shell-style and `*` matches hyphens, so `v*.*.*` matches
+        # `v1.2.0-gate-passed` exactly as happily as it matches `v1.2.0`. A tighter-looking glob
+        # does not help; only a guard does, and this is it.
+        #
+        # READ THIS BEFORE CONCLUDING THE MIRROR IS BROKEN. When this guard excludes a tag, the
+        # mirror job is SKIPPED -- and a skipped job looks IDENTICAL in the Actions list to a run
+        # that never triggered at all. That ambiguity is the accepted cost of the release-only
+        # vocabulary, recorded when it was chosen. If a tag you expected on GitHub is not there,
+        # read this step's output first: silence here is the designed outcome, not a fault.
+        run: |
+          set -eu
+          qualifies=false
+          case "${GITHUB_REF}" in
+            refs/tags/*)
+              tag="${GITHUB_REF#refs/tags/}"
+              if printf '%s' "$tag" | grep -qE '^v[0-9]+\.[0-9]+(\.[0-9]+)?$'; then
+                qualifies=true
+                echo "release vocabulary: tag $tag QUALIFIES"
+              else
+                echo "release vocabulary: tag $tag is EXCLUDED as a suffixed form"
+                echo "the mirror job will be SKIPPED -- this is the guard working, not a failure"
+              fi
+              ;;
+            refs/heads/main)
+              qualifies=true
+              echo "push to main: QUALIFIES under the site-push-mirror exception"
+              ;;
+            *)
+              echo "neither a tag nor main -- the mirror job will be SKIPPED"
+              ;;
+          esac
+          echo "qualifies=$qualifies" >> "$GITHUB_OUTPUT"
+
+      - name: Assert the commit is on the default branch
+        if: steps.gate.outputs.qualifies == 'true'
+        # NOT filler. The mirror job fast-forwards GitHub's `main` to this commit, which is only
+        # a genuine fast-forward if this commit is already reachable from `main` here. This is
+        # the precondition D-12's second push depends on, and asserting it locally is what stops
+        # it being discovered as a rejected push against a public host.
+        #
+        # The fetch is explicit rather than trusted to the checkout: on a tag push the checked-out
+        # ref is the tag, and whether `refs/remotes/origin/main` also materialises is an
+        # implementation detail of the action rather than a guarantee.
+        run: |
+          set -eu
+          git fetch --quiet --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          git merge-base --is-ancestor HEAD refs/remotes/origin/main
+          echo "HEAD is reachable from origin/main -- the fast-forward is legitimate"
+
+  mirror:
+    # THE GATE, and it is a scheduling fact rather than a check. `needs: verify` means the runner
+    # will not start this job at all unless the verify job finished green, so "verified" in
+    # FORGE-05 is mechanically enforced rather than asserted.
+    needs: verify
+    if: needs.verify.outputs.qualifies == 'true'
+    runs-on: linux-engine
+    steps:
+      - name: Check out at full depth
+        uses: https://data.forgejo.org/actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Push the verified ref to GitHub and fast-forward its main
+        env:
+          MIRROR_PAT: ${{ secrets.MIRROR_GITHUB_PAT }}
+        # EXACTLY TWO REFS leave this box: the tag (when the trigger was a tag), and a
+        # fast-forward of `main`. There is no push of every ref and no forced push anywhere in
+        # this file -- the sibling repositories carry dozens of `brain/*` and `gsd/*` session
+        # branches and the homeserver repository's planning content, none of which belongs on a
+        # public host, and no GitHub-side ref that existed before this lane may ever be moved
+        # backwards or removed by it.
+        #
+        # THE CREDENTIAL-BEARING URL IS ASSEMBLED INSIDE THE COMMAND THAT CONSUMES IT. It is
+        # never assigned to a variable that is later printed, never echoed, and deliberately
+        # never handed to `git remote add`, which would persist it into `.git/config` where a
+        # later step could read it. Embedding the registered secret VERBATIM is also what keeps
+        # Forgejo's log masking effective: masking matches the literal value, so any scheme that
+        # transforms it -- base64, splitting it across variables -- is what defeats the mask.
+        run: |
+          set -eu
+          case "${GITHUB_REF}" in
+            refs/tags/*)
+              tag="${GITHUB_REF#refs/tags/}"
+              git push "https://x-access-token:${MIRROR_PAT}@github.com/${GITHUB_REPOSITORY}.git" \
+                "refs/tags/${tag}"
+              echo "pushed tag ${tag}"
+              ;;
+          esac
+          git push "https://x-access-token:${MIRROR_PAT}@github.com/${GITHUB_REPOSITORY}.git" \
+            "${GITHUB_SHA}:refs/heads/main"
+          echo "fast-forwarded github main to ${GITHUB_SHA}"
