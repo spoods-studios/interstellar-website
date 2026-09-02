@@ -91,6 +91,17 @@ on:
     tags:
       - 'v*'
 
+# LEAST PRIVILEGE, DECLARED -- AND HONESTLY LABELLED. `contents: read` is everything this lane
+# needs from the forge's auto-provisioned Actions token; the mirror's write credential is the
+# separate organisation secret named further down. Recorded under the same rule (S-101) the
+# GitHub lane applies. BUT: Forgejo 15.0.7 does not model workflow `permissions:` at all -- the
+# forge binary carries no RawPermissions -- so today this is a declaration of intent the forge
+# ignores, which becomes enforcement if and when Forgejo implements it. Do not read it as an
+# active control. The credential reduction that IS mechanical in this file is
+# `persist-credentials: false` on the mirror job's checkout; see the note there.
+permissions:
+  contents: read
+
 # ORDERING IS NOT A PROPERTY OF THIS FILE TODAY, AND THAT IS THE PROBLEM. Mirror runs serialise
 # only because the runner registered capacity 1 -- an operational setting on the runner, not
 # anything these workflows state. Raise it, or add a second runner, and two pushes inside one
@@ -125,6 +136,11 @@ jobs:
           # fast-forwards GitHub's `main`; a shallow clone silently cannot do either, and the
           # failure reads like a permissions problem rather than like a truncated clone.
           fetch-depth: 0
+          # Credentials are KEPT here, deliberately, and this is the only job where they are:
+          # the ancestry step below runs its own `git fetch` from origin and needs them. This
+          # job never holds the mirror PAT, so the same-workspace adjacency the mirror job is
+          # careful about does not exist in it.
+          persist-credentials: true
 
       - name: Gate on the release tag vocabulary
         id: gate
@@ -205,6 +221,14 @@ jobs:
         uses: https://data.forgejo.org/actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5.1.0
         with:
           fetch-depth: 0
+          # THE FORGE TOKEN IS NOT WRITTEN INTO THIS WORKSPACE. checkout defaults to
+          # persist-credentials: true, which stores the forge Actions token in `.git/config`,
+          # where any later step -- or any code a moved action tag dragged in -- can read it,
+          # and where `git push` would pick it up through a credential helper. The push step
+          # below already refuses to hand the mirror PAT to `git remote add` for precisely that
+          # reason; the same hygiene has to apply to the forge's own token. This job needs no
+          # forge credential once the clone is done.
+          persist-credentials: false
 
       - name: Push the verified ref to GitHub and fast-forward its main
         env:
