@@ -12,6 +12,13 @@
 # the native feature would put all of them on a public host on a timer, which is the exact
 # inversion of D-02. This lane pushes EXACTLY TWO REFS and never more.
 #
+# READ THAT AS A PROPERTY OF THIS LANE, NOT OF THE REPOSITORY. It is the strongest claim this
+# file is able to make, and it is not the claim "nothing else reaches github.com". Every
+# repository still carries a `github` remote, and a plain `git push` from a working copy whose
+# upstream is set to it bypasses this lane entirely. Which routes to github.com exist is
+# governed by each working copy's remote configuration, which this file cannot see and does not
+# enforce.
+#
 # Action references are fully-qualified URLs on purpose: a bare `actions/checkout@v5` resolves
 # against an instance-wide default actions URL that an admin can change. They are ALSO pinned to an
 # immutable full commit SHA, under the same rule (S-21) the GitHub lane applies: the URL fixes
@@ -254,12 +261,16 @@ jobs:
           # same-named GitHub repository without anyone having decided that. The assertion in the
           # first line of the script below converts both into a red job that names the reason.
           MIRROR_TARGET: spoods-studios/interstellar-website
-        # EXACTLY TWO REFS leave this box: the tag (when the trigger was a tag), and a
-        # fast-forward of `main`. There is no push of every ref and no forced push anywhere in
-        # this file -- the sibling repositories carry dozens of `brain/*` and `gsd/*` session
-        # branches and the homeserver repository's planning content, none of which belongs on a
-        # public host, and no GitHub-side ref that existed before this lane may ever be moved
-        # backwards or removed by it.
+        # EXACTLY TWO REFS leave this box THROUGH THIS STEP: the tag (when the trigger was a
+        # tag), and a fast-forward of `main`. There is no push of every ref and no forced push
+        # anywhere in this file -- the sibling repositories carry dozens of `brain/*` and
+        # `gsd/*` session branches and the homeserver repository's planning content, none of
+        # which belongs on a public host, and no GitHub-side ref that existed before this lane
+        # may ever be moved backwards or removed by it.
+        #
+        # WHAT THIS DOES NOT SAY. The guarantee is scoped to THIS LANE. It does not govern other
+        # routes to github.com: each working copy still carries a `github` remote, and only that
+        # working copy's remote configuration decides whether a plain `git push` takes it.
         #
         # THE CREDENTIAL-BEARING URL IS ASSEMBLED INSIDE THE COMMAND THAT CONSUMES IT. It is
         # never assigned to a variable that is later printed, never echoed, and deliberately
