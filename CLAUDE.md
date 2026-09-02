@@ -36,3 +36,9 @@ what that requires at phase/milestone close.
 GSD-driven: `.planning/STATE.md` is the authoritative phase/progress position.
 See `.planning/ROADMAP.md` for the phase breakdown. GSD guidance:
 `.claude/CLAUDE.md` (generated).
+
+## Git workflow
+`origin` = Forgejo forge; push to `origin` only. Every `main` push auto-mirrors to
+GitHub (the org's one exception) so Pages `deploy.yml` keeps publishing — never
+add a manual `git push github main`. Issues live on the forge (D-BJ/D-BK).
+See `RUNBOOK.md` § Git workflow.

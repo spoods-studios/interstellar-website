@@ -68,6 +68,16 @@ up again only for real site work (Era 2 press kit, feature changes).
 | Session ending | `/website-end` (or `--discard` for purely exploratory sessions). |
 | Unsure | Read `../studio/RUNBOOK.md`; live org state: `../studio/vault/project/repo-status.md`. |
 
+## Git workflow (forge — D-BJ/D-BK)
+
+`origin` = `ssh://git@git.home.spoodsstudio.com:2222/spoods-studios/interstellar-website.git`
+(Forgejo, LAN/Tailscale); `github` = mirror. Push to `origin` only. This repo is
+the one exception to the org's tag-only mirror: `.forgejo/workflows/release.yml`
+mirrors **every** `main` push to GitHub, where `deploy.yml` publishes Pages —
+so "commit + push = deploy" still holds, and a manual `git push github main`
+is never needed. Issues live on the forge. Full rules:
+`../studio/vault/project/git-forge-workflow.md`.
+
 ## Org context
 
 - `../studio/RUNBOOK.md` — org-wide skill catalog + current state
