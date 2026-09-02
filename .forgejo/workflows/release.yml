@@ -120,6 +120,13 @@ jobs:
   verify:
     # The one label this runner registered.
     runs-on: linux-engine
+    # BOUNDED, because the runner registered capacity 1 and twelve repositories share it. A job
+    # that hangs holds the ONLY runner, and every other repository's mirror job, the engine's CI
+    # lane and the benchmark lane queue behind it indefinitely. Nothing alerts on that: the Kuma
+    # push monitor asserts the runner container is running and that the forge still lists the
+    # runner online, and both stay true the whole time it is stuck. Ten minutes is generous for a
+    # checkout and two shell steps.
+    timeout-minutes: 10
     outputs:
       # Consumed by the mirror job's `if:`. Fail-closed: it defaults to false and the mirror runs
       # only on the literal string `true`, so a gate step that fails to write its output BLOCKS
@@ -213,6 +220,9 @@ jobs:
     needs: verify
     if: needs.verify.outputs.qualifies == 'true'
     runs-on: linux-engine
+    # Bounded for the same capacity-1 reason verify gives. A push to github.com that stalls on a
+    # half-open connection would otherwise hold the only runner with no upper limit at all.
+    timeout-minutes: 10
     steps:
       - name: Check out at full depth
         # S-21: immutable SHA pin. A mutable @v5 tag can silently move to new code, and that code
