@@ -45,8 +45,7 @@ OLDEST="dist/devlog/${OLDEST_ID}/index.html"
 NEWEST="dist/devlog/${NEWEST_ID}/index.html"
 grep -q 'class="post-nav"' "$OLDEST"
 # Bound the nav window at its own closing tag (cut at the first </nav>), not
-# at an arbitrary content byte -- same anchoring as the breadcrumbs extraction
-# in technical.smoke.sh.
+# at an arbitrary content byte.
 OLDEST_NAV=$(grep -o 'class="post-nav">.*' "$OLDEST" | sed 's|</nav>.*|</nav>|')
 if grep -q '&larr;' <<<"$OLDEST_NAV"; then
   echo "FAIL: oldest post has a previous link"

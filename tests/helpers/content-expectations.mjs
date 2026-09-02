@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Single source of derived test expectations for tests/*.smoke.sh. Every
 // corpus-sized assertion in the harness reads its expected value from this
-// CLI at run time instead of a hardcoded literal, so a new devlog/technical/
-// roadmap content drop can never turn the suite red on its own.
+// CLI at run time instead of a hardcoded literal, so a new devlog/roadmap
+// content drop can never turn the suite red on its own.
 //
 // devlog-meta.ts's isAddendum()/entryDate() logic is deliberately mirrored
 // here rather than imported: its extensionless relative imports
@@ -26,8 +26,6 @@ const ROOT = path.resolve(__dirname, '../..');
 
 const ADDENDUM_TAG = 'milestone-addendum';
 const DEVLOG_FILENAME_RE = /^(\d{4}-\d{2}-\d{2})-.+\.md$/;
-const MILESTONE_DIR_RE = /^m\d+(?:\.\d+)?$/i;
-const DEEPDIVE_FILENAME_RE = /^phase-\d+(?:\.\d+)?-.+\.md$/;
 const ROADMAP_FILENAME_RE = /^M\d+(?:\.\d+)?\.md$/i;
 // Matches ![alt](path) and ![alt](path "title"); captures the path only.
 const IMAGE_RE = /!\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/;
@@ -114,37 +112,6 @@ function deriveDevlogEntries() {
   return [...entries].sort(compareNewestFirst);
 }
 
-function deriveTechnical() {
-  const dir = path.join(ROOT, 'technical');
-  const dirents = readdirSync(dir, { withFileTypes: true });
-  const milestoneDirs = dirents
-    .filter((entry) => entry.isDirectory() && MILESTONE_DIR_RE.test(entry.name))
-    .map((entry) => entry.name);
-  if (milestoneDirs.length === 0) {
-    throw new Error('technical/: derived zero milestone directories');
-  }
-
-  let deepdiveCount = 0;
-  for (const milestone of milestoneDirs) {
-    const milestoneDir = path.join(dir, milestone);
-    for (const name of listMarkdownFiles(milestoneDir)) {
-      if (!DEEPDIVE_FILENAME_RE.test(name)) continue;
-      const { data } = readFrontmatter(path.join(milestoneDir, name));
-      if (isDraft(data)) continue;
-      deepdiveCount++;
-    }
-  }
-  if (deepdiveCount === 0) {
-    throw new Error('technical/: derived zero deep-dive pages');
-  }
-
-  const legendPath = path.join(dir, '_how-to-read.md');
-  const { data: legendData } = readFrontmatter(legendPath);
-  const legendCount = isDraft(legendData) ? 0 : 1;
-
-  return { deepdiveCount, legendCount, milestoneCount: milestoneDirs.length };
-}
-
 function deriveRoadmapCount() {
   const dir = path.join(ROOT, 'roadmap');
   const files = listMarkdownFiles(dir).filter((name) => ROADMAP_FILENAME_RE.test(name));
@@ -203,18 +170,14 @@ function deriveDevlogHeroCount(devlogEntries) {
 
 function deriveAll() {
   const devlogEntries = deriveDevlogEntries();
-  const technical = deriveTechnical();
   const roadmapCount = deriveRoadmapCount();
   const pagesCount = derivePagesCount();
   const ogImageCount = deriveOgImageCount(devlogEntries);
   const devlogHeroCount = deriveDevlogHeroCount(devlogEntries);
 
-  const technicalPageCount = technical.deepdiveCount + technical.legendCount;
-
   // Structural singletons: these routes exist once no matter how much
-  // devlog/technical/roadmap content lands -- they are route-shaped, not
+  // devlog/roadmap content lands -- they are route-shaped, not
   // content-shaped, so they stay named constants rather than derived counts.
-  const TECHNICAL_INDEX_SINGLETON = 1; // dist/technical/index.html
   const ROADMAP_OVERVIEW_SINGLETON = 1; // dist/roadmap/index.html
   const HOW_ITS_MADE_SINGLETON = 1; // dist/how-its-made/index.html
   const HOMEPAGE_SINGLETON = 1; // dist/index.html
@@ -222,10 +185,6 @@ function deriveAll() {
 
   const sitePageCount =
     devlogEntries.length +
-    technical.deepdiveCount +
-    technical.legendCount +
-    TECHNICAL_INDEX_SINGLETON +
-    technical.milestoneCount +
     roadmapCount +
     ROADMAP_OVERVIEW_SINGLETON +
     HOW_ITS_MADE_SINGLETON +
@@ -234,9 +193,6 @@ function deriveAll() {
 
   return {
     devlog_count: devlogEntries.length,
-    technical_deepdive_count: technical.deepdiveCount,
-    technical_page_count: technicalPageCount,
-    technical_milestone_count: technical.milestoneCount,
     roadmap_count: roadmapCount,
     pages_count: pagesCount,
     site_page_count: sitePageCount,

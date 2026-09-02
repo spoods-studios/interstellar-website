@@ -14,11 +14,13 @@ repos). Activated 2026-07-13 under org-milestone m1.x.
 Decision Log instead.
 
 ## Content
-`devlog/`, `technical/`, `roadmap/`, and `pages/` are drop targets for the
+`devlog/`, `roadmap/`, and `pages/` are drop targets for the
 studio devlog draft → promote pipeline (drafted in-repo per D-AJ) — never move, rename, or restyle their
 `.md` files; the site layer renders them as-is (VOICE.md is locked, studio-side).
+The per-phase technical deep-dive series (`technical/`) was retired and
+unpublished (studio Decision Log D-BN, 2026-09-02).
 
-Once a devlog, technical, or roadmap page has deployed, its URL is permanent —
+Once a devlog or roadmap page has deployed, its URL is permanent —
 Discord embeds, RSS guids, and studio-vault references all pin these URLs, so a
 rename without a stub breaks links already published to readers, and unlike a
 broken build nothing tells you it happened (the only trace is the analytics

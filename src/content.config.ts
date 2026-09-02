@@ -37,36 +37,6 @@ const devlog = defineCollection({
   }),
 });
 
-// D-AJ (studio): sibling-repo deep-dives share the milestone dir with a repo
-// prefix and per-repo numbering — assets-phase-3-slug.md, and combined ranges
-// assets-phases-1-3-slug.md. Engine entries stay unprefixed.
-const TECHNICAL_RE = /^(m\d+(?:\.\d+)?)\/(?:[a-z][a-z0-9]*(?:-[a-z0-9]+)*-)?phases?-\d+(?:\.\d+)?(?:-\d+(?:\.\d+)?)?-.+\.md$/;
-
-const technical = defineCollection({
-  loader: glob({
-    pattern: ['**/*.md'],
-    // NOTE: project-root-relative, same landmine as the devlog loader above.
-    base: './technical',
-    generateId: ({ entry }) => {
-      if (entry === '_how-to-read.md') return 'how-to-read'; // D-32
-      if (!TECHNICAL_RE.test(entry)) {
-        // D-33: loud failure naming the offending file — this tree has no
-        // frontmatter to fall back on.
-        throw new Error(
-          `technical/${entry}: filename must match m{X.Y}/[repo-]phase(s)-NN[.N][-MM]-slug.md (D-33/D-AJ — no frontmatter fallback exists for this tree)`
-        );
-      }
-      return entry.slice(0, -3); // strip .md — preserves D-32's URL shape directly
-    },
-  }),
-  // D-33/D-30: no frontmatter fields beyond `status` -- schema still rejects
-  // any other unexpected key loudly. `status` is optional-and-uniform with
-  // devlog/pages (T-02-03) so isVisible's existing guard, already filtered
-  // onto every technical query site-wide, has a real field to act on rather
-  // than a structural no-op (02-08 Plan Task 2's D-30 fixture proves this).
-  schema: z.object({ status: z.enum(['draft', 'published', 'final']).optional() }).strict(),
-});
-
 const ROADMAP_RE = /^M(\d+(?:\.\d+)?)\.md$/i;
 
 const roadmap = defineCollection({
@@ -78,7 +48,7 @@ const roadmap = defineCollection({
       if (!match) {
         throw new Error(`roadmap/${entry}: filename must match M{milestone}.md (D-38)`);
       }
-      return `m${match[1]}`; // normalize to lowercase — joins directly against technical/'s m0.X dirs
+      return `m${match[1]}`; // normalize to lowercase
     },
   }),
   schema: z.object({}).strict(),
@@ -99,4 +69,4 @@ const pages = defineCollection({
   }),
 });
 
-export const collections = { devlog, technical, roadmap, pages };
+export const collections = { devlog, roadmap, pages };

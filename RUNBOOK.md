@@ -3,17 +3,17 @@
 Official website, devblog, press kit, and community hub — the public publish
 target for studio content. **Active — v1.0 shipped 2026-08-11**: Astro 7
 static site live at `spoods-studios.github.io/interstellar-website` (GitHub
-Pages, Actions deploy on every push to `main`). 99 pages: full devblog archive
-(manifesto + M0.1–M1.1 announcements), 55+ technical deep-dives, roadmap
-pages, How It's Made AI-transparency page, RSS + OpenGraph + Discord CTA.
+Pages, Actions deploy on every push to `main`). Full devblog archive
+(manifesto + milestone announcements), roadmap pages, How It's Made
+AI-transparency page, RSS + OpenGraph + Discord CTA.
 
 **Steady-state today (rest of Era 1):** the repo is a publish target, not a
-build site. Engine devlogs dual-post here per studio **D-Z** — every engine
-phase verify drafts a technical deep-dive, the user accepts it, and it lands
-in BOTH Discord `#technical-devlog` and this repo (`technical/m{X.Y}/`);
-milestone announcements land in `devlog/`. Commit + push = deploy. Next
-build-out milestone is **Era 2** (press kit / Steam launch campaign — Roadmap
-§5.4); no site milestone is scheduled before then.
+build site. Milestone announcements land in `devlog/`. Commit + push =
+deploy. The per-phase technical deep-dive series (`technical/`) was
+retired and unpublished (studio Decision Log D-BN) — engine devlogs no
+longer dual-post here. Next build-out milestone is **Era 2** (press kit /
+Steam launch campaign — Roadmap §5.4); no site milestone is scheduled
+before then.
 
 ## Skills available here
 
@@ -31,19 +31,19 @@ content (copy, broken links, press-kit accuracy). No mandatory multi-vendor
 grid, no mandatory playtest. Bugs/broken pages still block; cosmetic nits
 don't.
 
-**Content commits don't trigger milestones or review** — devlog/technical
-`.md` files landing here via the D-Z publish flow (or studio's `draft-devblog`
-→ promote for announcements) deploy on push and need no ceremony. GSD wakes
-up again only for real site work (Era 2 press kit, feature changes).
+**Content commits don't trigger milestones or review** — devlog `.md` files
+landing here via studio's `draft-devblog` → promote flow (announcements)
+deploy on push and need no ceremony. GSD wakes up again only for real site
+work (Era 2 press kit, feature changes).
 
 ## Publish rules (v1.0 invariants — violating these breaks live readers)
 
-- **URLs are permanent.** Deployed devlog/technical/roadmap URLs are pinned by
+- **URLs are permanent.** Deployed devlog/roadmap URLs are pinned by
   Discord embeds, RSS guids, and studio-vault references. Renaming a promoted
   file requires a `SLUG_REDIRECTS` entry in `astro.config.mjs` in the SAME
   commit (base-free key, base-composed destination) — see CLAUDE.md.
-- **Content renders as-is.** `devlog/`, `technical/`, `roadmap/`, `pages/` are
-  drop targets; never restyle or restructure their `.md` (VOICE.md is locked
+- **Content renders as-is.** `devlog/`, `roadmap/`, `pages/` are drop
+  targets; never restyle or restructure their `.md` (VOICE.md is locked
   studio-side).
 - **Deploy is self-checking.** `deploy.yml` runs a post-deploy live-probe
   smoke job (homepage, feed, launch post, 404-under-base, redirect stub);
@@ -62,7 +62,7 @@ up again only for real site work (Era 2 press kit, feature changes).
 
 | State | Action |
 |---|---|
-| A devlog/technical post needs publishing | Copy the accepted master in, commit, push — deploy is automatic. Verify the smoke job stays green. |
+| A devlog post needs publishing | Copy the accepted master in, commit, push — deploy is automatic. Verify the smoke job stays green. |
 | Broken page / red smoke job | Fix now — this is the only t3 state that blocks everything else. |
 | Era 2 opens (press kit slice) | `gsd-new-milestone` from the Era-2 org manifest's website slice. |
 | Session ending | `/website-end` (or `--discard` for purely exploratory sessions). |

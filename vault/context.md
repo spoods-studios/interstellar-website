@@ -11,11 +11,12 @@ linkable home of every devblog post and the public face of the project.
 Astro 7 static site, live on GitHub Pages, deploys on every push to `main`.
 
 ## Current mode
-Publish target for the rest of Era 1: engine devlogs dual-post here per
-studio D-Z (per-phase technical deep-dives → `technical/m{X.Y}/`, milestone
-announcements → `devlog/`), each accepted by the user before posting. No site
-build-out milestone is scheduled until **Era 2** (press kit / Steam launch
-campaign). Known accepted gap: ANLT-01 GoatCounter live-cert deferred (D-61).
+Publish target for the rest of Era 1: milestone announcements land in
+`devlog/`, each accepted by the user before posting. The per-phase technical
+deep-dive series (`technical/`) was retired and unpublished (studio Decision
+Log D-BN, 2026-09-02). No site build-out milestone is scheduled until
+**Era 2** (press kit / Steam launch campaign). Known accepted gap: ANLT-01
+GoatCounter live-cert deferred (D-61).
 
 ## History
 Activated 2026-07-13 (m1.x open, D-I); v1.0 built over 4 GSD phases and

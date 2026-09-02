@@ -1,7 +1,7 @@
-// D-35: the join key for every cross-collection query in this phase and Plans
-// 06/07. Announcement frontmatter carries "M0.1" (capital), technical/'s
-// directories are "m0.1" (lowercase), and roadmap/'s filenames are "M0.1.md" --
-// all three must normalize through this one helper before comparison.
+// D-35: the join key for cross-collection queries between devlog and
+// roadmap. Announcement frontmatter carries "M0.1" (capital) and roadmap/'s
+// filenames are "M0.1.md" -- both must normalize through this one helper
+// before comparison.
 
 const MILESTONE_RE = /^m?(\d+(?:\.\d+)?)/i;
 

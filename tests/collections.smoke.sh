@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Smoke-test harness for Phase 2 Plan 03, Task 2 (four Astro collections,
-# per-tree filename rules, loud failure -- CONT-02/03/04, D-32/D-33/D-38).
+# Smoke-test harness for Phase 2 Plan 03, Task 2 (Astro collections,
+# per-tree filename rules, loud failure -- CONT-02/03/04, D-32/D-38).
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-echo "== Positive check: all four collections resolve at their exact expected counts =="
+echo "== Positive check: all collections resolve at their exact expected counts =="
 # Repointed off the removed collection-counts.json.ts diagnostic route (02-08
 # orchestrator note) onto the real index/route output. This still catches
 # RESEARCH Pitfall 1 (glob()'s silent-empty-collection landmine): a
@@ -23,43 +23,17 @@ while IFS= read -r f; do
   if grep -q 'http-equiv="refresh"' "$f"; then continue; fi
   DEVLOG_COUNT=$((DEVLOG_COUNT + 1))
 done < <(find dist/devlog -name index.html)
-# Milestone glob widened off the m0 series (04-02): an m0-anchored path would
-# keep passing while silently ignoring every other milestone directory.
-TECHNICAL_COUNT=$(( $(find dist/technical -path 'dist/technical/m*/phase-*' -name index.html | wc -l) + 1 )) # +1 for how-to-read
 ROADMAP_COUNT=$(find dist/roadmap -mindepth 2 -maxdepth 2 -name index.html | wc -l)
 PAGES_COUNT=0
 test -f dist/how-its-made/index.html && PAGES_COUNT=$((PAGES_COUNT + 1))
 test -f dist/roadmap/index.html && PAGES_COUNT=$((PAGES_COUNT + 1))
 EXPECTED_DEVLOG=$(node tests/helpers/content-expectations.mjs devlog_count)
-EXPECTED_TECHNICAL=$(node tests/helpers/content-expectations.mjs technical_page_count)
 EXPECTED_ROADMAP=$(node tests/helpers/content-expectations.mjs roadmap_count)
 EXPECTED_PAGES=$(node tests/helpers/content-expectations.mjs pages_count)
-echo "devlog:$DEVLOG_COUNT technical:$TECHNICAL_COUNT roadmap:$ROADMAP_COUNT pages:$PAGES_COUNT"
+echo "devlog:$DEVLOG_COUNT roadmap:$ROADMAP_COUNT pages:$PAGES_COUNT"
 test "$DEVLOG_COUNT" -eq "$EXPECTED_DEVLOG"
-test "$TECHNICAL_COUNT" -eq "$EXPECTED_TECHNICAL"
 test "$ROADMAP_COUNT" -eq "$EXPECTED_ROADMAP"
 test "$PAGES_COUNT" -eq "$EXPECTED_PAGES"
-echo "counts OK (devlog $EXPECTED_DEVLOG / technical $EXPECTED_TECHNICAL / roadmap $EXPECTED_ROADMAP / pages $EXPECTED_PAGES)"
-
-echo "== Negative check (D-33): malformed technical/ filename fails the build loudly =="
-MARKER="technical/m0.1/not-a-conforming-name.md"
-trap 'rm -f "$MARKER"' EXIT
-printf '# Not a real deep-dive\n\nbody\n' > "$MARKER"
-if npm run build > /tmp/gsd-d33.log 2>&1; then
-  rm -f "$MARKER"
-  echo "D-33 FAIL: build did not error on malformed technical/ filename"
-  exit 1
-fi
-grep -q "not-a-conforming-name.md" /tmp/gsd-d33.log
-rm -f "$MARKER"
-if git status --porcelain technical/ | grep -q .; then
-  echo "D-33 FAIL: technical/ left dirty"
-  exit 1
-fi
-echo "D-33 OK: build failed loudly naming the offending file; technical/ clean"
-
-echo "== Rebuild clean after negative-case fixture removal =="
-npm run build
-echo "rebuild OK"
+echo "counts OK (devlog $EXPECTED_DEVLOG / roadmap $EXPECTED_ROADMAP / pages $EXPECTED_PAGES)"
 
 echo "ALL CHECKS PASSED"

@@ -5,9 +5,6 @@ import sitemap from '@astrojs/sitemap';
 import fs from 'node:fs';
 import nodePath from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { createWikilinkResolver } from './src/lib/wikilink-resolver.mjs';
-import { createWikilinkPlugin } from './src/lib/mdast-wikilinks.mjs';
-import { createDeepDiveLinkPlugin } from './src/lib/mdast-deepdive-links.mjs';
 import { assertInviteConfigured, assertGoatcounterConfigured } from './src/lib/site.mjs';
 
 const BASE = '/interstellar-website';
@@ -26,58 +23,19 @@ const SLUG_REDIRECTS = {
   '/devlog/2026-07-30-demo-old-slug': `${NORMALIZED_BASE}devlog/2026-07-30-first-burn/`,
 };
 
-const TECHNICAL_ROOT = fileURLToPath(new URL('./technical', import.meta.url));
-
-const wikilinkResolver = createWikilinkResolver({
-  base: BASE,
-  technicalRoot: TECHNICAL_ROOT,
-});
-
-// D-35/D-38: maps a roadmap phase number to its technical/ deep-dive URL by
-// walking technical/<milestone>/ once per milestone and matching filenames'
-// own phase-number capture (never a hand-written mapping table).
-const PHASE_FILE_RE = /^phase-(\d+(?:\.\d+)?)-(.+)\.md$/;
-const deepDivePhaseMapCache = new Map();
-
-function resolvePhase(milestone, phaseNumber) {
-  const milestoneDir = milestone.toLowerCase();
-  if (!deepDivePhaseMapCache.has(milestoneDir)) {
-    const map = new Map();
-    let files = [];
-    try {
-      files = fs.readdirSync(nodePath.join(TECHNICAL_ROOT, milestoneDir));
-    } catch {
-      // milestone directory doesn't exist -- leave the map empty, caller
-      // treats a missed lookup as an unresolvable phase.
-    }
-    for (const file of files) {
-      const match = file.match(PHASE_FILE_RE);
-      if (!match) continue;
-      map.set(parseFloat(match[1]), `${milestoneDir}/phase-${match[1]}-${match[2]}`);
-    }
-    deepDivePhaseMapCache.set(milestoneDir, map);
-  }
-  const id = deepDivePhaseMapCache.get(milestoneDir).get(phaseNumber);
-  return id ? `${NORMALIZED_BASE}technical/${id}/` : null;
-}
-
 const ROADMAP_ROOT = fileURLToPath(new URL('./roadmap', import.meta.url));
 const DEVLOG_ROOT = fileURLToPath(new URL('./devlog', import.meta.url));
 const PAGES_ROOT = fileURLToPath(new URL('./pages', import.meta.url));
-const mdastPlugins = [
-  createWikilinkPlugin({ resolve: wikilinkResolver.resolve }),
-  createDeepDiveLinkPlugin({ resolvePhase }),
-];
+const mdastPlugins = [];
 
-// CR-01 fix (02-REVIEW.md): mdastPlugins above runs on all four content
-// trees (see content.config.ts's `collections` export), so the preflight
-// below must walk all four too -- this list is the single place that
-// determines preflight coverage. A fifth tree can only escape validation by
+// CR-01 fix (02-REVIEW.md): mdastPlugins above runs on every content tree
+// (see content.config.ts's `collections` export), so the preflight below
+// must walk all of them too -- this list is the single place that
+// determines preflight coverage. A new tree can only escape validation by
 // someone forgetting to add a line here, not by the preflight silently
 // scoping itself to whichever trees happened to exist when it was written
 // (which is exactly how devlog/ and pages/ were missed originally).
 const CONTENT_TREES = [
-  { root: TECHNICAL_ROOT, recursive: true }, // technical/<milestone>/phase-*.md
   { root: ROADMAP_ROOT },
   { root: DEVLOG_ROOT, exclude: ['_TEMPLATE.md'] },
   { root: PAGES_ROOT },

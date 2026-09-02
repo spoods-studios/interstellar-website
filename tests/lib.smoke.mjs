@@ -1,14 +1,11 @@
 #!/usr/bin/env node
 // Committed assertion script for the pure build-pipeline helpers this phase adds
-// (D-34 phase sort, D-35 milestone key, D-01/D-33 title fallback, D-30 draft guard,
-// D-42 TOC threshold). No test framework is installed (RESEARCH.md Validation
+// (D-35 milestone key, D-01/D-33 title fallback, D-30 draft guard, D-42 TOC
+// threshold). No test framework is installed (RESEARCH.md Validation
 // Architecture) -- plain top-level assertions mirroring tests/build.smoke.sh's
 // committed-script precedent.
 import assert from 'node:assert/strict';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-import path from 'node:path';
 
-import { parsePhaseNumber, sortByPhaseNumber, phaseLabel } from '../src/lib/phase-sort.ts';
 import { normalizeMilestone, milestoneSortKey } from '../src/lib/milestone-key.ts';
 import { titleFromH1 } from '../src/lib/title-from-h1.ts';
 import { assertNonEmpty, isVisible } from '../src/lib/content-guards.ts';
@@ -16,61 +13,6 @@ import { buildToc } from '../src/lib/toc.ts';
 import { firstProseBlock, stripInline, truncate, describeBody } from '../src/lib/describe-entry.ts';
 import { compareNewestFirst } from '../src/lib/entry-order.ts';
 import { heroBasename, lookupHero } from '../src/lib/hero-image.ts';
-import { createWikilinkResolver } from '../src/lib/wikilink-resolver.mjs';
-import { createWikilinkPlugin } from '../src/lib/mdast-wikilinks.mjs';
-import { markdownToHtml } from 'satteri';
-
-const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url));
-
-console.log('== phase-sort ==');
-assert.equal(parsePhaseNumber('m0.3/phase-14.5-swapchain-acquire-fix'), 14.5);
-assert.equal(parsePhaseNumber('m0.1/phase-01-window-surface'), 1);
-assert.throws(() => parsePhaseNumber('how-to-read'), /how-to-read/);
-// D-AJ (studio): sibling-repo entries — repo prefix, per-repo numbering, ranges.
-assert.equal(parsePhaseNumber('m1.3/assets-phase-3-packaging-adapter'), 3);
-assert.equal(parsePhaseNumber('m1.3/assets-phases-1-3-terrain-pipeline'), 1);
-assert.equal(phaseLabel('m0.1/phase-01-window-surface'), 'Phase 1');
-assert.equal(phaseLabel('m0.3/phase-14.5-swapchain-acquire-fix'), 'Phase 14.5');
-assert.equal(phaseLabel('m1.3/assets-phase-3-packaging-adapter'), 'Assets Phase 3');
-assert.equal(phaseLabel('m1.3/assets-phases-1-3-terrain-pipeline'), 'Assets Phases 1–3');
-assert.equal(phaseLabel('m1.1/phase-53-two-phase-commit'), 'Phase 53');
-assert.throws(() => phaseLabel('how-to-read'), /how-to-read/);
-{
-  const ids = [
-    'm1.3/assets-phases-1-3-terrain-pipeline',
-    'm1.3/phase-64-srtm-ingest-tile-contract',
-    'm1.3/phase-62-camera-depth-foundation',
-  ].map((id) => ({ id }));
-  const sorted = sortByPhaseNumber(ids).map((e) => e.id);
-  assert.deepEqual(sorted, [
-    'm1.3/phase-62-camera-depth-foundation',
-    'm1.3/phase-64-srtm-ingest-tile-contract',
-    'm1.3/assets-phases-1-3-terrain-pipeline',
-  ]);
-}
-{
-  const ids = [
-    'm0.x/phase-17-slug',
-    'm0.x/phase-14-slug',
-    'm0.x/phase-16-slug',
-    'm0.x/phase-14.5-slug',
-    'm0.x/phase-15-slug',
-    'm0.x/phase-15.5-slug',
-  ].map((id) => ({ id }));
-  const sorted = sortByPhaseNumber(ids).map((e) => e.id);
-  assert.deepEqual(sorted, [
-    'm0.x/phase-14-slug',
-    'm0.x/phase-14.5-slug',
-    'm0.x/phase-15-slug',
-    'm0.x/phase-15.5-slug',
-    'm0.x/phase-16-slug',
-    'm0.x/phase-17-slug',
-  ]);
-  const original = ids.map((e) => e.id);
-  sortByPhaseNumber(ids);
-  assert.deepEqual(ids.map((e) => e.id), original, 'sortByPhaseNumber must not mutate its input');
-}
-console.log('phase-sort OK');
 
 console.log('== milestone-key ==');
 assert.equal(normalizeMilestone('M0.1'), 'm0.1');
@@ -126,98 +68,6 @@ console.log('== toc ==');
   assert.equal(buildToc(headings), null);
 }
 console.log('toc OK');
-
-console.log('== wikilink-resolver ==');
-{
-  const base = '/interstellar-website';
-  const resolver = createWikilinkResolver({
-    base,
-    technicalRoot: path.join(REPO_ROOT, 'technical'),
-  });
-
-  assert.equal(
-    resolver.resolve('../m0.1/phase-03-rendering-pipeline', 'm0.3/phase-14.5-swapchain-acquire-fix'),
-    '/interstellar-website/technical/m0.1/phase-03-rendering-pipeline/'
-  );
-  assert.equal(
-    resolver.resolve('../_how-to-read', 'm0.3/phase-14.5-swapchain-acquire-fix'),
-    '/interstellar-website/technical/how-to-read/'
-  );
-  assert.equal(
-    resolver.resolve('m0.1/phase-01-window-surface', 'm0.2/phase-07-anything'),
-    '/interstellar-website/technical/m0.1/phase-01-window-surface/'
-  );
-  assert.equal(resolver.resolve('nodiscard', 'm0.2/phase-07-anything'), null);
-  assert.equal(
-    resolver.resolve('../m9.9/phase-99-does-not-exist', 'm0.1/phase-01-window-surface'),
-    null
-  );
-}
-console.log('wikilink-resolver OK');
-
-console.log('== mdast-wikilinks plugin (compile assertions) ==');
-{
-  const base = '/interstellar-website';
-  const resolver = createWikilinkResolver({
-    base,
-    technicalRoot: path.join(REPO_ROOT, 'technical'),
-  });
-  const plugin = createWikilinkPlugin({ resolve: resolver.resolve });
-
-  // Labelled wikilink compiles to an anchor carrying the resolved href and the label as its text.
-  {
-    const source = 'See the [[m0.1/phase-01-window-surface|window surface post]] for detail.';
-    const result = markdownToHtml(source, {
-      mdastPlugins: [plugin],
-      fileURL: pathToFileURL(path.join(REPO_ROOT, 'technical/m0.2/phase-07-anything.md')),
-    });
-    assert.match(
-      result.html,
-      /<a href="\/interstellar-website\/technical\/m0\.1\/phase-01-window-surface\/">window surface post<\/a>/
-    );
-  }
-
-  // Fenced C++ code containing [[nodiscard]] compiles unchanged, no anchor produced.
-  {
-    const source = '```cpp\n[[nodiscard]] inline int foo();\n```\n';
-    const result = markdownToHtml(source, { mdastPlugins: [plugin] });
-    assert.match(result.html, /\[\[nodiscard\]\]/);
-    assert.doesNotMatch(result.html, /<a /);
-  }
-
-  // Inline backtick-wrapped [[nodiscard]] also survives untouched.
-  {
-    const source = 'Mark it `[[nodiscard]]` in the header.';
-    const result = markdownToHtml(source, { mdastPlugins: [plugin] });
-    assert.match(result.html, /\[\[nodiscard\]\]/);
-    assert.doesNotMatch(result.html, /<a /);
-  }
-
-  // Unresolvable target throws naming both the file and the bracketed text.
-  {
-    const source = 'Dangling [[m9.9/phase-99-does-not-exist]] link.';
-    let threw = false;
-    try {
-      markdownToHtml(source, {
-        mdastPlugins: [plugin],
-        fileURL: pathToFileURL(path.join(REPO_ROOT, 'technical/m0.1/phase-01-window-surface.md')),
-      });
-    } catch (err) {
-      threw = true;
-      assert.match(err.message, /phase-01-window-surface\.md/);
-      assert.match(err.message, /m9\.9\/phase-99-does-not-exist/);
-    }
-    assert.ok(threw, 'expected an unresolvable wikilink target to throw');
-  }
-
-  // A text node with no bracket pair is left structurally untouched.
-  {
-    const source = 'Plain prose with no brackets at all.';
-    const result = markdownToHtml(source, { mdastPlugins: [plugin] });
-    assert.match(result.html, /Plain prose with no brackets at all\./);
-  }
-}
-console.log('mdast-wikilinks plugin OK');
 
 console.log('== describe-entry ==');
 // D-51: the first block that is not chrome. The H1, a leading hero image, the

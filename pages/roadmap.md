@@ -10,10 +10,7 @@ The engine is being built one milestone at a time. This page tracks the
 arc: Era 0 — engine foundations (done) → Era 1 — first gameplay (in
 progress) → Era 2 — Early Access MVP → Era 3+ — career & story.
 
-Every milestone gets its own devblog announcement here. Every phase
-inside it gets a technical deep-dive in the Technical section. New to
-the era/milestone/phase hierarchy? The How to Read page in the
-Technical section explains it.
+Every milestone gets its own devblog announcement here.
 
 ## Era 0 — engine foundations ✅
 

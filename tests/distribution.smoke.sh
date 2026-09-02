@@ -151,16 +151,18 @@ fi
 echo "card images OK (3 distinct, default card $DEFAULT_CARD_DIMENSIONS)"
 
 echo "== DIST-02: descriptions are not collapsed onto shared boilerplate =="
-# The 55 deep-dives all open with an identical blockquote; if the extractor ever
-# stopped skipping it they would collapse onto one sentence while every
-# per-page assertion above still passed.
+# If the extractor ever stopped skipping a shared leading blockquote/heading,
+# every page's description would collapse onto one sentence while every
+# per-page assertion above still passed -- guard relative to the actual page
+# count so a new content drop can never turn this red on its own.
+TOTAL_PAGES=$(find dist -name "*.html" | wc -l)
 DISTINCT_DESCRIPTIONS=$(grep -rho '<meta name="description" content="[^"]*"' dist --include='*.html' \
   | sed -E 's/.*content="([^"]*)".*/\1/' | sort -u | wc -l)
-if [ "$DISTINCT_DESCRIPTIONS" -le 60 ]; then
-  echo "FAIL: only $DISTINCT_DESCRIPTIONS distinct description values across the site (expected more than 60)"
+if [ "$DISTINCT_DESCRIPTIONS" -le "$((TOTAL_PAGES / 2))" ]; then
+  echo "FAIL: only $DISTINCT_DESCRIPTIONS distinct description values across $TOTAL_PAGES pages (expected more than half distinct)"
   exit 1
 fi
-echo "description variety OK ($DISTINCT_DESCRIPTIONS distinct values)"
+echo "description variety OK ($DISTINCT_DESCRIPTIONS distinct values across $TOTAL_PAGES pages)"
 
 echo "== DIST-03: CTA placements and feed autodiscovery on every built page =="
 CTA_FAIL=0
@@ -382,7 +384,7 @@ grep -q "2026-07-10-warping-without-losing-the-moon" /tmp/gsd-dist-d48-unresolve
 grep -q "og-default.svg" /tmp/gsd-dist-d48-unresolved.log
 cp "$HERO_BACKUP" "$HERO_FILE"
 
-if git status --porcelain devlog/ technical/ roadmap/ pages/ | grep -q .; then
+if git status --porcelain devlog/ roadmap/ pages/ | grep -q .; then
   echo "D-48 FIXTURE FAIL: a content tree was left dirty"
   exit 1
 fi
@@ -393,7 +395,7 @@ SITE_LIB="src/lib/site.mjs"
 # Snapshot, don't demand emptiness: the fixture must leave the trees exactly
 # as it found them, but a set-and-not-yet-committed GOATCOUNTER_CODE (the
 # D-61 post-signup state) is legitimate src/ dirt, not fixture damage.
-PRE_FIXTURE_STATUS=$(git status --porcelain devlog/ technical/ roadmap/ pages/ src/)
+PRE_FIXTURE_STATUS=$(git status --porcelain devlog/ roadmap/ pages/ src/)
 SITE_LIB_BACKUP=$(mktemp)
 cp "$SITE_LIB" "$SITE_LIB_BACKUP"
 INVITE_PLACEHOLDER=$(grep -oP "^export const INVITE_PLACEHOLDER = '\K[^']+" "$SITE_LIB")
@@ -416,7 +418,7 @@ for BAD_INVITE in "" "   " "$INVITE_PLACEHOLDER"; do
   fi
 done
 cp "$SITE_LIB_BACKUP" "$SITE_LIB"
-if [ "$(git status --porcelain devlog/ technical/ roadmap/ pages/ src/)" != "$PRE_FIXTURE_STATUS" ]; then
+if [ "$(git status --porcelain devlog/ roadmap/ pages/ src/)" != "$PRE_FIXTURE_STATUS" ]; then
   echo "D-54 FIXTURE FAIL: a tree was left in a different state than the fixture found it"
   exit 1
 fi
@@ -447,7 +449,7 @@ if [ "$DRAFT_ARCHIVE" -ne $((BASELINE_ARCHIVE - 1)) ]; then
 fi
 cp "$DRAFT_BACKUP" "$DRAFT_FILE"
 [ "$DRAFT_LEAK" -eq 0 ]
-if git status --porcelain devlog/ technical/ roadmap/ pages/ | grep -q .; then
+if git status --porcelain devlog/ roadmap/ pages/ | grep -q .; then
   echo "D-30 FIXTURE FAIL: a content tree was left dirty"
   exit 1
 fi
@@ -458,7 +460,7 @@ rm -f "$HERO_BACKUP" "$SITE_LIB_BACKUP" "$DRAFT_BACKUP"
 
 echo "== Final clean rebuild after all fixtures restored =="
 npm run build
-if [ "$(git status --porcelain devlog/ technical/ roadmap/ pages/ src/)" != "$PRE_FIXTURE_STATUS" ]; then
+if [ "$(git status --porcelain devlog/ roadmap/ pages/ src/)" != "$PRE_FIXTURE_STATUS" ]; then
   echo "FAIL: trees not restored to their pre-fixture state after the full fixture run"
   exit 1
 fi

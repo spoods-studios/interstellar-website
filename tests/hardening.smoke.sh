@@ -94,9 +94,7 @@ echo "SHA tracking OK"
 # every schema/content error class is already a loud build failure, each with
 # an owning decision -- frontmatter schema violations (this fixture; Zod enum
 # via parseData, which sits OUTSIDE the glob loader's try/catch), filename
-# violations (D-10 devlog, D-33 technical, D-38 roadmap: generateId throws),
-# render-time wikilink/deep-dive placeholder failures (D-39: the config-load
-# preflight re-runs the full mdast pipeline and crashes the process), empty
+# violations (D-10 devlog, D-38 roadmap: generateId throws), empty
 # collections (assertNonEmpty at every query site), missing body heroes
 # (D-48: lookupHero throws; Astro's ImageNotFound fires upstream), and an
 # unset/blank/placeholder invite constant (D-54: config-load assert).
