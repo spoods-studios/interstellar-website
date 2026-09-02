@@ -105,48 +105,6 @@ checkpoint payload owed to the peer this phase is on disk in their
 coordination file (or explicitly still owed, with the peer notified). Don't
 leave owed state only in message history.
 
-**3e. Phase technical devlog — flagged phases only: draft → user accepts → post.**
-
-<!-- ⛔ LOCKED STEP — user decision 2026-09-02, studio Decision Log [D-BL]
-     (supersedes [D-AJ]'s every-phase rule; [D-Z] flow unchanged). Never
-     remove, skip, or trim this step when editing this file. Removing or
-     weakening it requires a superseding studio Decision Log entry. -->
-
-Check the phase's ROADMAP entry for a `**Devlog**: yes` line (user-set at
-milestone open, D-BL; addable mid-milestone by editing ROADMAP). No line →
-this step is complete; publish nothing. Line present → publish the deep-dive
-to BOTH targets — Discord `#technical-devlog` AND the website. The only legal
-skip for a flagged phase is an explicit user deferral recorded in the phase
-SUMMARY.
-
-1. **Draft** the deep-dive master:
-   - Phase coupled to an engine milestone (Step 1b manifest):
-     `../studio/vault/devlog/technical/m{X.Y}/website-phase-{N}-{slug}.md`
-   - Uncoupled: `../studio/vault/devlog/technical/website/phase-{N}-{slug}.md`
-   Register is strict code-only (studio D-P), VOICE.md rules 10–12 apply;
-   match the structure of existing posts under `technical/`.
-2. **User accepts** — present the draft via AskUserQuestion:
-   "Accept" / "Revise — describe" / "Defer — reason". Iterate on Revise.
-   NEVER post an unaccepted draft.
-3. **Post to both targets** (only after acceptance):
-   - **Discord:** full procedure in `../studio/vault/devlog/discord/POSTING.md` —
-     regenerate the `.discord.md` export via `md2discordmd.py` (never hand-edit),
-     post-body ≤ 2000 chars, run the full pre-post lint set. Title carries the
-     repo name (e.g. `M1.3 Assets Phase 3 — Packaging Adapter`); one tag — the
-     coupled engine-milestone tag, or the nearest org-milestone tag if uncoupled.
-   - **Website:** copy the master to `../interstellar-website/technical/` at the
-     same relative path, commit + push
-     (`feat(devlog): publish {milestone} website phase {N} deep-dive`).
-     If the post lands in a milestone dir `m{X.Y}/` and
-     `../interstellar-website/roadmap/M{X.Y}.md` does not exist, seed the
-     in-progress stub (H1 + `**Era:** …` line) in the same push — without it
-     the technical index groups the milestone under "Unmapped era".
-4. **Record disposition** in the phase's SUMMARY file(s) under a `## Devlog`
-   heading: master path, accepted date, Discord post title, website commit SHA —
-   or `deferred: {user's reason}` on explicit user say-so. A deferral is a named
-   carry-over: the next /website-implement run MUST surface it and fold
-   it in.
-
 ## Step 4 — Return to human
 
 Short report: what was built, requirements addressed, commits made,
