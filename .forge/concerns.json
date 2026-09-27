@@ -175,6 +175,22 @@
         "src/lib/title-from-h1.ts:4"
       ],
       "status": "open"
+    },
+    {
+      "id": "C-14",
+      "area": "testing",
+      "files": [
+        "tests/build.smoke.sh",
+        "devlog/2026-04-07-why-im-building-a-hyperrealistic-space-sim.md",
+        ".forge/TESTING.md"
+      ],
+      "severity": "medium",
+      "evidence": [
+        "tests/build.smoke.sh:13",
+        "devlog/2026-04-07-why-im-building-a-hyperrealistic-space-sim.md:1",
+        ".forge/TESTING.md:25"
+      ],
+      "status": "open"
     }
   ]
 }

@@ -7,9 +7,10 @@ Tests that bind ports add `FORGE_PORT_OFFSET` to their base port and tests that 
 ## Layout
 
 - `tests/lib.smoke.mjs`: committed assertion script for pure `src/lib/*.ts` helpers, run directly with `node`.
-- `tests/*.smoke.sh`: shell smoke scripts, each doing a clean `npm run build` and asserting against `dist/` output (canonical links, sitemap, favicon, no stray scripts, dead links, page-count, build-sha stamp, analytics gating, redirect stub contract, schema-violation fixture).
+- `tests/*.smoke.sh`: shell smoke scripts, each doing a clean `npm run build` and asserting against `dist/` output (build, collections, distribution, hardening, markdown, post, roadmap, shell, site).
 - `tests/run-all.sh`: runs `node tests/lib.smoke.mjs` then every `tests/*.smoke.sh` in sorted order; adding a new smoke script needs no harness edit.
-- `tests/live-probe.sh`: probes the deployed GitHub Pages site after deploy (not run locally as part of `npm test`).
+- `tests/live-probe.sh`: probes the deployed GitHub Pages site after deploy, not run locally as part of `npm test`.
+- `tests/hardening.smoke.sh` mutates the working tree with fixtures and does full rebuilds.
 
 ## Commands
 
@@ -17,9 +18,5 @@ Tests that bind ports add `FORGE_PORT_OFFSET` to their base port and tests that 
 
 ## Gates
 
-- `.github/workflows/deploy.yml`: `build` (via `withastro/action`) then `deploy` to GitHub Pages on every push to `main`, then a `smoke` job that runs `tests/live-probe.sh` against the live URL.
-- `tests/*.smoke.sh` and `tests/lib.smoke.mjs` are not run in CI; they are local-only harnesses (`tests/hardening.smoke.sh` mutates the working tree with fixtures and does full rebuilds, deliberately kept out of the push-gated pipeline).
-
-## Known failures
-
-- On `main` as of 2026-09-27, `tests/build.smoke.sh`, `collections.smoke.sh`, `post.smoke.sh` and `roadmap.smoke.sh` fail (build.smoke.sh at its manifesto-title assertion), so `npm test` stops at build.smoke.sh; `lib.smoke.mjs` and the other five smoke scripts pass.
+- `.github/workflows/deploy.yml`: `build` job (`withastro/action`) then `deploy` to GitHub Pages on every push to `main`, then a `smoke` job that runs `tests/live-probe.sh` against the live `page_url`.
+- `tests/*.smoke.sh` and `tests/lib.smoke.mjs` are not run in CI; they are local-only harnesses.
