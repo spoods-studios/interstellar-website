@@ -19,8 +19,7 @@ before then.
 
 | Skill | What it does |
 |---|---|
-| `/website-start` | Auto-fires on the first turn of any session here. Reads `vault/context.md` + `vault/conventions.md`, checks `vault/decisions/` for recent entries, surfaces git status and `.forge/archive/gsd/STATE.md`, prints a compact briefing. |
-| `/website-end [--discard]` | Session close — appends `vault/learnings/sessions.md`, captures any gray-area decision to `vault/decisions/`, stamps the org status board (`../studio/vault/project/repo-status.md`, D-AA), commits (no push). `--discard` skips all writes. |
+| forge (`/forge-new`, `/forge-quick`, `/forge-fast`) | Planned and ad-hoc work in this repo. `CLAUDE.md` routes to the `.forge/` docs. |
 | `gsd-*` phase-loop ceremonies | Live since v1.0 bootstrap (2026-07-13). Used for site build-out milestones only — content promotion never runs through GSD. |
 
 ## Lifecycle & gate tier
@@ -65,8 +64,7 @@ work (Era 2 press kit, feature changes).
 | A devlog post needs publishing | Copy the accepted master in, commit, push — deploy is automatic. Verify the smoke job stays green. |
 | Broken page / red smoke job | Fix now — this is the only t3 state that blocks everything else. |
 | Era 2 opens (press kit slice) | `gsd-new-milestone` from the Era-2 org manifest's website slice. |
-| Session ending | `/website-end` (or `--discard` for purely exploratory sessions). |
-| Unsure | Read `../studio/RUNBOOK.md`; live org state: `../studio/vault/project/repo-status.md`. |
+| Unsure | Read `../RUNBOOK.md`; live org state: `../vault/project/repo-status.md`. |
 
 ## Git workflow (forge — D-BJ/D-BK)
 
@@ -76,13 +74,13 @@ the one exception to the org's tag-only mirror: `.forgejo/workflows/release.yml`
 mirrors **every** `main` push to GitHub, where `deploy.yml` publishes Pages —
 so "commit + push = deploy" still holds, and a manual `git push github main`
 is never needed. Issues live on the forge. Full rules:
-`../studio/vault/project/git-forge-workflow.md`.
+`../vault/project/git-forge-workflow.md`.
 
 ## Org context
 
-- `../studio/RUNBOOK.md` — org-wide skill catalog + current state
-- `../studio/vault/project/repo-status.md` — live org status board (D-AA)
-- `../studio/vault/project/milestones/m1.x/manifest.md` — this repo's m1.x slice (closed)
-- `../studio/vault/project/gate-tiers.md` — full tier definitions (this repo is t3)
-- `../studio/vault/devlog/discord/POSTING.md` — Discord half of the dual-post flow
+- `../RUNBOOK.md` — org-wide skill catalog + current state
+- `../vault/project/repo-status.md` — live org status board (D-AA)
+- `../vault/project/milestones/m1.x/manifest.md` — this repo's m1.x slice (closed)
+- `../vault/project/gate-tiers.md` — full tier definitions (this repo is t3)
+- `../vault/devlog/discord/POSTING.md` — Discord half of the dual-post flow
 - Standing obligations auto-surface at every session start via the SessionStart hook.
