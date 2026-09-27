@@ -6,6 +6,16 @@ Tests that bind ports add `FORGE_PORT_OFFSET` to their base port and tests that 
 
 ## Layout
 
+Shell smoke tests in `tests/*.smoke.sh` plus `tests/lib.smoke.mjs`, run by `tests/run-all.sh`. `tests/live-probe.sh` probes the deployed site.
+
 ## Commands
 
+- `npm test` runs `bash tests/run-all.sh`.
+
 ## Gates
+
+- `deploy.yml` runs a post-deploy live-probe smoke job (homepage, feed, launch post, 404-under-base, redirect stub).
+
+## Known failures
+
+These already fail on `main` before the forge migration: `tests/build.smoke.sh`, `tests/collections.smoke.sh`, `tests/post.smoke.sh`, `tests/roadmap.smoke.sh`.
