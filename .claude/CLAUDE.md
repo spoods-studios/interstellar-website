@@ -17,7 +17,7 @@ M1.1 close.
 ### Constraints
 
 - **Gate tier**: T3 (standard review/checklist per
-  `../studio/vault/project/gate-tiers.md`) — bugs/broken pages block, cosmetic
+  `../vault/project/gate-tiers.md`) — bugs/broken pages block, cosmetic
   nits don't. No multi-vendor grid, no playtest.
 
 - **Timeline**: Live by engine M1.1 close — the engine milestone is the clock;
@@ -139,16 +139,6 @@ Conventions not yet established. Will populate as patterns emerge during develop
 
 Architecture not yet mapped. Follow existing patterns found in the codebase.
 <!-- GSD:architecture-end -->
-
-<!-- GSD:skills-start source:skills/ -->
-
-## Project Skills
-
-| Skill | Description | Path |
-|-------|-------------|------|
-| website-end | Close a session in the Official website, devblog, press kit, and community hub repo — append a dated entry to vault/learnings/sessions.md, capture any gray-area decision to vault/decisions/, and commit the working tree with a conventional-commit message (no push). Use --discard to skip all writes. | `.claude/skills/website-end/SKILL.md` |
-| website-start | Session-resume skill for the Official website, devblog, press kit, and community hub repo (dormant stub). Auto-fires on the first user turn in this repo. Reads vault/context.md + vault/conventions.md, checks vault/decisions/ for recent entries, surfaces git status and GSD phase state, and prints a compact briefing. | `.claude/skills/website-start/SKILL.md` |
-<!-- GSD:skills-end -->
 
 <!-- GSD:workflow-start source:GSD defaults -->
 
