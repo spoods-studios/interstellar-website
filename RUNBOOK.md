@@ -19,7 +19,7 @@ before then.
 
 | Skill | What it does |
 |---|---|
-| `/website-start` | Auto-fires on the first turn of any session here. Reads `vault/context.md` + `vault/conventions.md`, checks `vault/decisions/` for recent entries, surfaces git status and `.planning/STATE.md`, prints a compact briefing. |
+| `/website-start` | Auto-fires on the first turn of any session here. Reads `vault/context.md` + `vault/conventions.md`, checks `vault/decisions/` for recent entries, surfaces git status and `.forge/archive/gsd/STATE.md`, prints a compact briefing. |
 | `/website-end [--discard]` | Session close — appends `vault/learnings/sessions.md`, captures any gray-area decision to `vault/decisions/`, stamps the org status board (`../studio/vault/project/repo-status.md`, D-AA), commits (no push). `--discard` skips all writes. |
 | `gsd-*` phase-loop ceremonies | Live since v1.0 bootstrap (2026-07-13). Used for site build-out milestones only — content promotion never runs through GSD. |
 
@@ -56,7 +56,7 @@ work (Era 2 press kit, feature changes).
   live-certified — needs signup → `GOATCOUNTER_CODE` in `src/lib/site.mjs` →
   push → confirm dashboard records (incl. 404 traffic per D-62).
 - Nyquist VALIDATION.md for Phases 3–4 left `draft` — coverage TODO.
-- Full audit: `.planning/MILESTONES.md` + `milestones/v1.0-MILESTONE-AUDIT.md`.
+- Full audit: `.forge/archive/gsd/MILESTONES.md` + `milestones/v1.0-MILESTONE-AUDIT.md`.
 
 ## What do I do next?
 

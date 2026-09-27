@@ -3,7 +3,7 @@
 Audit record for the manual, in-repo promote of every piece of locked studio
 content for closed milestones M0.1–M0.8 (Phase 2, Plan 01 — D-25, D-43). This
 repo hosts no promote automation; that remains a studio-side concern per
-`.planning/REQUIREMENTS.md` ("Out of Scope"). This file is the record of what
+`.forge/archive/gsd/REQUIREMENTS.md` ("Out of Scope"). This file is the record of what
 was copied, from where, and why anything named here was excluded.
 
 ## devlog/ — milestone announcements
