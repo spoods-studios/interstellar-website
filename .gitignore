@@ -4,3 +4,4 @@ dist/
 
 # machine-local Claude permission state — never shared
 .claude/settings.local.json
+.serena/
