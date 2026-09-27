@@ -19,3 +19,7 @@ Tests that bind ports add `FORGE_PORT_OFFSET` to their base port and tests that 
 
 - `.github/workflows/deploy.yml`: `build` (via `withastro/action`) then `deploy` to GitHub Pages on every push to `main`, then a `smoke` job that runs `tests/live-probe.sh` against the live URL.
 - `tests/*.smoke.sh` and `tests/lib.smoke.mjs` are not run in CI; they are local-only harnesses (`tests/hardening.smoke.sh` mutates the working tree with fixtures and does full rebuilds, deliberately kept out of the push-gated pipeline).
+
+## Known failures
+
+- On `main` as of 2026-09-27, `tests/build.smoke.sh`, `collections.smoke.sh`, `post.smoke.sh` and `roadmap.smoke.sh` fail (build.smoke.sh at its manifesto-title assertion), so `npm test` stops at build.smoke.sh; `lib.smoke.mjs` and the other five smoke scripts pass.
