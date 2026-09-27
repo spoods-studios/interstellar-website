@@ -20,6 +20,6 @@ GoatCounter live-cert deferred (D-61).
 
 ## History
 Activated 2026-07-13 (m1.x open, D-I); v1.0 built over 4 GSD phases and
-closed 2026-08-11 — see `.planning/MILESTONES.md` and RUNBOOK.md for the
+closed 2026-08-11 — see `.forge/archive/gsd/MILESTONES.md` and RUNBOOK.md for the
 delivered scope and publish invariants (permanent URLs, SLUG_REDIRECTS,
 smoke-job discipline).
