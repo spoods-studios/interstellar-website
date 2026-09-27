@@ -6,7 +6,10 @@ Tests that bind ports add `FORGE_PORT_OFFSET` to their base port and tests that 
 
 ## Layout
 
-Shell smoke tests in `tests/*.smoke.sh` plus `tests/lib.smoke.mjs`, run by `tests/run-all.sh`. `tests/live-probe.sh` probes the deployed site.
+- `tests/lib.smoke.mjs`: committed assertion script for pure `src/lib/*.ts` helpers, run directly with `node`.
+- `tests/*.smoke.sh`: shell smoke scripts, each doing a clean `npm run build` and asserting against `dist/` output (canonical links, sitemap, favicon, no stray scripts, dead links, page-count, build-sha stamp, analytics gating, redirect stub contract, schema-violation fixture).
+- `tests/run-all.sh`: runs `node tests/lib.smoke.mjs` then every `tests/*.smoke.sh` in sorted order; adding a new smoke script needs no harness edit.
+- `tests/live-probe.sh`: probes the deployed GitHub Pages site after deploy (not run locally as part of `npm test`).
 
 ## Commands
 
@@ -14,8 +17,5 @@ Shell smoke tests in `tests/*.smoke.sh` plus `tests/lib.smoke.mjs`, run by `test
 
 ## Gates
 
-- `deploy.yml` runs a post-deploy live-probe smoke job (homepage, feed, launch post, 404-under-base, redirect stub).
-
-## Known failures
-
-These already fail on `main` before the forge migration: `tests/build.smoke.sh`, `tests/collections.smoke.sh`, `tests/post.smoke.sh`, `tests/roadmap.smoke.sh`.
+- `.github/workflows/deploy.yml`: `build` (via `withastro/action`) then `deploy` to GitHub Pages on every push to `main`, then a `smoke` job that runs `tests/live-probe.sh` against the live URL.
+- `tests/*.smoke.sh` and `tests/lib.smoke.mjs` are not run in CI; they are local-only harnesses (`tests/hardening.smoke.sh` mutates the working tree with fixtures and does full rebuilds, deliberately kept out of the push-gated pipeline).

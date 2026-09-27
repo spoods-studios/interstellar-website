@@ -1,0 +1,180 @@
+{
+  "concerns": [
+    {
+      "id": "C-01",
+      "area": "content-collections",
+      "files": [
+        "src/content.config.ts",
+        "src/lib/content-guards.ts",
+        "src/pages/roadmap/index.astro",
+        "src/pages/roadmap/[milestone].astro",
+        "roadmap/M1.3.md"
+      ],
+      "severity": "medium",
+      "evidence": [
+        "src/content.config.ts:54",
+        "src/lib/content-guards.ts:15",
+        "src/pages/roadmap/index.astro:30",
+        "src/pages/roadmap/[milestone].astro:17",
+        "roadmap/M1.3.md:3"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "C-02",
+      "area": "description-extraction",
+      "files": [
+        "src/lib/describe-entry.ts"
+      ],
+      "severity": "low",
+      "evidence": [
+        "src/lib/describe-entry.ts:6"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "C-03",
+      "area": "hero-images",
+      "files": [
+        "src/lib/hero-assets.ts"
+      ],
+      "severity": "medium",
+      "evidence": [
+        "src/lib/hero-assets.ts:24",
+        "src/lib/hero-image.ts:27"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "C-04",
+      "area": "rss-feed",
+      "files": [
+        "src/pages/rss.xml.ts"
+      ],
+      "severity": "low",
+      "evidence": [
+        "src/pages/rss.xml.ts:49"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "C-05",
+      "area": "build-tooling",
+      "files": [
+        "package.json"
+      ],
+      "severity": "low",
+      "evidence": [
+        "package.json:9"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "C-06",
+      "area": "rss-feed",
+      "files": [
+        "src/pages/rss.xml.ts",
+        "tests/distribution.smoke.sh"
+      ],
+      "severity": "medium",
+      "evidence": [
+        "src/pages/rss.xml.ts:33",
+        "tests/distribution.smoke.sh:323"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "C-07",
+      "area": "assets",
+      "files": [
+        "src/assets/og-default.svg",
+        "src/lib/site.mjs"
+      ],
+      "severity": "low",
+      "evidence": [
+        "src/lib/site.mjs:41"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "C-08",
+      "area": "testing",
+      "files": [
+        "tests/build.smoke.sh",
+        "tests/collections.smoke.sh",
+        "tests/post.smoke.sh",
+        "tests/roadmap.smoke.sh",
+        ".forge/TESTING.md"
+      ],
+      "severity": "medium",
+      "evidence": [
+        ".forge/TESTING.md:21"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "C-09",
+      "area": "deploy-probe",
+      "files": [
+        "tests/live-probe.sh",
+        ".github/workflows/deploy.yml"
+      ],
+      "severity": "medium",
+      "evidence": [
+        "tests/live-probe.sh:67",
+        "tests/live-probe.sh:82",
+        "tests/live-probe.sh:88",
+        ".github/workflows/deploy.yml:39"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "C-10",
+      "area": "analytics",
+      "files": [
+        "src/layouts/BaseLayout.astro"
+      ],
+      "severity": "low",
+      "evidence": [
+        "src/layouts/BaseLayout.astro:90"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "C-11",
+      "area": "analytics",
+      "files": [
+        "src/lib/site.mjs"
+      ],
+      "severity": "low",
+      "evidence": [
+        "src/lib/site.mjs:78"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "C-12",
+      "area": "deploy-workflow",
+      "files": [
+        ".github/workflows/deploy.yml"
+      ],
+      "severity": "low",
+      "evidence": [
+        ".github/workflows/deploy.yml:39"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "C-13",
+      "area": "title-extraction",
+      "files": [
+        "src/lib/title-from-h1.ts"
+      ],
+      "severity": "low",
+      "evidence": [
+        "src/lib/title-from-h1.ts:4"
+      ],
+      "status": "open"
+    }
+  ]
+}
