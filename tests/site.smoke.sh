@@ -141,7 +141,7 @@ while IFS= read -r f; do
   if is_redirect_stub "$f"; then continue; fi
   ACTUAL_PAGES=$((ACTUAL_PAGES + 1))
 done < <(find dist -name "*.html")
-if [ "$ACTUAL_PAGES" -ne "$EXPECTED_PAGES" ]; then
+if ! [ "$ACTUAL_PAGES" -eq "$EXPECTED_PAGES" ]; then
   echo "FAIL: expected $EXPECTED_PAGES built reader-facing HTML pages, found $ACTUAL_PAGES"
   exit 1
 fi

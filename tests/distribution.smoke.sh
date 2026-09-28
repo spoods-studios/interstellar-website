@@ -130,7 +130,7 @@ EXPECTED_IMAGE_COUNT=$(node tests/helpers/content-expectations.mjs og_image_coun
 DISTINCT_IMAGES=$(grep -rho '<meta property="og:image" content="[^"]*"' dist --include='*.html' \
   | sed -E 's/.*content="([^"]*)".*/\1/' | sort -u)
 DISTINCT_IMAGE_COUNT=$(printf '%s\n' "$DISTINCT_IMAGES" | wc -l)
-if [ "$DISTINCT_IMAGE_COUNT" -ne "$EXPECTED_IMAGE_COUNT" ]; then
+if ! [ "$DISTINCT_IMAGE_COUNT" -eq "$EXPECTED_IMAGE_COUNT" ]; then
   echo "FAIL: expected $EXPECTED_IMAGE_COUNT distinct og:image values (default card + per-post heroes), found $DISTINCT_IMAGE_COUNT"
   printf '%s\n' "$DISTINCT_IMAGES"
   exit 1
@@ -310,7 +310,7 @@ echo "== DIST-01: content fidelity -- absolutized images, no second-parse artifa
 # quote would pass vacuously forever.
 EXPECTED_HERO_URLS=$(node tests/helpers/content-expectations.mjs devlog_hero_count)
 HERO_URLS=$(grep -o "${SITE}[^&\"]*_astro/[^&\"]*\.webp" dist/rss.xml | wc -l)
-if [ "$HERO_URLS" -ne "$EXPECTED_HERO_URLS" ]; then
+if ! [ "$HERO_URLS" -eq "$EXPECTED_HERO_URLS" ]; then
   echo "FAIL: expected $EXPECTED_HERO_URLS absolute hero image URLs in the feed, found $HERO_URLS"
   exit 1
 fi
