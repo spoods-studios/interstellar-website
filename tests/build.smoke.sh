@@ -10,7 +10,7 @@ cd "$(dirname "$0")/.."
 echo "== Positive check: manifesto ingests and renders =="
 npm run build
 grep -q "Devblog" dist/index.html
-grep -q "Why I'm Building a Hyperrealistic Space Sim from Scratch" dist/index.html
+grep -q "Why I'm Building a Hyper-realistic Space Sim from Scratch" dist/index.html
 # Plan 05 switched the meta line from the throwaway page's raw ISO date to
 # formatDate()'s long-form rendering (matches the post route's meta line).
 grep -q "April 7, 2026" dist/index.html
