@@ -211,7 +211,7 @@ function main() {
     console.error(`content-expectations: unrecognised key '${key ?? ''}' -- valid keys: ${validKeys}`);
     process.exit(1);
   }
-  console.log(values[key]);
+  console.log(String(values[key]));
 }
 
 main();
