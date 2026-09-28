@@ -110,7 +110,7 @@
       "evidence": [
         ".forge/TESTING.md:21"
       ],
-      "status": "open"
+      "status": "resolved"
     },
     {
       "id": "C-09",
@@ -190,7 +190,7 @@
         "devlog/2026-04-07-why-im-building-a-hyperrealistic-space-sim.md:1",
         ".forge/TESTING.md:25"
       ],
-      "status": "open"
+      "status": "resolved"
     }
   ]
 }
