@@ -5,6 +5,8 @@
 // Architecture) -- plain top-level assertions mirroring tests/build.smoke.sh's
 // committed-script precedent.
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 import { normalizeMilestone, milestoneSortKey } from '../src/lib/milestone-key.ts';
 import { titleFromH1 } from '../src/lib/title-from-h1.ts';
@@ -251,5 +253,15 @@ assert.equal(heroBasename('m0.7-hero-contrast.png'), 'm0.7-hero-contrast.png');
   assert.throws(() => lookupHero(new Map(), '../assets/m0.7-hero-contrast.png', 'devlog/x'), /m0\.7-hero-contrast\.png/);
 }
 console.log('hero-image OK');
+
+console.log('== content-expectations ==');
+{
+  const helper = fileURLToPath(new URL('./helpers/content-expectations.mjs', import.meta.url));
+  for (const key of ['devlog_count', 'roadmap_count', 'pages_count', 'site_page_count', 'og_image_count', 'devlog_hero_count']) {
+    const out = execFileSync('node', [helper, key], { env: { ...process.env, FORCE_COLOR: '3' }, encoding: 'utf8' });
+    assert.match(out, /^\d+\n$/, key);
+  }
+}
+console.log('content-expectations OK');
 
 console.log('ALL CHECKS PASSED');
