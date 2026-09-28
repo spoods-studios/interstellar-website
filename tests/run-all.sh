@@ -7,9 +7,12 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-node tests/lib.smoke.mjs
+[ $# -gt 0 ] || set -- tests/lib.smoke.mjs tests/*.smoke.sh
 
-for script in tests/*.smoke.sh; do
+for script in "$@"; do
   echo "== running $script =="
-  bash "$script"
+  case $script in
+    *.mjs) node "$script" ;;
+    *) bash "$script" ;;
+  esac
 done
