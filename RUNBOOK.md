@@ -66,7 +66,7 @@ feature work is only for real site work (Era 2 press kit, feature changes).
 | Broken page / red smoke job | Fix now — this is the only t3 state that blocks everything else. |
 | Era 2 opens (press kit) | `/forge-new` at the workspace root opens the track and adds the website feature; then `/forge-discuss` here, `/forge-phase` per phase, `/forge-verify`, `/forge-ship`. |
 | Small site fix | `/forge-quick` or `/forge-fast`. |
-| Unsure | Read `../RUNBOOK.md`; live org state: `../vault/project/repo-status.md`. |
+| Unsure | Read `../RUNBOOK.md`; live org state: `../.forge/STATE.md`. |
 
 ## Git workflow (forge — D-BJ/D-BK)
 
@@ -76,13 +76,12 @@ the one exception to the org's tag-only mirror: `.forgejo/workflows/release.yml`
 mirrors **every** `main` push to GitHub, where `deploy.yml` publishes Pages —
 so "commit + push = deploy" still holds, and a manual `git push github main`
 is never needed. Issues live on the forge. Full rules:
-`../vault/project/git-forge-workflow.md`.
+`../.forge/docs/git-forge-workflow.md`.
 
 ## Org context
 
 - `../RUNBOOK.md` — org-wide skill catalog + current state
-- `../vault/project/repo-status.md` — live org status board (D-AA)
-- `../vault/project/milestones/m1.x/manifest.md` — this repo's m1.x slice (closed; the org manifest machinery is retired, kept as history)
-- `../vault/project/gate-tiers.md` — full tier definitions (this repo is t3)
+- `../.forge/docs/milestones/m1.x/manifest.md` — this repo's m1.x slice (closed; the org manifest machinery is retired, kept as history)
+- `../.forge/docs/gate-tiers.md` — full tier definitions (this repo is t3)
 - `../vault/devlog/discord/POSTING.md` — Discord half of the dual-post flow
 - No hook surfaces obligations: this repo's `.claude/settings.json` is `{}` and the user-level settings add no SessionStart hook. Obligation specs live in `../vault/obligations/`; read them there. (Auto-surfacing went with the retired `/studio-milestone open|status|close` machinery.)
