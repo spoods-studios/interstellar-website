@@ -56,7 +56,7 @@ wikilink rewriting (D-33).
 
 ## roadmap/ — per-milestone detail docs
 
-`../vault/project/roadmap-detail/M0.1.md` … `M0.8.md` copied
+`../.forge/docs/roadmap-detail/M0.1.md` … `M0.8.md` copied
 byte-for-byte into repo-root `roadmap/`, filenames unchanged (D-38).
 
 ## pages/ — standalone pages
@@ -73,7 +73,7 @@ byte-for-byte into repo-root `roadmap/`, filenames unchanged (D-38).
 | `../vault/devlog/drafts/how-this-gets-built.md` | `status: skeleton` — unreleased, scheduled after M1.1 close |
 | `../vault/devlog/drafts/m0.8-perturbations.discord.txt` | Not a post — a Discord-format sidecar of `m0.8-perturbations.md` |
 | `../vault/devlog/technical/m1.1/` (5 deep-dives) | Phase 4 content, riding with the M1.1 launch post (D-44) |
-| `../vault/project/roadmap-detail/M1.1.md` | Phase 4 content (D-44) — M1.1 appears on `pages/roadmap.md` as in-progress with no detail page until then |
+| `../.forge/docs/roadmap-detail/M1.1.md` | Phase 4 content (D-44) — M1.1 appears on `pages/roadmap.md` as in-progress with no detail page until then |
 
 ## Scope note
 
@@ -96,5 +96,5 @@ debt-fix addendum) and the M1.2 milestone announcement (pending draft
 acceptance at time of this entry — see git history for its landing commit).
 
 Still pending promote: `roadmap/M1.2.md` — its source
-(`../vault/project/roadmap-detail/M1.2.md`) is a studio close-side
+(`../.forge/docs/roadmap-detail/M1.2.md`) is a studio close-side
 artifact not yet written at the time of this entry.
