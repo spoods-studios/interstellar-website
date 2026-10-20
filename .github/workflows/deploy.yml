@@ -27,7 +27,7 @@ jobs:
           node-version: 22
       - run: sudo apt-get update && sudo apt-get install -y libxml2-utils
       - run: npm ci --ignore-scripts
-      - run: npm test
+      - run: env -u GITHUB_SHA npm test
 
   build:
     needs: test
