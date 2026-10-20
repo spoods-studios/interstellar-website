@@ -25,5 +25,6 @@ Tests that bind ports add `FORGE_PORT_OFFSET` to their base port and tests that 
 
 ## Gates
 
-- `.github/workflows/deploy.yml`: `build` job (`withastro/action`) then `deploy` to GitHub Pages on every push to `main`, then a `smoke` job that runs `tests/live-probe.sh` against the live `page_url`.
+- `.github/workflows/deploy.yml`: `test` job, then `build` job (`withastro/action`), then `deploy` to GitHub Pages, then a `smoke` job that runs `tests/live-probe.sh` against the live `page_url`, on every push to `main`.
 - The GitHub `test` job in `deploy.yml` runs `npm ci --ignore-scripts` then `npm test` (`tests/lib.smoke.mjs` plus every `tests/*.smoke.sh`) before `build`; `build` needs it, so a failing suite skips build, deploy and smoke.
+- `.forgejo/workflows/test.yml`: on every branch push and `pull_request`, runs `npm ci --ignore-scripts` then `npm test` (with `GITHUB_SHA` unset) in a digest-pinned `node:22-bookworm` job container on the `linux-engine` runner; it references no secrets, reports only, and is not in `release.yml`'s mirror `needs:`.
