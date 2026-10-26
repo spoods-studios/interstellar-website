@@ -2,7 +2,7 @@
 title: How It's Made — AI, Tools, and What's Off-Limits
 status: published
 audience: policy-page
-updated: 2026-08-12
+updated: 2026-10-26
 ---
 
 # How It's Made
@@ -35,15 +35,23 @@ rough drafts start AI-assisted. It gives me a base outline of everything, so I h
 
 I understnad the hesitation when someone says they use AI for a project. I too am wary of those kinds of projects. There is a lot of AI slop and vibe-coded apps out there. Like with all tools AI can be abused and misused. I aim to use it in a way that doesn't take away my control over the project, it's vision and direction.
 
-## What AI never does
+## What AI makes, and what stays human
 
-**No generative assets. None.** No AI-generated images, textures, 3D models,
-music, sound effects, or story content — now or planned. When you eventually see
-Earth's terrain or Saturn's rings in this engine, the data underneath comes from
-NASA and USGS spacecraft measurements — real elevation maps, real imagery, real
-ring photometry. 
+**Update, October 2026: I changed my position on generated assets.** When I first
+wrote this page, I said no AI-generated assets, now or planned. The tools have
+improved faster than I expected, and I now use AI to help make textures, 3D models,
+props, concept art, sound effects and marketing images. It lets me build far more
+than I could alone.
 
-I have a very stong opinion on this. AI belongs no where near art, it is a human expression that could never be replicated by a machine. So for anything that has to be drawn or designed or modeled, I will use the other options available to me. Open source data for terrain maps like mentioned above, hiring artists to create logos and assets for me. I will learn blender to hand create assests like command pods and parts. (I probably will just pay someone to do the bulk of it for me, but for the first couple I will try it and record the entire process for visibility).
+The quality bar hasn't moved. I look at every asset myself before it ships, and
+nothing goes in that doesn't hold up. The parts you'll spend the most time looking
+at, like command pods and engines, get finished by hand.
+
+**Music, voice and story stay human.** No AI-generated music, voice acting or story
+content, now or planned. And when you see Earth's terrain or Saturn's rings in this
+engine, the data underneath still comes from NASA and USGS spacecraft measurements:
+real elevation maps, real imagery, real ring photometry.
+
 ## Why the code is trustworthy anyway
 
 Nothing here ships on trust. Three things make that true:
@@ -58,7 +66,7 @@ Nothing here ships on trust. Three things make that true:
 - **Determinism contract.** The core force kernel produces bit-identical results,
   run after run. Changes to it are diffed at the byte level.
 
-So the boundary becomes: AI creates the machinery, humans create the art. I maintain the direction, the planning, the architecture and vision. If you disagree and believe that I shouldn't use AI at all, I totally understand. But by my process, I am able to move much faster, do less grunt work and still come out with a quality product that I control. I am always open to feedback and discussion on this. As with all new technologies, there's a lot we don't know yet about how it will affect us in the future. I will remain transparent about this project as much as possible. 
+So the boundary becomes: AI does the labor, I sign off on everything that ships, and music, voice and story stay human. I maintain the direction, the planning, the architecture and vision. If you disagree and believe that I shouldn't use AI at all, I totally understand. But by my process, I am able to move much faster, do less grunt work and still come out with a quality product that I control. I am always open to feedback and discussion on this. As with all new technologies, there's a lot we don't know yet about how it will affect us in the future. I will remain transparent about this project as much as possible. 
 
 ---
 
