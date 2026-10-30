@@ -150,4 +150,22 @@ for token in \
 done
 grep -qF 'font-display:swap;' <<<"$FLAT_CSS"
 
+echo "== Perf log prints one structured page-load metric =="
+PERF_OUT=$(bash tools/perf-log.sh)
+node -e '
+const out = process.argv[1];
+const lines = out.split("\n").filter((l) => l.length > 0);
+if (lines.length !== 1) throw new Error(`perf log printed ${lines.length} lines: ${out}`);
+const rec = JSON.parse(lines[0]);
+const keys = Object.keys(rec).sort().join(",");
+if (keys !== "at,kind,metric,unit,value") throw new Error(`perf log keys are ${keys}`);
+if (typeof rec.metric !== "string" || rec.metric.length === 0) throw new Error("perf log metric is not a non-empty string");
+if (typeof rec.value !== "number" || !Number.isFinite(rec.value) || rec.value < 0) throw new Error(`perf log value ${rec.value} is not a number >= 0`);
+if (typeof rec.unit !== "string" || rec.unit.length === 0) throw new Error("perf log unit is not a non-empty string");
+if (rec.kind !== "count") throw new Error(`perf log kind is ${rec.kind}`);
+const iso = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
+if (typeof rec.at !== "string" || !iso.test(rec.at) || Number.isNaN(Date.parse(rec.at))) throw new Error(`perf log at ${rec.at} is not an ISO-8601 time`);
+' "$PERF_OUT"
+echo "perf log: $PERF_OUT"
+
 echo "ALL CHECKS PASSED"
