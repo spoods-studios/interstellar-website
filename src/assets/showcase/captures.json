@@ -66,5 +66,23 @@
       "start": 0,
       "end": 359
     }
+  },
+  "terminator": {
+    "script": "photo_match",
+    "lookdev_shot": "lookdev/shots/lookdev.json#terminator",
+    "kind": "still",
+    "captured": "2026-10-30",
+    "build_sha": "2939cd644f72eb1f731db9980319c0f8632ad476",
+    "gpu": "AMD Radeon RX 7700S (RADV NAVI33)",
+    "frame": 600
+  },
+  "orbit": {
+    "script": "photo_match",
+    "lookdev_shot": "lookdev/shots/lookdev.json#orbit",
+    "kind": "still",
+    "captured": "2026-10-30",
+    "build_sha": "2939cd644f72eb1f731db9980319c0f8632ad476",
+    "gpu": "AMD Radeon RX 7700S (RADV NAVI33)",
+    "frame": 600
   }
 }
