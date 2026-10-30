@@ -22,9 +22,13 @@ if grep -q 'devlog/' dist/index.html; then
   exit 1
 fi
 
-# No client JS beyond the sanctioned analytics tag (D-60/D-61: the script-tag
-# count must equal the analytics-tag count in either constant state).
-test "$(grep -o '<script' dist/index.html | wc -l)" -eq "$(grep -o 'gc\.zgo\.at' dist/index.html | wc -l)"
+# No client JS beyond the sanctioned analytics tag and the showcase's one
+# hashed motion module (D-60/D-61: the script-tag count must equal the
+# analytics-tag count plus that module in either constant state).
+BASE=$(grep -oP "^const BASE = '\K[^']+" astro.config.mjs)
+NORMALIZED_BASE="${BASE%/}/"
+test "$(grep -o '<script' dist/index.html | wc -l)" -eq "$(( $(grep -o 'gc\.zgo\.at' dist/index.html | wc -l) + 1 ))"
+test "$(grep -oE "<script type=\"module\" src=\"${NORMALIZED_BASE}_astro/[^\"/]+\\.js\"></script>" dist/index.html | wc -l)" -eq 1
 echo "positive check OK"
 
 echo "== Negative check (D-38): malformed roadmap filename fails the build loudly =="
