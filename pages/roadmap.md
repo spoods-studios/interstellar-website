@@ -10,8 +10,6 @@ The engine is being built one milestone at a time. This page tracks the
 arc: Era 0 — engine foundations (done) → Era 1 — first gameplay (in
 progress) → Era 2 — Early Access MVP → Era 3+ — career & story.
 
-Every milestone gets its own devblog announcement here.
-
 ## Era 0 — engine foundations ✅
 
 - **M0.1 Vulkan Bootstrap** ✅ — window → swap chain → first triangle →

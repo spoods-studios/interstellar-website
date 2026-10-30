@@ -94,10 +94,9 @@ echo "SHA tracking OK"
 # every schema/content error class is already a loud build failure, each with
 # an owning decision -- frontmatter schema violations (this fixture; Zod enum
 # via parseData, which sits OUTSIDE the glob loader's try/catch), filename
-# violations (D-10 devlog, D-38 roadmap: generateId throws), empty
-# collections (assertNonEmpty at every query site), missing body heroes
-# (D-48: lookupHero throws; Astro's ImageNotFound fires upstream), and an
-# unset/blank/placeholder invite constant (D-54: config-load assert).
+# violations (D-38 roadmap: generateId throws), empty collections
+# (assertNonEmpty at every query site), and an unset/blank/placeholder invite
+# constant (D-54: config-load assert).
 # Three residual silent classes are ACCEPTED, per the 04-RESEARCH audit:
 #   1. unreadable-file skip (glob loader logs and skips) -- near-impossible in
 #      a clean git checkout, and the exact-count assertions catch it locally;
@@ -110,30 +109,30 @@ echo "SHA tracking OK"
 #      already fails loudly on every schema and content error class above,
 #      which is SITE-03's build-side letter.
 echo "== SITE-03 fixture: an out-of-enum frontmatter status fails the build, naming the file =="
-# The fixture filename conforms to YYYY-MM-DD-slug.md so the D-10 filename
-# guard is NOT what fires -- only the schema enum can reject it. The status
-# value is the exact one the studio's unpublished how-this-gets-built.md
-# carries: the landmine this fixture retires (04-CONTEXT).
-SCHEMA_FIXTURE="2026-01-01-schema-audit-fixture.md"
-trap 'rm -f "devlog/$SCHEMA_FIXTURE"' EXIT
-printf -- '---\nstatus: skeleton\n---\n\n# Schema Audit Fixture\n\nfixture body\n' > "devlog/$SCHEMA_FIXTURE"
+# The pages collection's status enum is the only guard that can reject this
+# fixture. The status value is the exact one the studio's unpublished
+# how-this-gets-built.md carries: the landmine this fixture retires
+# (04-CONTEXT).
+SCHEMA_FIXTURE="schema-audit-fixture.md"
+trap 'rm -f "pages/$SCHEMA_FIXTURE"' EXIT
+printf -- '---\nstatus: skeleton\n---\n\n# Schema Audit Fixture\n\nfixture body\n' > "pages/$SCHEMA_FIXTURE"
 if npm run build > /tmp/gsd-hardening-schema.log 2>&1; then
-  rm -f "devlog/$SCHEMA_FIXTURE"
+  rm -f "pages/$SCHEMA_FIXTURE"
   echo "SITE-03 FIXTURE FAIL: build succeeded with an out-of-enum status value"
   exit 1
 fi
-if ! grep -q "2026-01-01-schema-audit-fixture" /tmp/gsd-hardening-schema.log; then
-  rm -f "devlog/$SCHEMA_FIXTURE"
+if ! grep -q "schema-audit-fixture" /tmp/gsd-hardening-schema.log; then
+  rm -f "pages/$SCHEMA_FIXTURE"
   echo "SITE-03 FIXTURE FAIL: the failure output did not name the offending file"
   exit 1
 fi
-rm -f "devlog/$SCHEMA_FIXTURE"
+rm -f "pages/$SCHEMA_FIXTURE"
 trap - EXIT
-if git status --porcelain devlog/ | grep -q .; then
-  echo "SITE-03 FIXTURE FAIL: devlog/ left dirty"
+if git status --porcelain pages/ | grep -q .; then
+  echo "SITE-03 FIXTURE FAIL: pages/ left dirty"
   exit 1
 fi
-echo "SITE-03 fixture OK: schema violation failed the build loudly naming the file; devlog/ clean"
+echo "SITE-03 fixture OK: schema violation failed the build loudly naming the file; pages/ clean"
 
 echo "== D-61 fixture: an unset site code warns and builds; a placeholder or malformed one fails loudly =="
 SITE_LIB="src/lib/site.mjs"
@@ -269,67 +268,50 @@ if [ "$(git status --porcelain src/)" != "$PRE_SRC_STATUS" ]; then
 fi
 echo "ANLT-01/D-62 fixture OK: one tag everywhere incl. 404, endpoint carries the code, async, empty body; src/ restored"
 
-echo "== CONT-06/D-65: redirect stub contract -- base-prefixed target, noindex, canonical, resolvable destination =="
-# Derive the map's single key and destination suffix from astro.config.mjs
-# itself (the SITE-02 idiom: no base or slug literal repeated here). The
-# config composes its destination from NORMALIZED_BASE, so recompose it here
-# from the same derived value and demand the emitted stub agrees. `|| true`
-# keeps a missing map reportable under pipefail rather than a silent exit.
-REDIRECT_KEY=$(sed -n '/^const SLUG_REDIRECTS = {/,/^};/p' astro.config.mjs | grep -oP "'\K/[^']+(?=':)" | head -1) || true
-REDIRECT_DEST_SUFFIX=$(sed -n '/^const SLUG_REDIRECTS = {/,/^};/p' astro.config.mjs | grep -oP '\$\{NORMALIZED_BASE\}\K[^`]+' | head -1) || true
-if [ -z "$REDIRECT_KEY" ] || [ -z "$REDIRECT_DEST_SUFFIX" ]; then
-  echo "FAIL: no SLUG_REDIRECTS entry in astro.config.mjs -- the demonstration stub cannot exist (CONT-06)"
+echo "== CONT-06/D-65: redirect stub contract -- root target, noindex, canonical, resolvable destination =="
+# Derive the keys from astro.config.mjs itself (the SITE-02 idiom: no base or
+# slug literal repeated here). Every takedown entry's destination is exactly
+# `${NORMALIZED_BASE}`, so each emitted stub must refresh to the derived base
+# and resolve to dist/index.html. `|| true` keeps a missing map reportable
+# under pipefail rather than a silent exit.
+mapfile -t REDIRECT_KEYS < <(sed -n '/^const SLUG_REDIRECTS = {/,/^};/p' astro.config.mjs \
+  | grep -oP "^\s*'\K/[^']+(?=': \`\\$\{NORMALIZED_BASE\}\`,?\s*$)") || true
+if [ "${#REDIRECT_KEYS[@]}" -eq 0 ]; then
+  echo "FAIL: no SLUG_REDIRECTS entry with a root destination in astro.config.mjs (CONT-06)"
   exit 1
 fi
-STUB_FILE="dist${REDIRECT_KEY}/index.html"
-if [ ! -f "$STUB_FILE" ]; then
-  echo "FAIL: redirect stub missing at $STUB_FILE for map key $REDIRECT_KEY"
+if [ ! -f dist/index.html ]; then
+  echo "FAIL: the root destination ${NORMALIZED_BASE} does not resolve to a built file (looked for dist/index.html)"
   exit 1
 fi
-if ! grep -q 'http-equiv="refresh"' "$STUB_FILE"; then
-  echo "FAIL: $STUB_FILE carries no meta refresh directive"
-  exit 1
-fi
-if ! grep -q '<meta name="robots" content="noindex"' "$STUB_FILE"; then
-  echo "FAIL: $STUB_FILE carries no robots noindex directive"
-  exit 1
-fi
-if ! grep -q '<link rel="canonical"' "$STUB_FILE"; then
-  echo "FAIL: $STUB_FILE carries no canonical link"
-  exit 1
-fi
-REFRESH_TARGET=$(grep -oP 'http-equiv="refresh" content="[0-9]+;url=\K[^"]+' "$STUB_FILE")
-# Pitfall 1 (04-RESEARCH): Astro emits string destinations VERBATIM into the
-# refresh URL while applying the base only to the match side -- a base-less
-# destination builds clean and sends readers to a path that does not exist.
-case "$REFRESH_TARGET" in
-  "$NORMALIZED_BASE"*) ;;
-  *)
-    echo "FAIL: stub refresh target '$REFRESH_TARGET' does not start with the configured base '$NORMALIZED_BASE'"
+for REDIRECT_KEY in "${REDIRECT_KEYS[@]}"; do
+  STUB_FILE="dist${REDIRECT_KEY}/index.html"
+  if [ ! -f "$STUB_FILE" ]; then
+    echo "FAIL: redirect stub missing at $STUB_FILE for map key $REDIRECT_KEY"
     exit 1
-    ;;
-esac
-if [ "$REFRESH_TARGET" != "${NORMALIZED_BASE}${REDIRECT_DEST_SUFFIX}" ]; then
-  echo "FAIL: emitted refresh target '$REFRESH_TARGET' differs from the config's composed destination '${NORMALIZED_BASE}${REDIRECT_DEST_SUFFIX}'"
-  exit 1
-fi
-# Astro never validates concrete-path destinations -- a typo'd one builds
-# fine and redirects every reader to a 404. Resolve the emitted target to a
-# real build artifact, not merely a non-empty string.
-TARGET_REL="${REFRESH_TARGET#"$NORMALIZED_BASE"}"
-TARGET_REL="${TARGET_REL%%#*}"
-if [ -z "$TARGET_REL" ]; then
-  TARGET_FILE="dist/index.html"
-elif [[ "$TARGET_REL" == */ ]]; then
-  TARGET_FILE="dist/${TARGET_REL}index.html"
-else
-  TARGET_FILE="dist/${TARGET_REL}"
-fi
-if [ ! -f "$TARGET_FILE" ]; then
-  echo "FAIL: stub refresh target '$REFRESH_TARGET' does not resolve to a built file (looked for $TARGET_FILE)"
-  exit 1
-fi
-echo "redirect stub contract OK ($REDIRECT_KEY -> $REFRESH_TARGET)"
+  fi
+  if ! grep -q 'http-equiv="refresh"' "$STUB_FILE"; then
+    echo "FAIL: $STUB_FILE carries no meta refresh directive"
+    exit 1
+  fi
+  if ! grep -q '<meta name="robots" content="noindex"' "$STUB_FILE"; then
+    echo "FAIL: $STUB_FILE carries no robots noindex directive"
+    exit 1
+  fi
+  if ! grep -q '<link rel="canonical"' "$STUB_FILE"; then
+    echo "FAIL: $STUB_FILE carries no canonical link"
+    exit 1
+  fi
+  REFRESH_TARGET=$(grep -oP 'http-equiv="refresh" content="[0-9]+;url=\K[^"]+' "$STUB_FILE") || true
+  # Pitfall 1 (04-RESEARCH): Astro emits string destinations VERBATIM into the
+  # refresh URL while applying the base only to the match side -- a base-less
+  # destination builds clean and sends readers to a path that does not exist.
+  if [ "$REFRESH_TARGET" != "$NORMALIZED_BASE" ]; then
+    echo "FAIL: $STUB_FILE refresh target '$REFRESH_TARGET' is not the site root '$NORMALIZED_BASE'"
+    exit 1
+  fi
+done
+echo "redirect stub contract OK (${#REDIRECT_KEYS[@]} stubs -> $NORMALIZED_BASE)"
 
 echo "== Final clean rebuild: leave dist/ as a plain local build =="
 npm run build > /dev/null
