@@ -175,7 +175,13 @@ const ogImage = {
   </section>
 
   <script>
+    import { setupClipPlay } from '../scripts/clip-play';
     import { initShowcaseMotion } from '../scripts/showcase-motion';
+    setupClipPlay([...document.querySelectorAll('video')], {
+      IntersectionObserver,
+      matchMedia,
+      saveData: (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true,
+    });
     initShowcaseMotion();
   </script>
 </BaseLayout>

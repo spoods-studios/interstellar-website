@@ -7,6 +7,93 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+echo "== Clip playback: near the viewport, at most two, never under reduced motion =="
+node --input-type=module -e '
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import { pathToFileURL } from "node:url";
+const file = process.argv[1];
+const src = fs.readFileSync(file, "utf8");
+assert.ok(!/from\s*["\x27](motion|framer-motion|lenis)(\/[^"\x27]*)?["\x27]/.test(src), "clip-play.ts imports the animation library");
+const { setupClipPlay } = await import(pathToFileURL(file).href);
+assert.equal(typeof setupClipPlay, "function", "clip-play.ts exports no setupClipPlay");
+
+const world = ({ reduce = false, saveData = false, count = 4 } = {}) => {
+  const touched = [];
+  const videos = Array.from({ length: count }, (_, i) => {
+    const v = { id: i, paused: true, plays: 0, pauses: 0 };
+    v.play = () => { v.plays++; v.paused = false; return Promise.resolve(); };
+    v.pause = () => { v.pauses++; v.paused = true; };
+    Object.defineProperty(v, "currentTime", { get: () => { touched.push(i); return 0; }, set: () => touched.push(i) });
+    return v;
+  });
+  const observers = [];
+  class IntersectionObserver {
+    constructor(callback, options) { this.callback = callback; this.options = options; this.targets = []; observers.push(this); }
+    observe(t) { this.targets.push(t); }
+    unobserve() {}
+    disconnect() {}
+  }
+  const listeners = [];
+  const mq = { matches: reduce, media: "(prefers-reduced-motion: reduce)", addEventListener: (type, l) => { assert.equal(type, "change"); listeners.push(l); }, removeEventListener() {} };
+  const queries = [];
+  const matchMedia = function (q) { queries.push(q); return mq; };
+  setupClipPlay(videos, { IntersectionObserver, matchMedia, saveData });
+  assert.equal(observers.length, 1, "expected one IntersectionObserver");
+  const io = observers[0];
+  const fire = (entries) => io.callback(entries.map(([v, isIntersecting]) => ({ target: v, isIntersecting })), io);
+  const setReduce = (matches) => { mq.matches = matches; for (const l of listeners) l({ matches, media: mq.media }); };
+  const playing = () => videos.filter((v) => !v.paused).length;
+  return { videos, io, fire, setReduce, playing, touched, queries };
+};
+
+{
+  const w = world();
+  assert.equal(w.io.options?.rootMargin, "200px", "observer rootMargin is not 200px");
+  assert.deepEqual(w.io.targets, w.videos, "observer does not watch every clip");
+  assert.ok(w.queries.includes("(prefers-reduced-motion: reduce)"), "never queries prefers-reduced-motion: reduce");
+  w.fire([[w.videos[0], true]]);
+  assert.equal(w.videos[0].plays, 1, "an intersecting clip did not play");
+  w.fire([[w.videos[0], false]]);
+  assert.equal(w.videos[0].pauses, 1, "a leaving clip did not pause");
+  assert.equal(w.playing(), 0);
+}
+{
+  const w = world();
+  w.fire(w.videos.map((v) => [v, true]));
+  assert.ok(w.playing() <= 2, `${w.playing()} clips playing with four near`);
+  assert.equal(w.playing(), 2, "two near clips should play");
+  const first = w.videos.find((v) => !v.paused);
+  w.fire([[first, false]]);
+  assert.equal(w.playing(), 2, "a waiting near clip should take the freed slot");
+  assert.ok(first.paused);
+}
+{
+  const w = world({ reduce: true });
+  w.fire(w.videos.map((v) => [v, true]));
+  w.fire(w.videos.map((v) => [v, false]));
+  w.fire(w.videos.map((v) => [v, true]));
+  assert.equal(w.videos.reduce((n, v) => n + v.plays, 0), 0, "play() was called under reduced motion");
+}
+{
+  const w = world();
+  w.fire(w.videos.map((v) => [v, true]));
+  assert.equal(w.playing(), 2);
+  w.setReduce(true);
+  assert.equal(w.playing(), 0, "a switch to reduce left clips playing");
+  const plays = w.videos.reduce((n, v) => n + v.plays, 0);
+  w.fire(w.videos.map((v) => [v, true]));
+  assert.equal(w.videos.reduce((n, v) => n + v.plays, 0), plays, "play() was called after the switch to reduce");
+  assert.deepEqual(w.touched, [], "currentTime was touched");
+}
+{
+  const w = world({ saveData: true });
+  w.fire(w.videos.map((v) => [v, true]));
+  assert.equal(w.videos.reduce((n, v) => n + v.plays, 0), 0, "play() was called with saveData on");
+}
+console.log("clip-play OK");
+' "$PWD/src/scripts/clip-play.ts"
+
 echo "== Clean build =="
 rm -rf dist
 npm run build
