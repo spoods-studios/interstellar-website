@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
-# Smoke-test harness for the build: the site builds, the interim index
+# Smoke-test harness for the build: the site builds, the showcase index
 # renders, and a malformed content file fails the build loudly.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-echo "== Positive check: the site builds and the interim index renders =="
+echo "== Positive check: the site builds and the showcase index renders =="
 npm run build
 test -f dist/index.html
+grep -q '<h1[^>]*>Setare Aerospace</h1>' dist/index.html
 if grep -rIn -e 'github\.io' -e '/interstellar-website' src/; then
   echo "FAIL: hardcoded host/base string under src/"
   exit 1
@@ -21,9 +22,13 @@ if grep -q 'devlog/' dist/index.html; then
   exit 1
 fi
 
-# No client JS beyond the sanctioned analytics tag (D-60/D-61: the script-tag
-# count must equal the analytics-tag count in either constant state).
-test "$(grep -o '<script' dist/index.html | wc -l)" -eq "$(grep -o 'gc\.zgo\.at' dist/index.html | wc -l)"
+# No client JS beyond the sanctioned analytics tag and the showcase's one
+# hashed motion module (D-60/D-61: the script-tag count must equal the
+# analytics-tag count plus that module in either constant state).
+BASE=$(grep -oP "^const BASE = '\K[^']+" astro.config.mjs)
+NORMALIZED_BASE="${BASE%/}/"
+test "$(grep -o '<script' dist/index.html | wc -l)" -eq "$(( $(grep -o 'gc\.zgo\.at' dist/index.html | wc -l) + 1 ))"
+test "$(grep -oE "<script type=\"module\" src=\"${NORMALIZED_BASE}_astro/[^\"/]+\\.js\"></script>" dist/index.html | wc -l)" -eq 1
 echo "positive check OK"
 
 echo "== Negative check (D-38): malformed roadmap filename fails the build loudly =="

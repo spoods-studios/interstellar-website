@@ -1,0 +1,40 @@
+---
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import captures from '../assets/showcase/captures.json';
+
+export interface Props {
+  name: string;
+  number: string;
+  caption: string;
+  class?: string;
+}
+
+const { name, number, caption, class: className } = Astro.props;
+
+const posters = import.meta.glob<{ default: ImageMetadata }>('../assets/showcase/*-poster.png', { eager: true });
+const posterModule = posters[`../assets/showcase/${name}-poster.png`];
+if (!posterModule) {
+  throw new Error(`ShowcaseClip: no poster at src/assets/showcase/${name}-poster.png for clip "${name}"`);
+}
+const record = (captures as Record<string, { captured?: string }>)[name];
+if (!record?.captured) {
+  throw new Error(`ShowcaseClip: src/assets/showcase/captures.json has no captured date for clip "${name}"`);
+}
+
+const poster = await getImage({ src: posterModule.default, format: 'webp', width: 1280, quality: 'mid' });
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+const clip = `${base}showcase/${name}`;
+---
+
+<figure class={className}>
+  <div class="plate">
+    <video muted loop playsinline preload="none" poster={poster.src} width="1280" height="720" disableremoteplayback>
+      <source src={`${clip}.webm`} type="video/webm" />
+      <source src={`${clip}.mp4`} type="video/mp4" />
+    </video>
+    <span class="clip label"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5l12 7-12 7z" /></svg>Clip</span>
+  </div>
+  <figcaption><b>{number}</b>{caption} Captured {record.captured}.</figcaption>
+</figure>

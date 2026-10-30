@@ -121,21 +121,38 @@ if grep -rq 'og:title" content="[^"]*— Interstellar Engine"' dist --include='*
 fi
 echo "og:title de-duplication OK"
 
-echo "== DIST-02: every page uses the default card, at the embed threshold =="
+echo "== DIST-02: the default card on every page but the showcase, which carries its own =="
+DEFAULT_CARD="${PREFIX}og-default.png"
+CARD_FAIL=0
+while IFS= read -r f; do
+  if is_redirect_stub "$f"; then continue; fi
+  OG_IMAGE=$(attr_value 'property="og:image"' "$f")
+  if [ "$f" = "dist/index.html" ]; then
+    SHOWCASE_CARD="$OG_IMAGE"
+    if [ "$OG_IMAGE" = "$DEFAULT_CARD" ]; then
+      echo "FAIL: dist/index.html uses the default card, expected the showcase card"
+      CARD_FAIL=1
+    fi
+  elif [ "$OG_IMAGE" != "$DEFAULT_CARD" ]; then
+    echo "FAIL: $f og:image is '$OG_IMAGE', expected the default card '$DEFAULT_CARD'"
+    CARD_FAIL=1
+  fi
+done < <(find dist -name "*.html")
+[ "$CARD_FAIL" -eq 0 ]
 DISTINCT_IMAGES=$(grep -rho '<meta property="og:image" content="[^"]*"' dist --include='*.html' \
   | sed -E 's/.*content="([^"]*)".*/\1/' | sort -u)
 DISTINCT_IMAGE_COUNT=$(printf '%s\n' "$DISTINCT_IMAGES" | wc -l)
-if ! [ "$DISTINCT_IMAGE_COUNT" -eq 1 ]; then
-  echo "FAIL: expected 1 distinct og:image value (the default card), found $DISTINCT_IMAGE_COUNT"
+if ! [ "$DISTINCT_IMAGE_COUNT" -eq 2 ]; then
+  echo "FAIL: expected 2 distinct og:image values (the default card and the showcase card), found $DISTINCT_IMAGE_COUNT"
   printf '%s\n' "$DISTINCT_IMAGES"
   exit 1
 fi
 # `identify` is an ImageMagick system tool used only by this local harness --
 # it is not an npm dependency and the deploy never runs the suite. Fail loudly
 # naming it rather than silently skipping the one assertion that proves the
-# card's real pixel dimensions rather than its declared ones.
+# cards' real pixel dimensions rather than their declared ones.
 if ! command -v identify > /dev/null 2>&1; then
-  echo "FAIL: identify (ImageMagick) is not on PATH -- required for the default card dimension assertion"
+  echo "FAIL: identify (ImageMagick) is not on PATH -- required for the card dimension assertions"
   exit 1
 fi
 DEFAULT_CARD_DIMENSIONS=$(identify -format '%wx%h' dist/og-default.png)
@@ -143,7 +160,13 @@ if [ "$DEFAULT_CARD_DIMENSIONS" != "1200x630" ]; then
   echo "FAIL: dist/og-default.png is ${DEFAULT_CARD_DIMENSIONS}, expected exactly 1200x630"
   exit 1
 fi
-echo "card images OK (default card $DEFAULT_CARD_DIMENSIONS)"
+SHOWCASE_CARD_FILE="dist/${SHOWCASE_CARD#"$PREFIX"}"
+read -r SHOWCASE_W SHOWCASE_H < <(identify -format '%w %h' "$SHOWCASE_CARD_FILE")
+if [ "$SHOWCASE_W" -lt 1200 ] || [ "$SHOWCASE_H" -lt 630 ]; then
+  echo "FAIL: $SHOWCASE_CARD_FILE is ${SHOWCASE_W}x${SHOWCASE_H}, below 1200x630"
+  exit 1
+fi
+echo "card images OK (default card $DEFAULT_CARD_DIMENSIONS, showcase card ${SHOWCASE_W}x${SHOWCASE_H})"
 
 echo "== DIST-02: descriptions are not collapsed onto shared boilerplate =="
 # If the extractor ever stopped skipping a shared leading blockquote/heading,
@@ -164,13 +187,13 @@ fi
 echo "description variety OK ($DISTINCT_DESCRIPTIONS distinct values across $TOTAL_PAGES pages)"
 
 echo "== DIST-03: CTA placements on every built page =="
-# Every page carries the header-nav and footer invites; the interim homepage
-# (src/pages/index.astro) adds one more in its body.
+# Every page carries the header-nav and footer invites; the showcase homepage
+# (src/pages/index.astro) adds two more, in its hero and its Discord close.
 CTA_FAIL=0
 while IFS= read -r f; do
   if is_redirect_stub "$f"; then continue; fi
   EXPECTED_INVITES=2
-  if [ "$f" = "dist/index.html" ]; then EXPECTED_INVITES=3; fi
+  if [ "$f" = "dist/index.html" ]; then EXPECTED_INVITES=4; fi
   INVITE_COUNT=$(count_occurrences "$INVITE" "$f")
   if [ "$INVITE_COUNT" -ne "$EXPECTED_INVITES" ]; then
     echo "FAIL: $f carries $INVITE_COUNT invite links (expected exactly $EXPECTED_INVITES)"
