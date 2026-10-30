@@ -1,10 +1,9 @@
 ---
-// Shared reading layout for all four content trees (UI-SPEC "Layout
-// factoring") -- Plans 05-07 pass their own meta/breadcrumbs/TOC/prevNext
-// props to this same layout rather than re-deriving the shell.
+// Shared reading layout for the content trees (UI-SPEC "Layout factoring")
+// -- each route passes its own meta/breadcrumbs/TOC props to this same layout
+// rather than re-deriving the shell.
 import BaseLayout from './BaseLayout.astro';
 import TableOfContents from '../components/TableOfContents.astro';
-import { escapeHtml } from '../lib/escape-html';
 import type { MarkdownHeading } from '../lib/toc';
 
 export interface LinkRef {
@@ -17,7 +16,6 @@ export interface Props {
   meta?: string;
   headings?: MarkdownHeading[];
   breadcrumbs?: LinkRef[];
-  prevNext?: { prev?: LinkRef; next?: LinkRef };
   backLink?: LinkRef;
   description?: string;
   ogType?: 'article' | 'website';
@@ -32,7 +30,6 @@ const {
   meta,
   headings,
   breadcrumbs,
-  prevNext,
   backLink,
   description,
   ogType,
@@ -56,11 +53,9 @@ const {
   {meta && <p class="meta">{meta}</p>}
   {headings && <TableOfContents headings={headings} />}
   <slot />
-  {(prevNext?.prev || prevNext?.next || backLink) && (
+  {backLink && (
     <nav class="post-nav">
-      {prevNext?.prev && <a href={prevNext.prev.href} set:html={`&larr; ${escapeHtml(prevNext.prev.label)}`} />}
-      {prevNext?.next && <a href={prevNext.next.href} set:html={`${escapeHtml(prevNext.next.label)} &rarr;`} />}
-      {backLink && <a href={backLink.href}>{backLink.label}</a>}
+      <a href={backLink.href}>{backLink.label}</a>
     </nav>
   )}
 </BaseLayout>

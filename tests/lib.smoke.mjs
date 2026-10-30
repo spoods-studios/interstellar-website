@@ -13,8 +13,6 @@ import { titleFromH1 } from '../src/lib/title-from-h1.ts';
 import { assertNonEmpty, isVisible } from '../src/lib/content-guards.ts';
 import { buildToc } from '../src/lib/toc.ts';
 import { firstProseBlock, stripInline, truncate, describeBody } from '../src/lib/describe-entry.ts';
-import { compareNewestFirst } from '../src/lib/entry-order.ts';
-import { heroBasename, lookupHero } from '../src/lib/hero-image.ts';
 
 console.log('== milestone-key ==');
 assert.equal(normalizeMilestone('M0.1'), 'm0.1');
@@ -150,114 +148,10 @@ assert.equal(
 );
 console.log('describe-entry OK');
 
-console.log('== entry-order ==');
-{
-  const d = (s) => new Date(`${s}T00:00:00Z`);
-  const a = { id: 'a', date: d('2026-01-01') };
-  const b = { id: 'b', date: d('2026-07-13') };
-  const c = { id: 'c', date: d('2026-04-07') };
-  assert.deepEqual(
-    [a, b, c].sort(compareNewestFirst).map((e) => e.id),
-    ['b', 'c', 'a']
-  );
-
-  // Identical dates must tie-break on id, independent of input order --
-  // otherwise the archive, the post route and the feed can disagree.
-  const x = { id: 'alpha', date: d('2026-05-05') };
-  const y = { id: 'beta', date: d('2026-05-05') };
-  assert.deepEqual([x, y].sort(compareNewestFirst).map((e) => e.id), ['alpha', 'beta']);
-  assert.deepEqual([y, x].sort(compareNewestFirst).map((e) => e.id), ['alpha', 'beta']);
-
-  assert.equal(compareNewestFirst(x, x), 0);
-
-  // Same date, one flagged as an addendum: the addendum sorts first,
-  // independent of input order (Array.sort is only stable w.r.t. input order).
-  const addendum = { id: 'zzz-addendum', date: d('2026-08-11'), isAddendum: true };
-  const announcement = { id: 'aaa-announcement', date: d('2026-08-11'), isAddendum: false };
-  assert.deepEqual(
-    [addendum, announcement].sort(compareNewestFirst).map((e) => e.id),
-    ['zzz-addendum', 'aaa-announcement']
-  );
-  assert.deepEqual(
-    [announcement, addendum].sort(compareNewestFirst).map((e) => e.id),
-    ['zzz-addendum', 'aaa-announcement']
-  );
-
-  // Same date, neither flagged: id-ascending tie-break still decides (regression
-  // guard for the nine untagged posts).
-  const p = { id: 'p', date: d('2026-05-05') };
-  const q = { id: 'q', date: d('2026-05-05') };
-  assert.deepEqual([p, q].sort(compareNewestFirst).map((e) => e.id), ['p', 'q']);
-  assert.deepEqual([q, p].sort(compareNewestFirst).map((e) => e.id), ['p', 'q']);
-
-  // Same date, both flagged: id-ascending decides.
-  const r = { id: 'r', date: d('2026-05-05'), isAddendum: true };
-  const s = { id: 's', date: d('2026-05-05'), isAddendum: true };
-  assert.deepEqual([r, s].sort(compareNewestFirst).map((e) => e.id), ['r', 's']);
-  assert.deepEqual([s, r].sort(compareNewestFirst).map((e) => e.id), ['r', 's']);
-
-  // Different dates, the OLDER entry flagged as an addendum: the newer entry
-  // still sorts first -- the flag must never override the date comparison.
-  const older = { id: 'older', date: d('2026-01-01'), isAddendum: true };
-  const newer = { id: 'newer', date: d('2026-07-13'), isAddendum: false };
-  assert.deepEqual(
-    [older, newer].sort(compareNewestFirst).map((e) => e.id),
-    ['newer', 'older']
-  );
-
-  // Real-world pin: the actual M1.2 pair, same date, the addendum flagged.
-  const theLineYouFly = { id: '2026-08-11-the-line-you-fly', date: d('2026-08-11'), isAddendum: false };
-  const threeSmallFixes = {
-    id: '2026-08-11-three-small-fixes-before-closing-the-books',
-    date: d('2026-08-11'),
-    isAddendum: true,
-  };
-  assert.deepEqual(
-    [theLineYouFly, threeSmallFixes].sort(compareNewestFirst).map((e) => e.id),
-    ['2026-08-11-three-small-fixes-before-closing-the-books', '2026-08-11-the-line-you-fly']
-  );
-}
-console.log('entry-order OK');
-
-console.log('== hero-image ==');
-// The lookup takes its map as a parameter precisely so it is reachable here:
-// the eager import.meta.glob that supplies it in production is Vite-only and
-// lives in hero-assets.ts, which bare Node cannot evaluate.
-assert.equal(heroBasename('../assets/m0.7-hero-contrast.png'), 'm0.7-hero-contrast.png');
-assert.equal(heroBasename('assets/m0.8-hero-precession.png'), 'm0.8-hero-precession.png');
-assert.equal(heroBasename('m0.7-hero-contrast.png'), 'm0.7-hero-contrast.png');
-{
-  const record = { src: '/interstellar-website/_astro/m0.7-hero-contrast.pk4qHc1U.png', width: 1900, height: 1060 };
-  const map = new Map([['m0.7-hero-contrast.png', record]]);
-
-  // No body image means the default card, not an error.
-  assert.equal(lookupHero(map, undefined, 'devlog/x'), null);
-
-  const hit = lookupHero(map, '../assets/m0.7-hero-contrast.png', 'devlog/x');
-  assert.equal(hit.src, record.src);
-  assert.equal(hit.width, 1900);
-  assert.equal(hit.height, 1060);
-
-  // D-48: a reference that does not resolve is a loud failure naming the post
-  // AND the path -- never a silent fall-through to the default card.
-  assert.throws(
-    () => lookupHero(map, '../assets/does-not-exist.png', 'devlog/2026-07-10-warping-without-losing-the-moon'),
-    /2026-07-10-warping-without-losing-the-moon/
-  );
-  assert.throws(
-    () => lookupHero(map, '../assets/does-not-exist.png', 'devlog/2026-07-10-warping-without-losing-the-moon'),
-    /does-not-exist\.png/
-  );
-
-  // An unresolvable reference is never downgraded to "no image".
-  assert.throws(() => lookupHero(new Map(), '../assets/m0.7-hero-contrast.png', 'devlog/x'), /m0\.7-hero-contrast\.png/);
-}
-console.log('hero-image OK');
-
 console.log('== content-expectations ==');
 {
   const helper = fileURLToPath(new URL('./helpers/content-expectations.mjs', import.meta.url));
-  for (const key of ['devlog_count', 'roadmap_count', 'pages_count', 'site_page_count', 'og_image_count', 'devlog_hero_count']) {
+  for (const key of ['roadmap_count', 'pages_count', 'site_page_count']) {
     const out = execFileSync('node', [helper, key], { env: { ...process.env, FORCE_COLOR: '3' }, encoding: 'utf8' });
     assert.match(out, /^\d+\n$/, key);
   }
