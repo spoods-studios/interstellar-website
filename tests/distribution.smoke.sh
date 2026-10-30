@@ -161,7 +161,7 @@ if [ "$DEFAULT_CARD_DIMENSIONS" != "1200x630" ]; then
   exit 1
 fi
 SHOWCASE_CARD_FILE="dist/${SHOWCASE_CARD#"$PREFIX"}"
-read -r SHOWCASE_W SHOWCASE_H < <(identify -format '%w %h' "$SHOWCASE_CARD_FILE")
+read -r SHOWCASE_W SHOWCASE_H < <(identify -format '%w %h\n' "$SHOWCASE_CARD_FILE")
 if [ "$SHOWCASE_W" -lt 1200 ] || [ "$SHOWCASE_H" -lt 630 ]; then
   echo "FAIL: $SHOWCASE_CARD_FILE is ${SHOWCASE_W}x${SHOWCASE_H}, below 1200x630"
   exit 1
