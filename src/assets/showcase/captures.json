@@ -1,0 +1,88 @@
+{
+  "buildup-l4": {
+    "script": "showcase_buildup_l4",
+    "kind": "clip",
+    "captured": "2026-10-30",
+    "build_sha": "2939cd644f72eb1f731db9980319c0f8632ad476",
+    "gpu": "AMD Radeon RX 7700S (RADV NAVI33)",
+    "frames": {
+      "start": 0,
+      "end": 359
+    }
+  },
+  "buildup-l0": {
+    "script": "showcase_buildup_l0",
+    "kind": "still",
+    "captured": "2026-10-30",
+    "build_sha": "2939cd644f72eb1f731db9980319c0f8632ad476",
+    "gpu": "AMD Radeon RX 7700S (RADV NAVI33)",
+    "frame": 0
+  },
+  "buildup-l1": {
+    "script": "showcase_buildup_l1",
+    "kind": "still",
+    "captured": "2026-10-30",
+    "build_sha": "2939cd644f72eb1f731db9980319c0f8632ad476",
+    "gpu": "AMD Radeon RX 7700S (RADV NAVI33)",
+    "frame": 0
+  },
+  "buildup-l2": {
+    "script": "showcase_buildup_l2",
+    "kind": "still",
+    "captured": "2026-10-30",
+    "build_sha": "2939cd644f72eb1f731db9980319c0f8632ad476",
+    "gpu": "AMD Radeon RX 7700S (RADV NAVI33)",
+    "frame": 0
+  },
+  "spot-ksc": {
+    "script": "showcase_spot_ksc",
+    "kind": "clip",
+    "captured": "2026-10-30",
+    "build_sha": "2939cd644f72eb1f731db9980319c0f8632ad476",
+    "gpu": "AMD Radeon RX 7700S (RADV NAVI33)",
+    "frames": {
+      "start": 0,
+      "end": 359
+    }
+  },
+  "spot-starbase": {
+    "script": "showcase_spot_starbase",
+    "kind": "clip",
+    "captured": "2026-10-30",
+    "build_sha": "2939cd644f72eb1f731db9980319c0f8632ad476",
+    "gpu": "AMD Radeon RX 7700S (RADV NAVI33)",
+    "frames": {
+      "start": 0,
+      "end": 359
+    }
+  },
+  "spot-vandenberg": {
+    "script": "showcase_spot_vandenberg",
+    "kind": "clip",
+    "captured": "2026-10-30",
+    "build_sha": "2939cd644f72eb1f731db9980319c0f8632ad476",
+    "gpu": "AMD Radeon RX 7700S (RADV NAVI33)",
+    "frames": {
+      "start": 0,
+      "end": 359
+    }
+  },
+  "terminator": {
+    "script": "photo_match",
+    "lookdev_shot": "lookdev/shots/lookdev.json#terminator",
+    "kind": "still",
+    "captured": "2026-10-30",
+    "build_sha": "2939cd644f72eb1f731db9980319c0f8632ad476",
+    "gpu": "AMD Radeon RX 7700S (RADV NAVI33)",
+    "frame": 600
+  },
+  "orbit": {
+    "script": "photo_match",
+    "lookdev_shot": "lookdev/shots/lookdev.json#orbit",
+    "kind": "still",
+    "captured": "2026-10-30",
+    "build_sha": "2939cd644f72eb1f731db9980319c0f8632ad476",
+    "gpu": "AMD Radeon RX 7700S (RADV NAVI33)",
+    "frame": 600
+  }
+}
