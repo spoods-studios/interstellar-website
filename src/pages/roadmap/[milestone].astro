@@ -15,15 +15,14 @@ import PostLayout from '../../layouts/PostLayout.astro';
 export async function getStaticPaths() {
   const allEntries = assertNonEmpty(await getCollection('roadmap'), 'roadmap');
   const visible = allEntries.filter(isVisible);
-  const devlogEntries = assertNonEmpty(await getCollection('devlog'), 'devlog').filter(isVisible);
 
   return visible.map((entry) => ({
     params: { milestone: entry.id },
-    props: { entry, devlogEntries },
+    props: { entry },
   }));
 }
 
-const { entry, devlogEntries } = Astro.props;
+const { entry } = Astro.props;
 const { Content, headings } = await render(entry);
 
 const title = titleFromH1(entry.body, entry.id);
@@ -36,17 +35,6 @@ const meta = milestoneDisplay;
 const rawBase = import.meta.env.BASE_URL;
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
-// D-35: breadcrumb to the milestone's announcement, resolved through
-// normalizeMilestone and isVisible-filtered (T-02-03) -- omitted rather than
-// a dead link if the milestone has no visible announcement.
-const announcementEntry = devlogEntries.find(
-  (e) => e.data.milestone && normalizeMilestone(e.data.milestone) === milestoneKey
-);
-
-const breadcrumbs = announcementEntry
-  ? [{ href: `${base}devlog/${announcementEntry.id}/`, label: `↑ ${milestoneDisplay} announcement` }]
-  : [];
-
 const backLink = { href: `${base}roadmap/`, label: 'Back to roadmap' };
 
 // D-51: description from the entry's own body. No publishedTime -- this tree
@@ -58,7 +46,6 @@ const description = describeBody(entry.body, entry.id);
   title={title}
   meta={meta}
   headings={headings}
-  breadcrumbs={breadcrumbs}
   backLink={backLink}
   description={description}
   ogType="article"
