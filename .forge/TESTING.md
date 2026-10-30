@@ -20,6 +20,7 @@ Tests that bind ports add `FORGE_PORT_OFFSET` to their base port and tests that 
 - `npm test` runs `bash tests/run-all.sh`.
 - Setup: `npm ci`
 - All tests: `npm test`
+- CI full suite: `test`
 - Test: `bash tests/run-all.sh {test}` (a script path, e.g. `tests/post.smoke.sh`).
 - Changed tests: `bash tests/changed.sh {files}`
 
