@@ -1,16 +1,13 @@
 #!/usr/bin/env bash
-# Distribution smoke harness for Phase 3 (RSS, OpenGraph, Discord CTA).
-# Proves DIST-01 (the feed builds, is well-formed, and cannot drift from the
-# homepage archive), DIST-02 (every built page carries a complete, absolute,
-# resolvable OpenGraph block) and DIST-03 (every page carries both CTA
-# placements plus feed autodiscovery), including the three loud-failure paths
-# this phase introduced (D-48 hero path, D-54 invite constant, D-30 draft).
+# Distribution smoke harness (OpenGraph, Discord CTA). Proves DIST-02 (every
+# built page carries a complete, absolute, resolvable OpenGraph block) and
+# DIST-03 (every page carries both CTA placements), including the D-54
+# loud-failure path for the invite constant. The RSS feed and the devlog were
+# taken down (SSC-07), so no feed or hero-image assertions remain.
 #
-# Everything here is offline and asserted against real build output. The two
-# things that genuinely cannot be proven this way -- that Discord actually
-# renders an embed, and that the W3C feed service reports zero errors -- are
-# deliberately NOT faked with a build-time proxy (D-57's split acceptance
-# criterion); they are human verifications owned by Plan 03-06.
+# Everything here is offline and asserted against real build output. That
+# Discord actually renders an embed cannot be proven this way and stays a
+# human verification.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -45,8 +42,7 @@ attr_value() {
 
 # CONT-06/D-65: redirect stubs are machine-facing artifacts, not pages a
 # reader lands on -- Astro's stub template carries a refresh directive and
-# none of the reader-facing chrome (no OpenGraph block, no CTA, no feed
-# autodiscovery). The per-page sweeps below skip them by this predicate; the
+# none of the reader-facing chrome (no OpenGraph block, no CTA). The per-page sweeps below skip them by this predicate; the
 # stub's own contract lives in tests/hardening.smoke.sh. The invariants
 # themselves are unchanged -- this is a page-selection predicate only.
 is_redirect_stub() {
@@ -125,13 +121,12 @@ if grep -rq 'og:title" content="[^"]*— Interstellar Engine"' dist --include='*
 fi
 echo "og:title de-duplication OK"
 
-echo "== DIST-02: exactly the derived number of distinct card images site-wide, all at or above the embed threshold =="
-EXPECTED_IMAGE_COUNT=$(node tests/helpers/content-expectations.mjs og_image_count)
+echo "== DIST-02: every page uses the default card, at the embed threshold =="
 DISTINCT_IMAGES=$(grep -rho '<meta property="og:image" content="[^"]*"' dist --include='*.html' \
   | sed -E 's/.*content="([^"]*)".*/\1/' | sort -u)
 DISTINCT_IMAGE_COUNT=$(printf '%s\n' "$DISTINCT_IMAGES" | wc -l)
-if ! [ "$DISTINCT_IMAGE_COUNT" -eq "$EXPECTED_IMAGE_COUNT" ]; then
-  echo "FAIL: expected $EXPECTED_IMAGE_COUNT distinct og:image values (default card + per-post heroes), found $DISTINCT_IMAGE_COUNT"
+if ! [ "$DISTINCT_IMAGE_COUNT" -eq 1 ]; then
+  echo "FAIL: expected 1 distinct og:image value (the default card), found $DISTINCT_IMAGE_COUNT"
   printf '%s\n' "$DISTINCT_IMAGES"
   exit 1
 fi
@@ -148,14 +143,18 @@ if [ "$DEFAULT_CARD_DIMENSIONS" != "1200x630" ]; then
   echo "FAIL: dist/og-default.png is ${DEFAULT_CARD_DIMENSIONS}, expected exactly 1200x630"
   exit 1
 fi
-echo "card images OK (3 distinct, default card $DEFAULT_CARD_DIMENSIONS)"
+echo "card images OK (default card $DEFAULT_CARD_DIMENSIONS)"
 
 echo "== DIST-02: descriptions are not collapsed onto shared boilerplate =="
 # If the extractor ever stopped skipping a shared leading blockquote/heading,
 # every page's description would collapse onto one sentence while every
 # per-page assertion above still passed -- guard relative to the actual page
 # count so a new content drop can never turn this red on its own.
-TOTAL_PAGES=$(find dist -name "*.html" | wc -l)
+TOTAL_PAGES=0
+while IFS= read -r f; do
+  if is_redirect_stub "$f"; then continue; fi
+  TOTAL_PAGES=$((TOTAL_PAGES + 1))
+done < <(find dist -name "*.html")
 DISTINCT_DESCRIPTIONS=$(grep -rho '<meta name="description" content="[^"]*"' dist --include='*.html' \
   | sed -E 's/.*content="([^"]*)".*/\1/' | sort -u | wc -l)
 if [ "$DISTINCT_DESCRIPTIONS" -le "$((TOTAL_PAGES / 2))" ]; then
@@ -164,38 +163,35 @@ if [ "$DISTINCT_DESCRIPTIONS" -le "$((TOTAL_PAGES / 2))" ]; then
 fi
 echo "description variety OK ($DISTINCT_DESCRIPTIONS distinct values across $TOTAL_PAGES pages)"
 
-echo "== DIST-03: CTA placements and feed autodiscovery on every built page =="
+echo "== DIST-03: CTA placements on every built page =="
+# Every page carries the header-nav and footer invites; the interim homepage
+# (src/pages/index.astro) adds one more in its body.
 CTA_FAIL=0
 while IFS= read -r f; do
   if is_redirect_stub "$f"; then continue; fi
+  EXPECTED_INVITES=2
+  if [ "$f" = "dist/index.html" ]; then EXPECTED_INVITES=3; fi
   INVITE_COUNT=$(count_occurrences "$INVITE" "$f")
-  if [ "$INVITE_COUNT" -ne 2 ]; then
-    echo "FAIL: $f carries $INVITE_COUNT invite links (expected exactly 2: header nav + footer)"
+  if [ "$INVITE_COUNT" -ne "$EXPECTED_INVITES" ]; then
+    echo "FAIL: $f carries $INVITE_COUNT invite links (expected exactly $EXPECTED_INVITES)"
     CTA_FAIL=1
   fi
   REL_COUNT=$(count_occurrences 'rel="noopener noreferrer"' "$f")
-  if [ "$REL_COUNT" -ne 2 ]; then
-    echo "FAIL: $f carries $REL_COUNT external-link rel pairs (expected exactly 2)"
-    CTA_FAIL=1
-  fi
-  FEED_LINK_COUNT=$(count_occurrences 'rel="alternate" type="application/rss+xml"' "$f")
-  if [ "$FEED_LINK_COUNT" -ne 1 ]; then
-    echo "FAIL: $f carries $FEED_LINK_COUNT feed autodiscovery links (expected exactly 1)"
+  if [ "$REL_COUNT" -ne "$EXPECTED_INVITES" ]; then
+    echo "FAIL: $f carries $REL_COUNT external-link rel pairs (expected exactly $EXPECTED_INVITES)"
     CTA_FAIL=1
   fi
 done < <(find dist -name "*.html")
 [ "$CTA_FAIL" -eq 0 ]
-echo "CTA and autodiscovery coverage OK"
+echo "CTA coverage OK"
 
-echo "== DIST-03: footer order is copyright, RSS, then Discord =="
-FOOTER=$(grep -o '<footer>.*</footer>' dist/index.html)
-FOOTER_FEED_OFFSET=$(printf '%s' "$FOOTER" | grep -bo 'rss.xml' | head -1 | cut -d: -f1)
-FOOTER_INVITE_OFFSET=$(printf '%s' "$FOOTER" | grep -boF "$INVITE" | head -1 | cut -d: -f1)
-if [ "$FOOTER_FEED_OFFSET" -ge "$FOOTER_INVITE_OFFSET" ]; then
-  echo "FAIL: the footer's feed link does not precede its invite link"
+echo "== DIST-03: the footer is exactly the copyright line and the Discord link =="
+FOOTER=$(grep -o '<footer>.*</footer>' dist/index.html | sed -E 's/<[^>]*>//g; s/^[[:space:]]+//; s/[[:space:]]+$//')
+if [ "$FOOTER" != "© 2026 Spoods Studios · Join the Discord" ]; then
+  echo "FAIL: footer text is '$FOOTER'"
   exit 1
 fi
-echo "footer order OK"
+echo "footer OK"
 
 echo "== DIST-02: two consecutive builds emit identical metadata (content-hashed URLs are stable) =="
 capture_metadata() {
@@ -212,194 +208,16 @@ if [ "$METADATA_BEFORE" != "$METADATA_AFTER" ]; then
 fi
 echo "build determinism OK"
 
-echo "== DIST-01: the feed is well-formed XML =="
-# This is only the OFFLINE half of D-57's split acceptance criterion: it proves
-# the document parses, not that it is semantically valid RSS 2.0. The other
-# half -- submitting the deployed feed to the W3C feed validation service --
-# is a network service and stays a human verification in Plan 03-06. Do not
-# bolt a network validator into this harness to "finish" this check.
-xmllint --noout dist/rss.xml
-echo "feed well-formedness OK"
-
-echo "== DIST-01/D-45: the feed and the homepage archive cannot drift =="
-FEED_ITEMS=$(grep -o '<item>' dist/rss.xml | wc -l)
-ARCHIVE_LINKS=$(grep -o 'href="[^"]*devlog/[^"]*/"' dist/index.html | wc -l)
-if [ "$FEED_ITEMS" -ne "$ARCHIVE_LINKS" ]; then
-  echo "FAIL: the feed carries $FEED_ITEMS items but the homepage archive lists $ARCHIVE_LINKS announcements"
-  exit 1
-fi
-# Equal counts are not equal ordering. This build tree is the only place in the
-# phase where both artifacts exist together -- Plans 03-02 and 03-04 are wave
-# siblings, so neither could assert across the pair. 03-04 put the archive onto
-# the same shared comparator the feed uses; this diff is what makes that
-# permanent, and it is the only check that would catch a reintroduced inline
-# comparator on either side.
-if ! diff \
-  <(grep -o 'href="[^"]*devlog/[^"]*/"' dist/index.html | sed -E 's#.*devlog/([^"]+)/"#\1#') \
-  <(grep -oP '<guid[^>]*>\K[^<]+' dist/rss.xml | sed -E 's#.*devlog/([^/]+)/$#\1#'); then
-  echo "FAIL: the homepage archive and the feed list announcements in different orders"
-  exit 1
-fi
-if grep -qE 'entryDate\(b\)\.getTime\(\)' src/pages/index.astro "src/pages/devlog/[slug].astro" src/pages/rss.xml.ts; then
-  echo "FAIL: an inline ordering comparator was reintroduced alongside the shared sortEntriesNewestFirst()"
-  exit 1
-fi
-echo "feed/archive drift lock OK ($FEED_ITEMS items, identical order, one shared comparator)"
-
-echo "== DIST-01: channel shape =="
-CHANNEL_COUNT=$(grep -o '<channel>' dist/rss.xml | wc -l)
-if [ "$CHANNEL_COUNT" -ne 1 ]; then
-  echo "FAIL: expected exactly 1 channel element, found $CHANNEL_COUNT"
-  exit 1
-fi
-grep -q '<title>' dist/rss.xml
-grep -q '<link>' dist/rss.xml
-grep -q '<description>' dist/rss.xml
-grep -q '<language>' dist/rss.xml
-# D-57: the self-referencing atom link pre-empts the one recommendation the
-# W3C feed validation service predictably raises.
-grep -q 'rel="self"' dist/rss.xml
-# The package declares the content module namespace automatically whenever an
-# item carries `content`; a second occurrence means it was also declared by hand.
-CONTENT_NS_COUNT=$(grep -o 'xmlns:content' dist/rss.xml | wc -l)
-if [ "$CONTENT_NS_COUNT" -ne 1 ]; then
-  echo "FAIL: xmlns:content declared $CONTENT_NS_COUNT times (expected exactly 1)"
-  exit 1
-fi
-echo "channel shape OK"
-
-echo "== DIST-01: item shape -- absolute links, unique guids, RFC-822 dates =="
-ITEM_FAIL=0
-while IFS= read -r url; do
-  case "$url" in
-    "$PREFIX"*) ;;
-    *) echo "FAIL: feed link '$url' does not carry the expected prefix '$PREFIX'"; ITEM_FAIL=1 ;;
-  esac
-done < <(grep -oP '<link>\K[^<]+' dist/rss.xml)
-while IFS= read -r guid; do
-  case "$guid" in
-    "$PREFIX"*) ;;
-    *) echo "FAIL: feed guid '$guid' does not carry the expected prefix '$PREFIX'"; ITEM_FAIL=1 ;;
-  esac
-done < <(grep -oP '<guid[^>]*>\K[^<]+' dist/rss.xml)
-GUID_COUNT=$(grep -oP '<guid[^>]*>\K[^<]+' dist/rss.xml | wc -l)
-DISTINCT_GUIDS=$(grep -oP '<guid[^>]*>\K[^<]+' dist/rss.xml | sort -u | wc -l)
-if [ "$GUID_COUNT" -ne "$FEED_ITEMS" ] || [ "$DISTINCT_GUIDS" -ne "$FEED_ITEMS" ]; then
-  echo "FAIL: $FEED_ITEMS items carry $GUID_COUNT guids, $DISTINCT_GUIDS of them distinct (both must equal the item count)"
-  ITEM_FAIL=1
-fi
-PUBDATE_COUNT=$(grep -oP '<pubDate>\K[^<]+' dist/rss.xml | wc -l)
-if [ "$PUBDATE_COUNT" -ne "$FEED_ITEMS" ]; then
-  echo "FAIL: $FEED_ITEMS items carry $PUBDATE_COUNT publication dates"
-  ITEM_FAIL=1
-fi
-# A zero non-matching count makes the counting grep exit 1, which set -e would
-# otherwise read as a script failure -- the opposite of what a clean result means.
-BAD_DATES=$(grep -oP '<pubDate>\K[^<]+' dist/rss.xml | grep -cvP '^[A-Z][a-z]{2}, [0-9]{2} [A-Z][a-z]{2} [0-9]{4} ') || true
-if [ "$BAD_DATES" -ne 0 ]; then
-  echo "FAIL: $BAD_DATES publication dates are not RFC-822 shaped"
-  ITEM_FAIL=1
-fi
-[ "$ITEM_FAIL" -eq 0 ]
-echo "item shape OK ($GUID_COUNT unique, absolute, RFC-822-dated items)"
-
-echo "== DIST-01: content fidelity -- absolutized images, no second-parse artifacts =="
-# @astrojs/rss@4.0.19 emits content:encoded as XML-ESCAPED markup, not a CDATA
-# block, so the rendered attributes read `src=&quot;https://…&quot;`. Every
-# assertion below targets that escaped form; a pattern written against the raw
-# quote would pass vacuously forever.
-EXPECTED_HERO_URLS=$(node tests/helpers/content-expectations.mjs devlog_hero_count)
-HERO_URLS=$(grep -o "${SITE}[^&\"]*_astro/[^&\"]*\.webp" dist/rss.xml | wc -l)
-if ! [ "$HERO_URLS" -eq "$EXPECTED_HERO_URLS" ]; then
-  echo "FAIL: expected $EXPECTED_HERO_URLS absolute hero image URLs in the feed, found $HERO_URLS"
-  exit 1
-fi
-# A root-relative src is broken in every reader; the pattern is built from the
-# derived BASE, never typed.
-if grep -q "src=&quot;${BASE}" dist/rss.xml || grep -q "src=\"${BASE}" dist/rss.xml; then
-  echo "FAIL: the feed carries a root-relative image source -- absolutize() did not fire"
-  exit 1
-fi
-# absolutize()'s href branch is currently unexercised: no devlog body contains
-# an anchor (03-02 logged this as partial coverage rather than papering over
-# it). This assertion is deliberately a live gate rather than a fixture -- the
-# moment a post does add a link, a non-absolute href fails here instead of
-# shipping a dead URL to every reader.
-if grep -q "href=&quot;${BASE}" dist/rss.xml || grep -q "href=&quot;\.\." dist/rss.xml; then
-  echo "FAIL: the feed carries a non-absolute anchor href -- absolutize()'s href branch did not fire"
-  exit 1
-fi
-# Both of these exit 0 and are invisible in the feed source: a pre-rendered
-# content field ships unresolved image placeholders, and a second Markdown
-# parser never sees this repo's wikilink plugin.
-if grep -qF '__ASTRO_IMAGE_' dist/rss.xml; then
-  echo "FAIL: the feed carries unresolved Astro image placeholders"
-  exit 1
-fi
-if grep -qF '[[' dist/rss.xml; then
-  echo "FAIL: the feed carries an unresolved wikilink delimiter"
-  exit 1
-fi
-echo "content fidelity OK"
-
-echo "== DIST-01: no second Markdown parser was adopted =="
-# The published recipe for this task recommends one; adopting it would silently
-# emit feed content that differs from the site's own rendering.
-if grep -q 'markdown-it' package.json; then
-  echo "FAIL: a second Markdown parser dependency appeared in package.json"
-  exit 1
-fi
-echo "dependency hygiene OK"
-
-echo "== D-48 fixture: an unresolvable body hero reference fails the build, naming the post and the path =="
-HERO_FILE="devlog/2026-07-10-warping-without-losing-the-moon.md"
-HERO_BACKUP=$(mktemp)
-cp "$HERO_FILE" "$HERO_BACKUP"
-trap 'cp "$HERO_BACKUP" "$HERO_FILE" 2>/dev/null || true; rm -f "$HERO_BACKUP"' EXIT
-
-# Leg 1 -- a path with no file behind it at all. Astro's own ImageNotFound guard
-# fires during the Markdown asset import, upstream of heroFor(), so the message
-# names the referenced path but not the post. That is still a loud build
-# failure, and it is the layer that actually catches a bad promote, so it is
-# asserted here rather than pretended away.
-sed -i 's|(../assets/m0.7-hero-contrast.png)|(../assets/m0.7-hero-does-not-exist.png)|' "$HERO_FILE"
-if npm run build > /tmp/gsd-dist-d48-missing.log 2>&1; then
-  cp "$HERO_BACKUP" "$HERO_FILE"
-  echo "D-48 FIXTURE FAIL: build did not error on a body image with no file behind it"
-  exit 1
-fi
-grep -q "m0.7-hero-does-not-exist.png" /tmp/gsd-dist-d48-missing.log
-cp "$HERO_BACKUP" "$HERO_FILE"
-
-# Leg 2 -- a reference Astro CAN import but that is not a built hero record.
-# This is the leg that reaches lookupHero()'s own throw, which is the one
-# required to name both the collection id and the referenced path.
-sed -i 's|(../assets/m0.7-hero-contrast.png)|(../src/assets/og-default.svg)|' "$HERO_FILE"
-if npm run build > /tmp/gsd-dist-d48-unresolved.log 2>&1; then
-  cp "$HERO_BACKUP" "$HERO_FILE"
-  echo "D-48 FIXTURE FAIL: build did not error on a body image that is not a built hero asset"
-  exit 1
-fi
-grep -q "2026-07-10-warping-without-losing-the-moon" /tmp/gsd-dist-d48-unresolved.log
-grep -q "og-default.svg" /tmp/gsd-dist-d48-unresolved.log
-cp "$HERO_BACKUP" "$HERO_FILE"
-
-if git status --porcelain devlog/ roadmap/ pages/ | grep -q .; then
-  echo "D-48 FIXTURE FAIL: a content tree was left dirty"
-  exit 1
-fi
-echo "D-48 fixture OK: both unresolvable-hero paths fail the build loudly; content trees clean"
-
 echo "== D-54 fixture: an unset, blank or placeholder invite constant fails the build, naming the constant =="
 SITE_LIB="src/lib/site.mjs"
 # Snapshot, don't demand emptiness: the fixture must leave the trees exactly
 # as it found them, but a set-and-not-yet-committed GOATCOUNTER_CODE (the
 # D-61 post-signup state) is legitimate src/ dirt, not fixture damage.
-PRE_FIXTURE_STATUS=$(git status --porcelain devlog/ roadmap/ pages/ src/)
+PRE_FIXTURE_STATUS=$(git status --porcelain roadmap/ pages/ src/)
 SITE_LIB_BACKUP=$(mktemp)
 cp "$SITE_LIB" "$SITE_LIB_BACKUP"
 INVITE_PLACEHOLDER=$(grep -oP "^export const INVITE_PLACEHOLDER = '\K[^']+" "$SITE_LIB")
-trap 'cp "$SITE_LIB_BACKUP" "$SITE_LIB" 2>/dev/null || true; rm -f "$SITE_LIB_BACKUP" "$HERO_BACKUP"' EXIT
+trap 'cp "$SITE_LIB_BACKUP" "$SITE_LIB" 2>/dev/null || true; rm -f "$SITE_LIB_BACKUP"' EXIT
 # A near-miss value must be rejected too -- the requirement is that no page can
 # ever ship a CTA with a blank or scaffold href, not merely that an empty
 # constant breaks something.
@@ -418,49 +236,18 @@ for BAD_INVITE in "" "   " "$INVITE_PLACEHOLDER"; do
   fi
 done
 cp "$SITE_LIB_BACKUP" "$SITE_LIB"
-if [ "$(git status --porcelain devlog/ roadmap/ pages/ src/)" != "$PRE_FIXTURE_STATUS" ]; then
+if [ "$(git status --porcelain roadmap/ pages/ src/)" != "$PRE_FIXTURE_STATUS" ]; then
   echo "D-54 FIXTURE FAIL: a tree was left in a different state than the fixture found it"
   exit 1
 fi
 echo "D-54 fixture OK: unset, blank and placeholder invites all fail loudly naming the constant; trees restored"
 
-echo "== D-45/D-30 fixture: a drafted announcement leaves the feed and the archive together =="
-npm run build > /dev/null 2>&1
-BASELINE_ITEMS=$(grep -o '<item>' dist/rss.xml | wc -l)
-BASELINE_ARCHIVE=$(grep -o 'href="[^"]*devlog/[^"]*/"' dist/index.html | wc -l)
-DRAFT_FILE="devlog/2026-04-07-why-im-building-a-hyperrealistic-space-sim.md"
-DRAFT_BACKUP=$(mktemp)
-cp "$DRAFT_FILE" "$DRAFT_BACKUP"
-trap 'cp "$DRAFT_BACKUP" "$DRAFT_FILE" 2>/dev/null || true; rm -f "$DRAFT_BACKUP" "$SITE_LIB_BACKUP" "$HERO_BACKUP"' EXIT
-# The manifesto carries no frontmatter block at all, so prepending one cannot
-# produce a duplicate block.
-{ printf -- '---\nstatus: draft\n---\n\n'; cat "$DRAFT_BACKUP"; } > "$DRAFT_FILE"
-npm run build
-DRAFT_LEAK=0
-DRAFT_ITEMS=$(grep -o '<item>' dist/rss.xml | wc -l)
-DRAFT_ARCHIVE=$(grep -o 'href="[^"]*devlog/[^"]*/"' dist/index.html | wc -l)
-if [ "$DRAFT_ITEMS" -ne $((BASELINE_ITEMS - 1)) ]; then
-  echo "D-30 FIXTURE FAIL: feed went from $BASELINE_ITEMS to $DRAFT_ITEMS items (expected one fewer)"
-  DRAFT_LEAK=1
-fi
-if [ "$DRAFT_ARCHIVE" -ne $((BASELINE_ARCHIVE - 1)) ]; then
-  echo "D-30 FIXTURE FAIL: archive went from $BASELINE_ARCHIVE to $DRAFT_ARCHIVE links (expected one fewer)"
-  DRAFT_LEAK=1
-fi
-cp "$DRAFT_BACKUP" "$DRAFT_FILE"
-[ "$DRAFT_LEAK" -eq 0 ]
-if git status --porcelain devlog/ roadmap/ pages/ | grep -q .; then
-  echo "D-30 FIXTURE FAIL: a content tree was left dirty"
-  exit 1
-fi
-echo "D-30 fixture OK: the drafted announcement left both surfaces together; content trees clean"
-
 trap - EXIT
-rm -f "$HERO_BACKUP" "$SITE_LIB_BACKUP" "$DRAFT_BACKUP"
+rm -f "$SITE_LIB_BACKUP"
 
 echo "== Final clean rebuild after all fixtures restored =="
 npm run build
-if [ "$(git status --porcelain devlog/ roadmap/ pages/ src/)" != "$PRE_FIXTURE_STATUS" ]; then
+if [ "$(git status --porcelain roadmap/ pages/ src/)" != "$PRE_FIXTURE_STATUS" ]; then
   echo "FAIL: trees not restored to their pre-fixture state after the full fixture run"
   exit 1
 fi

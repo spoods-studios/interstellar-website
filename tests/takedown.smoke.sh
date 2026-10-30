@@ -61,6 +61,24 @@ if [ -e dist/rss.xml ]; then
   exit 1
 fi
 
+echo "== No built page references the feed or links to How It's Made =="
+CHROME_FAIL=0
+while IFS= read -r f; do
+  if grep -qF 'rss.xml' "$f"; then
+    echo "FAIL: $f references rss.xml"
+    CHROME_FAIL=1
+  fi
+  if grep -qF 'application/rss+xml' "$f"; then
+    echo "FAIL: $f carries an application/rss+xml link"
+    CHROME_FAIL=1
+  fi
+  if grep -q 'href="[^"]*how-its-made' "$f"; then
+    echo "FAIL: $f links to how-its-made"
+    CHROME_FAIL=1
+  fi
+done < <(find dist -name "*.html")
+[ "$CHROME_FAIL" -eq 0 ]
+
 echo "== dist/devlog/ holds only redirect stubs =="
 while IFS= read -r f; do
   case $f in
