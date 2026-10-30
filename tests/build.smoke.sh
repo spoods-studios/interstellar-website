@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
-# Smoke-test harness for the build: the site builds, the interim index
+# Smoke-test harness for the build: the site builds, the showcase index
 # renders, and a malformed content file fails the build loudly.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-echo "== Positive check: the site builds and the interim index renders =="
+echo "== Positive check: the site builds and the showcase index renders =="
 npm run build
 test -f dist/index.html
+grep -q '<h1[^>]*>Setare Aerospace</h1>' dist/index.html
 if grep -rIn -e 'github\.io' -e '/interstellar-website' src/; then
   echo "FAIL: hardcoded host/base string under src/"
   exit 1
