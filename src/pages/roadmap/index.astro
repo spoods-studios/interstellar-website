@@ -54,11 +54,15 @@ const description = describeBody(entry.body, entry.id);
   description={description}
   ogType="website"
 >
-  <Content />
-  <h2>Milestone detail pages</h2>
-  <ul>
-    {milestoneLinks.map((link) => (
-      <li><a href={link.href}>{link.label}</a></li>
-    ))}
-  </ul>
+  <div class="roadmap">
+    <Content />
+    <section class="era">
+      <h2 class="label">Milestone detail pages</h2>
+      <ul>
+        {milestoneLinks.map((link) => (
+          <li><a href={link.href}>{link.label}</a></li>
+        ))}
+      </ul>
+    </section>
+  </div>
 </PostLayout>
