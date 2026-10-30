@@ -8,9 +8,35 @@ cd "$(dirname "$0")/.."
 echo "== Build =="
 npm run build
 
-echo "== Nine roadmap detail pages built =="
-for m in m0.1 m0.2 m0.3 m0.4 m0.5 m0.6 m0.7 m0.8 m1.1; do
-  test -f "dist/roadmap/$m/index.html"
+echo "== Every visible roadmap/*.md builds at dist/roadmap/<id>/ with no JS beyond the analytics tag =="
+is_draft() {
+  awk 'NR == 1 && $0 != "---" { exit 1 } NR > 1 && $0 == "---" { exit 1 } NR > 1 && /^status:[[:space:]]*draft[[:space:]]*$/ { found = 1; exit 0 } END { exit !found }' "$1"
+}
+no_extra_js() {
+  test "$(grep -o '<script' "$1" | wc -l)" -eq "$(grep -o 'gc\.zgo\.at' "$1" | wc -l)"
+}
+ROADMAP_IDS=()
+for f in roadmap/*.md; do
+  name=$(basename "$f" .md)
+  [[ $name =~ ^[Mm][0-9]+(\.[0-9]+)?$ ]] || continue
+  is_draft "$f" && continue
+  ROADMAP_IDS+=("${name,,}")
+done
+test "${#ROADMAP_IDS[@]}" -eq "$(node tests/helpers/content-expectations.mjs roadmap_count)"
+[[ " ${ROADMAP_IDS[*]} " == *" m1.2 "* ]]
+[[ " ${ROADMAP_IDS[*]} " == *" m1.3 "* ]]
+test -f dist/roadmap/index.html
+no_extra_js dist/roadmap/index.html
+for id in "${ROADMAP_IDS[@]}"; do
+  PAGE="dist/roadmap/$id/index.html"
+  if [ ! -f "$PAGE" ]; then
+    echo "FAIL: $PAGE not built"
+    exit 1
+  fi
+  if ! no_extra_js "$PAGE"; then
+    echo "FAIL: $PAGE loads a script beyond the analytics tag"
+    exit 1
+  fi
 done
 
 echo "== A detail page contains its milestone name, phase headings, and a TOC =="
@@ -32,13 +58,6 @@ if grep -rq 'devlog/' dist/roadmap/; then
   exit 1
 fi
 
-echo "== No client JS beyond the analytics tag on roadmap detail pages (D-60/D-61) =="
-RM_PAGE=dist/roadmap/m0.1/index.html
-test "$(grep -o '<script' "$RM_PAGE" | wc -l)" -eq "$(grep -o 'gc\.zgo\.at' "$RM_PAGE" | wc -l)"
-
-echo "== Roadmap overview builds =="
-test -f dist/roadmap/index.html
-
 echo "== Overview carries a generated milestone link per roadmap entry, including the M1.1 detail link =="
 OVERVIEW="dist/roadmap/index.html"
 # Href regex widened off the m0 anchor (04-02) so a new milestone's link counts.
@@ -48,6 +67,10 @@ test "$(grep -o 'href="[^"]*roadmap/m[0-9]*\.[0-9]*/"' "$OVERVIEW" | sort -u | w
 # generates one link per visible roadmap collection entry, so once roadmap/M1.1.md
 # is promoted this link is required, not forbidden.
 grep -q 'roadmap/m1\.1' "$OVERVIEW"
+
+echo "== The generated milestone-detail list renders as an era section on the page grid =="
+ERA=$(tr -d '\n' <"$OVERVIEW" | grep -o '<section class="era"><h2 class="label">Milestone detail pages</h2><ul>.*</ul></section>' | head -1)
+test "$(grep -o 'href="[^"]*roadmap/m[0-9]*\.[0-9]*/"' <<<"$ERA" | sort -u | wc -l)" -eq "$EXPECTED_ROADMAP_LINKS"
 
 echo "== Overview carries the authored era-arc prose and presents every promoted milestone as closed =="
 # Only completed milestones are ever promoted into roadmap/ -- unlike a
@@ -75,8 +98,5 @@ while IFS= read -r ROW; do
     exit 1
   fi
 done < <(grep -o '<strong>M[0-9][^<]*</strong>[^<]*' "$OVERVIEW")
-
-echo "== No client JS beyond the analytics tag on the overview (D-60/D-61) =="
-test "$(grep -o '<script' "$OVERVIEW" | wc -l)" -eq "$(grep -o 'gc\.zgo\.at' "$OVERVIEW" | wc -l)"
 
 echo "ALL CHECKS PASSED"
