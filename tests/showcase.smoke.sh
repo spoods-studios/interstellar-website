@@ -188,6 +188,14 @@ for (const v of videos) {
 for (const [name, rec] of Object.entries(captures))
   if (rec.kind === "clip" && !clipNames.has(name)) fail(`clip ${name} from captures.json is not on the page`);
 
+if (/vandenberg/i.test(html)) fail("the page references Vandenberg, whose plate was dropped for the stepped-coast terrain defect");
+const launch = sections.filter((s) => />Launch-site terrain<\/h2>/.test(s));
+if (launch.length !== 1) fail(`found ${launch.length} sections headed Launch-site terrain`);
+else {
+  const launchClips = [...launch[0].matchAll(/<source\b[^>]*type="video\/webm"[^>]*>/g)].map((m) => (attrs(m[0]).get("src") ?? "").slice(`${base}showcase/`.length).replace(/\.webm$/, ""));
+  if (JSON.stringify(launchClips) !== JSON.stringify(["spot-ksc", "spot-starbase"])) fail(`the launch-site chapter carries clips ${JSON.stringify(launchClips)}, expected ["spot-ksc","spot-starbase"]`);
+}
+
 let lazyStillBytes = 0;
 const pictures = [...html.matchAll(/<picture\b[^>]*>[\s\S]*?<\/picture>/g)].map((m) => m[0]);
 if (pictures.length < 1 || pictures.length > 12) fail(`${pictures.length} <picture> elements, expected 1 to 12`);

@@ -86,11 +86,10 @@ const ogImage = {
   <section class="ch">
     <svg class="traj flip" aria-hidden="true" set:html={bend} />
     <header><span class="label num">Chapter 3</span><h2 class="enter">Launch-site terrain</h2></header>
-    <p class="body enter">Kennedy Space Center, Starbase and Vandenberg load dataset-backed elevation and land cover. Each clip is the first 6 s of a descent from 12 km to 6 km, looking down at 28.6°.</p>
-    <div class="row3">
+    <p class="body enter">Kennedy Space Center and Starbase load dataset-backed elevation and land cover. Each clip is the first 6 s of a descent from 12 km to 6 km, looking down at 28.6°.</p>
+    <div class="row2">
       <ShowcaseClip class="enter" name="spot-ksc" number="3.1" caption="Kennedy Space Center, Florida." />
       <ShowcaseClip class="enter" name="spot-starbase" number="3.2" caption="Starbase, Texas." />
-      <ShowcaseClip class="enter" name="spot-vandenberg" number="3.3" caption="Vandenberg, California." />
     </div>
   </section>
 
@@ -420,7 +419,7 @@ const ogImage = {
   }
 
   .row4,
-  .row3,
+  .row2,
   .split,
   .ghosts {
     grid-column: 1 / 13;
@@ -434,8 +433,8 @@ const ogImage = {
     grid-template-columns: repeat(4, 1fr);
   }
 
-  .row3 {
-    grid-template-columns: repeat(3, 1fr);
+  .row2 {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .split {
@@ -542,7 +541,7 @@ const ogImage = {
       grid-template-columns: repeat(2, 1fr);
     }
 
-    .row3,
+    .row2,
     .split {
       grid-template-columns: 1fr;
     }
