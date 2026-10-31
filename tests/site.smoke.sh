@@ -86,10 +86,13 @@ done < <(find dist -name "*.html")
 [ "$FAVICON_FAIL" -eq 0 ]
 echo "favicon coverage OK"
 
-echo "== Every script tag anywhere in dist/ is the sanctioned analytics tag (D-60/D-61) =="
-# State-free: while GOATCOUNTER_CODE is unset both totals are zero; once it is
-# set both are one per page. A stray script breaks it in either state.
-test "$(grep -ro '<script' dist/ | wc -l)" -eq "$(grep -ro 'gc\.zgo\.at' dist/ | wc -l)"
+echo "== Every script tag in dist/ is the analytics tag, plus the showcase module on / (D-60/D-61) =="
+# State-free: while GOATCOUNTER_CODE is unset the analytics total is zero; once
+# it is set it is one per page. The one allowed exception is the showcase's
+# hashed motion module on dist/index.html. A stray script breaks it in either state.
+test "$(grep -ro '<script' dist/ | wc -l)" -eq "$(( $(grep -ro 'gc\.zgo\.at' dist/ | wc -l) + 1 ))"
+test "$(grep -o '<script' dist/index.html | wc -l)" -eq "$(( $(grep -o 'gc\.zgo\.at' dist/index.html | wc -l) + 1 ))"
+test "$(grep -oE "<script type=\"module\" src=\"${NORMALIZED_BASE}_astro/[^\"/]+\\.js\"></script>" dist/index.html | wc -l)" -eq 1
 echo "no-extra-JS OK"
 
 echo "== Dead-link sweep: every internal href resolves to a real file in dist/ =="

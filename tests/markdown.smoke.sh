@@ -13,7 +13,7 @@ grep -q "interstellar-website/" dist/sitemap-index.xml
 echo "sitemap OK"
 
 echo "== Zero client JS beyond the analytics tag (D-60/D-61) =="
-RENDERED="dist/index.html"
+RENDERED="dist/roadmap/index.html"
 test -f "$RENDERED"
 test "$(grep -o '<script' "$RENDERED" | wc -l)" -eq "$(grep -o 'gc\.zgo\.at' "$RENDERED" | wc -l)"
 echo "no-extra-JS OK"
