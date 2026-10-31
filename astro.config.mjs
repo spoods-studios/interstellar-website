@@ -10,21 +10,33 @@ import { assertInviteConfigured, assertGoatcounterConfigured } from './src/lib/s
 const BASE = '/interstellar-website';
 const NORMALIZED_BASE = BASE.endsWith('/') ? BASE : `${BASE}/`;
 
-// D-65/CONT-06: one entry per renamed published slug -- a deployed URL is
-// permanent, and a rename lands here in the same commit. Keys are base-FREE
-// old paths because Astro applies the base to the match side itself;
-// destinations MUST be base-composed (never a literal) because Astro emits
-// string destinations verbatim into the stub's meta-refresh URL -- a base-less
-// destination builds clean and sends readers to a path that does not exist.
-// The entry below is a demonstration: a never-published old slug pointing at
-// the launch post, kept so the harness exercises the mechanism end-to-end
-// rather than because a real rename happened.
+// D-65/CONT-06 takedown redirects: the devlog and How It's Made were taken
+// down, and a deployed URL is permanent, so every removed path lands here
+// pointing at the site root. Keys are base-FREE old paths because Astro
+// applies the base to the match side itself; destinations MUST be
+// base-composed (never a literal) because Astro emits string destinations
+// verbatim into the stub's meta-refresh URL -- a base-less destination builds
+// clean and sends readers to a path that does not exist. The demo-old-slug
+// entry was never published; it stays so the harness keeps exercising the
+// mechanism end-to-end.
 const SLUG_REDIRECTS = {
-  '/devlog/2026-07-30-demo-old-slug': `${NORMALIZED_BASE}devlog/2026-07-30-first-burn/`,
+  '/devlog/2026-04-07-why-im-building-a-hyperrealistic-space-sim': `${NORMALIZED_BASE}`,
+  '/devlog/2026-04-13-before-the-galaxy-a-triangle': `${NORMALIZED_BASE}`,
+  '/devlog/2026-04-25-a-coordinate-system-that-doesnt-lie': `${NORMALIZED_BASE}`,
+  '/devlog/2026-06-05-a-moon-that-actually-orbits': `${NORMALIZED_BASE}`,
+  '/devlog/2026-06-14-from-one-world-to-many': `${NORMALIZED_BASE}`,
+  '/devlog/2026-06-19-teaching-the-engine-to-fast-forward': `${NORMALIZED_BASE}`,
+  '/devlog/2026-06-25-shipping-the-warp-lever-with-a-bouncer-on-the-door': `${NORMALIZED_BASE}`,
+  '/devlog/2026-07-10-warping-without-losing-the-moon': `${NORMALIZED_BASE}`,
+  '/devlog/2026-07-13-making-mercury-precess': `${NORMALIZED_BASE}`,
+  '/devlog/2026-07-30-first-burn': `${NORMALIZED_BASE}`,
+  '/devlog/2026-08-11-the-line-you-fly': `${NORMALIZED_BASE}`,
+  '/devlog/2026-08-11-three-small-fixes-before-closing-the-books': `${NORMALIZED_BASE}`,
+  '/devlog/2026-07-30-demo-old-slug': `${NORMALIZED_BASE}`,
+  '/how-its-made': `${NORMALIZED_BASE}`,
 };
 
 const ROADMAP_ROOT = fileURLToPath(new URL('./roadmap', import.meta.url));
-const DEVLOG_ROOT = fileURLToPath(new URL('./devlog', import.meta.url));
 const PAGES_ROOT = fileURLToPath(new URL('./pages', import.meta.url));
 const mdastPlugins = [];
 
@@ -34,10 +46,9 @@ const mdastPlugins = [];
 // determines preflight coverage. A new tree can only escape validation by
 // someone forgetting to add a line here, not by the preflight silently
 // scoping itself to whichever trees happened to exist when it was written
-// (which is exactly how devlog/ and pages/ were missed originally).
+// (which is exactly how pages/ was missed originally).
 const CONTENT_TREES = [
   { root: ROADMAP_ROOT },
-  { root: DEVLOG_ROOT, exclude: ['_TEMPLATE.md'] },
   { root: PAGES_ROOT },
 ];
 

@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import { DISCORD_INVITE_URL, SITE_NAME, SITE_TAGLINE, OG_DEFAULT, FEED_TITLE, assertGoatcounterConfigured } from '../lib/site.mjs';
+import { DISCORD_INVITE_URL, SITE_NAME, SITE_TAGLINE, OG_DEFAULT, assertGoatcounterConfigured } from '../lib/site.mjs';
 
 export interface Props {
   title: string;
@@ -38,6 +38,9 @@ const ogImageUrl = new URL(card.src, Astro.site).toString();
 // layout and the config share one definition of "configured" -- null while
 // the code is unset, the trimmed code once the developer signs up.
 const goatcounterCode = assertGoatcounterConfigured();
+const roadmapHref = `${base}roadmap/`;
+const pathname = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
+const onRoadmap = pathname.startsWith(roadmapHref);
 ---
 
 <html lang="en">
@@ -48,11 +51,8 @@ const goatcounterCode = assertGoatcounterConfigured();
     <meta name="description" content={metaDescription} />
     {/*
       Values below use plain Astro {expr} attribute interpolation, which escapes
-      attribute context correctly (" -> &quot;, & -> &amp;). Deliberately NOT
-      src/lib/escape-html.ts: that helper leaves quotes unescaped (an
-      attribute-breakout hazard here) and would double-escape ampersands. The
-      WR-01/WR-02 findings that introduced it applied to set:html on titles --
-      the opposite context, and they do not generalize to attributes.
+      attribute context correctly (" -> &quot;, & -> &amp;), so no hand-rolled
+      escaping helper belongs here.
       og:title carries the bare title prop: <title> has no site-name suffix, so
       appending SITE_NAME would visibly double the brand next to og:site_name.
     */}
@@ -67,7 +67,7 @@ const goatcounterCode = assertGoatcounterConfigured();
     <meta property="og:image:alt" content={card.alt} />
     {publishedTime && <meta property="article:published_time" content={publishedTime} />}
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="theme-color" content="#1d5fae" />
+    <meta name="theme-color" content="#dfe6e1" />
     {/* D-68: freshness stamp -- a post-deploy probe greps for this exact meta
         carrying the deploying commit's SHA to tell the deployed bytes apart
         from a stale CDN copy (an HTTP 200 alone proves nothing). Emitted
@@ -90,30 +90,21 @@ const goatcounterCode = assertGoatcounterConfigured();
         src="//gc.zgo.at/count.js"></script>
     )}
     <link rel="canonical" href={canonicalUrl} />
-    {/* D-47: autodiscovery lives in the shared layout, not per-route, so every
-        built page tells a reader app where the feed is. */}
-    <link rel="alternate" type="application/rss+xml" title={FEED_TITLE} href={`${base}rss.xml`} />
     <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
   </head>
   <body>
-    <header>
-      <a class="wordmark" href={base}>Interstellar Engine</a>
+    <header class="head">
+      <a class="mark" href={base}>Interstellar Engine <span>/ Setare Aerospace</span></a>
       <nav>
-        <a href={base}>Devblog</a>
-        <a href={`${base}how-its-made/`}>How It's Made</a>
-        <a href={`${base}roadmap/`}>Roadmap</a>
-        <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer">Discord</a>
+        <a href={roadmapHref} aria-current={onRoadmap ? 'page' : undefined}>Roadmap</a>
+        <a class="cta" href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12h14M13 6l6 6-6 6" /></svg>Join the Discord</a>
       </nav>
     </header>
-    <main>
+    <main class="page">
       <slot />
     </main>
     <footer>
-      {/* D-47/D-53: the feed link stays same-tab -- readers intercept it and a
-          raw XML tab is one back-button away; only the Discord links leave the
-          site. Separators are literal middots in the text flow, not a flex gap,
-          so the line wraps naturally at any width. */}
-      <p>© 2026 Spoods Studios · <a href={`${base}rss.xml`}>RSS</a> · <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer">Join the Discord</a></p>
+      <p class="meta">© 2026 Spoods Studios · <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer">Join the Discord</a></p>
     </footer>
   </body>
 </html>

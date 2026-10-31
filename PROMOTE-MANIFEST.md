@@ -6,33 +6,6 @@ repo hosts no promote automation; that remains a studio-side concern per
 `.forge/archive/gsd/REQUIREMENTS.md` ("Out of Scope"). This file is the record of what
 was copied, from where, and why anything named here was excluded.
 
-## devlog/ — milestone announcements
-
-| Source (`../vault/devlog/drafts/`) | Destination (`devlog/`) |
-|---|---|
-| `m0.1-vulkan-bootstrap.md` | `2026-04-13-before-the-galaxy-a-triangle.md` |
-| `m0.2-coordinate-system.md` | `2026-04-25-a-coordinate-system-that-doesnt-lie.md` |
-| `m0.3-basic-orbit.md` | `2026-06-05-a-moon-that-actually-orbits.md` |
-| `m0.4-multi-body.md` | `2026-06-14-from-one-world-to-many.md` |
-| `m0.5-gravity-performance.md` | `2026-06-19-teaching-the-engine-to-fast-forward.md` |
-| `m0.6-wh-shipped.md` | `2026-06-25-shipping-the-warp-lever-with-a-bouncer-on-the-door.md` |
-| `m0.7-nested-wisdom-holman.md` | `2026-07-10-warping-without-losing-the-moon.md` |
-| `m0.8-perturbations.md` | `2026-07-13-making-mercury-precess.md` |
-
-Plus two hero assets from `../vault/devlog/assets/`, referenced by the
-M0.7/M0.8 bodies as `../assets/<file>.png` (D-28):
-
-| Source | Destination |
-|---|---|
-| `m0.7-hero-contrast.png` | `assets/m0.7-hero-contrast.png` |
-| `m0.8-hero-precession.png` | `assets/m0.8-hero-precession.png` |
-
-`manifesto.md` is not listed above — it was already promoted in Phase 1
-(`devlog/2026-04-07-why-im-building-a-hyperrealistic-space-sim.md`).
-
-Copies are byte-for-byte, no frontmatter or body edits (D-14, D-25;
-VOICE.md is locked studio-side).
-
 ## technical/ — per-phase deep-dives
 
 `../vault/devlog/technical/` copied wholesale into repo-root
@@ -63,7 +36,6 @@ byte-for-byte into repo-root `roadmap/`, filenames unchanged (D-38).
 
 | Source | Destination | Note |
 |---|---|---|
-| `../vault/devlog/drafts/how-its-made.md` | `pages/how-its-made.md` | Body byte-identical. One frontmatter field mutated: `status: draft` → `status: published` — the only content mutation permitted anywhere in this plan. Rationale: D-30 makes a `draft`-status entry non-rendering; CONT-03 requires this page live at M1.1 close; the file's own (now-removed) staging comment already said it publishes to this site at M1.1 close. The act of promoting IS the publication. `updated:`, `title`, and every body line are untouched. |
 | `../vault/devlog/discord/roadmap-overview.pinned.md` | `pages/roadmap.md` | **Authored, not copied** (D-37). Transcribed into site voice: dropped the "How this channel works" Discord-mechanics paragraph, rewrote the "confused by tags" pointer to name the How to Read page in this site's Technical section instead of a pinned Discord post, dropped the closing "follow the milestone threads below" line (site-generated chrome supersedes it), kept the era arc and the Era 0 milestone list with per-milestone summaries and phase counts in order, kept M1.1 listed as in-progress with no detail-page link (its detail doc lands in Phase 4, D-44). |
 
 ## Excluded and why
@@ -89,11 +61,6 @@ Promoted at the engine M1.2 `/complete-milestone` close, same rules as above
 | Source | Destination | Files |
 |---|---|---|
 | `../vault/devlog/technical/m1.2/` | `technical/m1.2/` | 10 (phases 55, 55.1, 55.2, 56, 57, 57.1, 58, 59, 60, 61) |
-
-Devlog additions landed separately (authored, not copied):
-`devlog/2026-08-11-three-small-fixes-before-closing-the-books.md` (M1.2
-debt-fix addendum) and the M1.2 milestone announcement (pending draft
-acceptance at time of this entry — see git history for its landing commit).
 
 Still pending promote: `roadmap/M1.2.md` — its source
 (`../.forge/docs/roadmap-detail/M1.2.md`) is a studio close-side

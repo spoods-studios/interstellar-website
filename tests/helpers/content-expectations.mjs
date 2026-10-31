@@ -1,16 +1,8 @@
 #!/usr/bin/env node
 // Single source of derived test expectations for tests/*.smoke.sh. Every
 // corpus-sized assertion in the harness reads its expected value from this
-// CLI at run time instead of a hardcoded literal, so a new devlog/roadmap
-// content drop can never turn the suite red on its own.
-//
-// devlog-meta.ts's isAddendum()/entryDate() logic is deliberately mirrored
-// here rather than imported: its extensionless relative imports
-// (./title-from-h1, ./entry-order) do not resolve under bare Node -- there is
-// no bundler here to rewrite them. entry-order.ts is import-free on purpose
-// (see its own header comment) and is the one file in src/lib/ that CAN be
-// imported directly from a plain Node CLI, so the newest/oldest derivation
-// below imports compareNewestFirst from it and nothing else.
+// CLI at run time instead of a hardcoded literal, so a new roadmap content
+// drop can never turn the suite red on its own.
 //
 // Usage: node tests/helpers/content-expectations.mjs <key>
 // Prints exactly one bare value on stdout, no label, so bash can consume it
@@ -19,27 +11,20 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { compareNewestFirst } from '../../src/lib/entry-order.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '../..');
 
-const ADDENDUM_TAG = 'milestone-addendum';
-const DEVLOG_FILENAME_RE = /^(\d{4}-\d{2}-\d{2})-.+\.md$/;
 const ROADMAP_FILENAME_RE = /^M\d+(?:\.\d+)?\.md$/i;
-// Matches ![alt](path) and ![alt](path "title"); captures the path only.
-const IMAGE_RE = /!\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/;
 
 // Deliberately minimal line scanner -- no YAML dependency, and not the
 // js-yaml that happens to sit in node_modules as an Astro transitive. Reads
-// only the leading `---` fenced block, and only the handful of keys this
-// helper needs. Anything shaped differently than every current post throws
-// naming the file, rather than silently guessing.
+// only the leading `---` fenced block as flat `key: value` lines.
 function readFrontmatter(filePath) {
   const text = readFileSync(filePath, 'utf8');
   const lines = text.split(/\r?\n/);
   if (lines[0] !== '---') {
-    return { data: {}, body: text };
+    return {};
   }
   let end = -1;
   for (let i = 1; i < lines.length; i++) {
@@ -49,35 +34,15 @@ function readFrontmatter(filePath) {
     }
   }
   if (end === -1) {
-    return { data: {}, body: text };
+    return {};
   }
   const data = {};
   for (let i = 1; i < end; i++) {
     const match = lines[i].match(/^([A-Za-z_]+):\s*(.*)$/);
     if (!match) continue;
-    const [, key, rawValue] = match;
-    let value = rawValue.trim();
-    if (key === 'status') {
-      // devlog frontmatter carries a trailing inline comment, e.g.
-      // "published   # draft | published" -- strip it.
-      value = value.split('#')[0].trim();
-    }
-    if (key === 'tags') {
-      if (!value.startsWith('[') || !value.endsWith(']')) {
-        throw new Error(
-          `${filePath}: tags line is not the inline-array form every current post uses: ${rawValue}`
-        );
-      }
-      value = value
-        .slice(1, -1)
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean);
-    }
-    data[key] = value;
+    data[match[1]] = match[2].trim();
   }
-  const body = lines.slice(end + 1).join('\n');
-  return { data, body };
+  return data;
 }
 
 function isDraft(data) {
@@ -90,32 +55,10 @@ function listMarkdownFiles(dir) {
     .map((entry) => entry.name);
 }
 
-function deriveDevlogEntries() {
-  const dir = path.join(ROOT, 'devlog');
-  const entries = [];
-  for (const name of listMarkdownFiles(dir)) {
-    if (name === '_TEMPLATE.md') continue;
-    const match = name.match(DEVLOG_FILENAME_RE);
-    if (!match) continue;
-    const { data } = readFrontmatter(path.join(dir, name));
-    if (isDraft(data)) continue;
-    const id = name.replace(/\.md$/, '');
-    const date = data.date
-      ? new Date(`${data.date}T00:00:00Z`)
-      : new Date(`${match[1]}T00:00:00Z`);
-    const isAddendum = Array.isArray(data.tags) && data.tags.includes(ADDENDUM_TAG);
-    entries.push({ id, date, isAddendum });
-  }
-  if (entries.length === 0) {
-    throw new Error('devlog/: derived zero visible entries');
-  }
-  return [...entries].sort(compareNewestFirst);
-}
-
 function deriveRoadmapCount() {
   const dir = path.join(ROOT, 'roadmap');
   const files = listMarkdownFiles(dir).filter((name) => ROADMAP_FILENAME_RE.test(name));
-  const visible = files.filter((name) => !isDraft(readFrontmatter(path.join(dir, name)).data));
+  const visible = files.filter((name) => !isDraft(readFrontmatter(path.join(dir, name))));
   if (visible.length === 0) {
     throw new Error('roadmap/: derived zero milestone files');
   }
@@ -125,81 +68,34 @@ function deriveRoadmapCount() {
 function derivePagesCount() {
   const dir = path.join(ROOT, 'pages');
   const files = listMarkdownFiles(dir);
-  const visible = files.filter((name) => !isDraft(readFrontmatter(path.join(dir, name)).data));
+  const visible = files.filter((name) => !isDraft(readFrontmatter(path.join(dir, name))));
   if (visible.length === 0) {
     throw new Error('pages/: derived zero standalone pages');
   }
   return visible.length;
 }
 
-// D-48/hero-assets.ts: the og:image hero is resolved from the entry's FIRST
-// body image import, never the hero_visual frontmatter field -- two posts
-// put a prose sentence there with no file behind it. Mirror that here by
-// scanning the body (post-frontmatter) for the first Markdown image
-// reference and reducing it to its basename.
-function firstBodyImageBasename(body) {
-  const match = body.match(IMAGE_RE);
-  if (!match) return null;
-  return path.basename(match[1]);
-}
-
-function deriveOgImageCount(devlogEntries) {
-  const dir = path.join(ROOT, 'devlog');
-  const basenames = new Set();
-  for (const entry of devlogEntries) {
-    const { body } = readFrontmatter(path.join(dir, `${entry.id}.md`));
-    const basename = firstBodyImageBasename(body);
-    if (basename) basenames.add(basename);
-  }
-  return basenames.size + 1; // +1 for the default card, used by heroless entries
-}
-
-// Distinct from og_image_count: the RSS feed embeds one absolute hero image
-// URL per devlog entry that carries a body image, regardless of whether two
-// entries happen to share the same source image -- so this counts entries,
-// not distinct basenames.
-function deriveDevlogHeroCount(devlogEntries) {
-  const dir = path.join(ROOT, 'devlog');
-  let count = 0;
-  for (const entry of devlogEntries) {
-    const { body } = readFrontmatter(path.join(dir, `${entry.id}.md`));
-    if (firstBodyImageBasename(body)) count++;
-  }
-  return count;
-}
-
 function deriveAll() {
-  const devlogEntries = deriveDevlogEntries();
   const roadmapCount = deriveRoadmapCount();
   const pagesCount = derivePagesCount();
-  const ogImageCount = deriveOgImageCount(devlogEntries);
-  const devlogHeroCount = deriveDevlogHeroCount(devlogEntries);
 
   // Structural singletons: these routes exist once no matter how much
-  // devlog/roadmap content lands -- they are route-shaped, not
-  // content-shaped, so they stay named constants rather than derived counts.
+  // roadmap content lands -- they are route-shaped, not content-shaped, so
+  // they stay named constants rather than derived counts.
   const ROADMAP_OVERVIEW_SINGLETON = 1; // dist/roadmap/index.html
-  const HOW_ITS_MADE_SINGLETON = 1; // dist/how-its-made/index.html
   const HOMEPAGE_SINGLETON = 1; // dist/index.html
   const NOT_FOUND_SINGLETON = 1; // dist/404.html
 
   const sitePageCount =
-    devlogEntries.length +
     roadmapCount +
     ROADMAP_OVERVIEW_SINGLETON +
-    HOW_ITS_MADE_SINGLETON +
     HOMEPAGE_SINGLETON +
     NOT_FOUND_SINGLETON;
 
   return {
-    devlog_count: devlogEntries.length,
     roadmap_count: roadmapCount,
     pages_count: pagesCount,
     site_page_count: sitePageCount,
-    og_image_count: ogImageCount,
-    devlog_hero_count: devlogHeroCount,
-    newest_devlog_id: devlogEntries[0].id,
-    oldest_devlog_id: devlogEntries[devlogEntries.length - 1].id,
   };
 }
 
