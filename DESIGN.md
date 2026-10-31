@@ -150,8 +150,8 @@ Only two sizes exist: `--s` (1.0625rem) and `--l` (`clamp(2.6rem, 6.2vw, 5.6rem)
 - **Page grid:** `main.page` is 12 equal columns with a 24 px column gap and padding of 56 px top, `--gut` sides and 120 px bottom. Each showcase section spans all 12 columns as a subgrid, so plates, captions and margin notes in every section share one set of columns.
 - **Quadrille:** the body draws 1 px lines in the `grid` colour every 24 px (`--cell`) in both directions.
 - **Hero:** the H1 spans columns 1–9 and the lede 1–7. The action row (CTA plus a Roadmap link, 28 px gap) spans all 12 columns. Fig. 1 spans 1–9, with the vis-viva margin note in 10–12, both 48 px below the action row.
-- **Chapters:** 140 px top padding (180 px for the Discord close). The chapter header is a subgrid row with the number in columns 1–2 and the H2 in 3–12, over a hairline. The body copy spans 3–8. Content rows start 40 px below it with a 24 px gap: four up for the buildup row and the ghosts, three up for the launch-site clips, and a 7fr/5fr split for still plus diagram or diagram plus margin note.
-- **Breakpoint 860 px:** below it every column span collapses to 1–12. Four-up rows become two-up, and three-up rows and splits become one column. The roadmap's sticky era headings become static.
+- **Chapters:** 140 px top padding (180 px for the Discord close). The chapter header is a subgrid row with the number in columns 1–2 and the H2 in 3–12, over a hairline. The body copy spans 3–8. Content rows start 40 px below it with a 24 px gap: four up for the buildup row and the ghosts, two up for the launch-site clips, and a 7fr/5fr split for still plus diagram or diagram plus margin note.
+- **Breakpoint 860 px:** below it every column span collapses to 1–12. Four-up rows become two-up, and the two-up launch-site row and the splits become one column. The roadmap's sticky era headings become static.
 - **Running head:** sticky at top, z-index 5, 14 px by `--gut` padding. The wordmark sits left; Roadmap and the CTA sit right.
 
 ## Elevation & Depth
@@ -289,10 +289,10 @@ initialises once on load.
 **Clips** (`ShowcaseClip.astro`):
 - Markup: `<video muted loop playsinline preload="none" poster="…" width="1280" height="720" disableremoteplayback>` with a webm `<source>` first and an mp4 second, both at `${BASE_URL}showcase/<name>` from `public/showcase/`. There is no `autoplay` (it overrides `preload`) and no `controls`.
 - The build fails loudly when a clip has no `-poster.png` or no `captured` date in `captures.json`.
-- `/` carries 4 clips, against a cap of 8: buildup-l4, spot-ksc, spot-starbase and spot-vandenberg.
+- `/` carries 3 clips, against a cap of 8: buildup-l4, spot-ksc and spot-starbase.
 - Encodes come from `tools/showcase-encode.sh`. Captures must be 1280×720 and clips 4–8 s long.
 
-**Posters:** each is built from `<name>-poster.png` with `getImage({ format: 'webp', width: 1280, quality: 'mid' })`. The cap is 80,000 bytes each. The shipped posters are 5,186 to 10,418 B.
+**Posters:** each is built from `<name>-poster.png` with `getImage({ format: 'webp', width: 1280, quality: 'mid' })`. The cap is 80,000 bytes each. The shipped posters are 5,186 to 9,272 B.
 
 **OG image:** the terminator still via `getImage` as a 1280×720 jpg, passed to `BaseLayout`'s `ogImage`. It is used on `/` only. Every other page keeps the default card.
 
@@ -306,21 +306,21 @@ GitHub Pages applies.
 | Budget | Cap | Measured |
 |---|---|---|
 | Animation JS: gzip of the module `/` loads plus every `_astro` chunk it imports | ≤ 20,000 B | 9,987 B (one 30,266 B module, no chunks) |
-| Eager bytes on `/` (`bash tools/perf-log.sh`, metric `home_eager_bytes`) | ≤ 500,000 B | 205,751 B |
-| Worst-case full scroll (eager + each lazy still's largest candidate + posters + each clip's larger encode) | ≤ 8,000,000 B | 1,064,951 B |
-| Clips on the page | ≤ 8 | 4 |
+| Eager bytes on `/` (`bash tools/perf-log.sh`, metric `home_eager_bytes`) | ≤ 500,000 B | 205,115 B |
+| Worst-case full scroll (eager + each lazy still's largest candidate + posters + each clip's larger encode) | ≤ 8,000,000 B | 718,464 B |
+| Clips on the page | ≤ 8 | 3 |
 | Stills on the page | ≤ 12 | 5 |
 | Clips playing at once | ≤ 2 | 2 (clip-play cap) |
 
 The eager total breaks down as follows:
-- HTML: 22,669 B. This includes the inlined page styles and `lenis.css`.
+- HTML: 22,033 B. This includes the inlined page styles and `lenis.css`.
 - Linked stylesheet: 5,147 B.
 - Three woff2 fonts: 145,288 B.
 - The JS module: 30,266 B.
 - The hero's largest AVIF candidate: 2,381 B.
 
-The worst case adds lazy stills (71,472 B), posters (30,202 B) and clips
-(757,526 B). `tools/perf-log.sh` fails loudly, naming the path, when
+The worst case adds lazy stills (71,472 B), posters (19,784 B) and clips
+(422,093 B). `tools/perf-log.sh` fails loudly, naming the path, when
 `dist/index.html` is missing.
 
 There are no cookies. GoatCounter is the only analytics and the only
