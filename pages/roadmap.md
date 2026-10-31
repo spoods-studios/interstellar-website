@@ -1,6 +1,6 @@
 ---
 title: Roadmap
-updated: 2026-08-12
+updated: 2026-10-31
 status: published
 ---
 
@@ -8,7 +8,8 @@ status: published
 
 The engine is being built one milestone at a time. This page tracks the
 arc: Era 0 — engine foundations (done) → Era 1 — first gameplay (in
-progress) → Era 2 — Early Access MVP → Era 3+ — career & story.
+progress) → Era 2 — Early Access MVP → Era 3+ — career mode, EVA and the
+full game.
 
 ## Era 0 — engine foundations ✅
 
