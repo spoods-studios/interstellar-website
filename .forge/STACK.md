@@ -4,9 +4,11 @@
 
 ## Languages and frameworks
 
-- Astro 7 static site (`astro.config.mjs`) with TypeScript, Content Collections (`src/content.config.ts`), `@astrojs/rss`, `@astrojs/sitemap`, `sanitize-html`.
+- Astro 7 static site (`astro.config.mjs`) with TypeScript, Content Collections (`src/content.config.ts`), `@astrojs/sitemap`.
 - Markdown renders through Sätteri (`@astrojs/markdown-satteri`, `satteri`), configured via `markdown.processor` in `astro.config.mjs`, not the classic remark/rehype pipeline.
-- Content lives in three glob-loaded trees: `devlog/`, `roadmap/`, `pages/` (`src/content.config.ts`, `CONTENT_TREES` in `astro.config.mjs`).
+- Content lives in two glob-loaded trees: `roadmap/`, `pages/` (`src/content.config.ts`, `CONTENT_TREES` in `astro.config.mjs`).
+- `motion` and `lenis` (pinned exact in `package.json`) animate the showcase page only; GSAP is not used.
+- Capture media are encoded with `ffmpeg` and `oxipng` via `tools/showcase-encode.sh`.
 - GitHub Pages hosting, deployed via GitHub Actions (`.github/workflows/deploy.yml`), served at `spoods-studios.github.io/interstellar-website`.
 - GoatCounter for cookieless analytics, loaded client-side from `BaseLayout.astro` only when a site code is configured (`src/lib/site.mjs`).
 
