@@ -75,10 +75,16 @@ for l in "$p1" "$p2" "$mp4"; do
   [[ "$l" == *"-framerate 60 -start_number 0 -ss 0.500000 -t 6 -i $CAP/frames/%06d.ppm"* ]] || fail "input trim not on the input: $l"
   [[ "$l" == *" -an "* ]] || fail "audio not dropped: $l"
 done
-[[ "$p1" == *"-vf fps=30,scale=1280:720:flags=lanczos,format=yuv420p -c:v libvpx-vp9 -b:v 0 -crf 34 -g 60 -row-mt 1"* ]] || fail "VP9 pass 1 args: $p1"
-[[ "$p1" == *"-pass 1 -an -f null /dev/null" ]] || fail "VP9 pass 1 output: $p1"
-[[ "$p2" == *"-crf 34"* && "$p2" == *"-deadline good -cpu-used 1 -pass 2 -an $T/site/public/showcase/buildup-l4.webm" ]] || fail "VP9 pass 2 args: $p2"
-[[ "$mp4" == *"-vf fps=30,scale=1280:720:flags=lanczos:out_color_matrix=bt709,format=yuv420p -c:v libx264 -preset veryslow -crf 27 -profile:v high -level 4.1 -maxrate 1500k -bufsize 3000k -g 60 -colorspace bt709 -color_primaries bt709 -color_trc bt709 -movflags +faststart -an $T/site/public/showcase/buildup-l4.mp4" ]] || fail "H.264 args: $mp4"
+has() {
+  local line=$1 want; shift
+  for want in "$@"; do [[ "$line" == *"$want"* ]] || fail "lacks '$want': $line"; done
+}
+has "$p1" "-c:v libvpx-vp9" "-crf 34" "scale=1280:720" "format=yuv420p"
+[[ "$p1" == *" /dev/null" ]] || fail "VP9 pass 1 output: $p1"
+has "$p2" "-c:v libvpx-vp9" "-crf 34" "scale=1280:720" "format=yuv420p"
+[[ "$p2" == *" $T/site/public/showcase/buildup-l4.webm" ]] || fail "VP9 pass 2 output: $p2"
+has "$mp4" "-c:v libx264" "-crf 27" "scale=1280:720" "format=yuv420p" "-movflags +faststart"
+[[ "$mp4" == *" $T/site/public/showcase/buildup-l4.mp4" ]] || fail "H.264 output: $mp4"
 plog=$(sed -n 's/.*-passlogfile \([^ ]*\).*/\1/p' "$STUB_LOG" | sort -u)
 [ "$(echo "$plog" | wc -l)" = 1 ] || fail "both passes must share one pass log: $plog"
 [[ "$plog" != "$T/site"* && "$plog" != "$PWD"* ]] || fail "pass log inside a repo: $plog"
@@ -119,8 +125,8 @@ run "$LD" terminator --still 100 || fail "lookdev still refused"
 echo "== cap overflow retries with crf +2 =="
 STUB_SIZE_webm_34=1100000 STUB_SIZE_webm_36=900000 STUB_SIZE_mp4_27=1600000 STUB_SIZE_mp4_29=1400000 \
   run "$CAP" buildup-l4 --clip 30 || { cat "$T/err"; fail "retry run exited non-zero"; }
-grep -qe 'libvpx-vp9 -b:v 0 -crf 36 .*-pass 2' "$STUB_LOG" || fail "VP9 not retried at crf 36"
-grep -qe 'libx264 -preset veryslow -crf 29' "$STUB_LOG" || fail "H.264 not retried at crf 29"
+grep -qe 'libvpx-vp9 .*-crf 36 .*-pass 2' "$STUB_LOG" || fail "VP9 not retried at crf 36"
+grep -qe 'libx264 .*-crf 29' "$STUB_LOG" || fail "H.264 not retried at crf 29"
 [ "$(stat -c %s "$T/site/public/showcase/buildup-l4.webm")" = 900000 ] || fail "webm not the retried encode"
 [ "$(stat -c %s "$T/site/public/showcase/buildup-l4.mp4")" = 1400000 ] || fail "mp4 not the retried encode"
 

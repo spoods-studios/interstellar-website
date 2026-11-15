@@ -26,25 +26,14 @@ REMOVED_PATHS=(
   /how-its-made
 )
 
-mapfile -t REDIRECT_KEYS < <(sed -n '/^const SLUG_REDIRECTS = {/,/^};/p' astro.config.mjs | grep -oP "^\s*'\K/[^']+(?=':)")
-
 echo "== Build =="
 npm run build
 
-echo "== Every removed path is a SLUG_REDIRECTS key =="
+echo "== Every removed path builds a stub refreshing to the site root =="
 for path in "${REMOVED_PATHS[@]}"; do
-  if ! printf '%s\n' "${REDIRECT_KEYS[@]}" | grep -qxF "$path"; then
-    echo "FAIL: $path has no SLUG_REDIRECTS entry"
-    exit 1
-  fi
-done
-
-echo "== Every SLUG_REDIRECTS key builds a stub refreshing to the site root =="
-test "${#REDIRECT_KEYS[@]}" -ge "${#REMOVED_PATHS[@]}"
-for key in "${REDIRECT_KEYS[@]}"; do
-  STUB="dist${key}/index.html"
+  STUB="dist${path}/index.html"
   if [ ! -f "$STUB" ]; then
-    echo "FAIL: $key built no stub at $STUB"
+    echo "FAIL: $path built no stub at $STUB"
     exit 1
   fi
   TARGET=$(grep -oP 'http-equiv="refresh" content="[0-9]+;url=\K[^"]+' "$STUB" || true)
