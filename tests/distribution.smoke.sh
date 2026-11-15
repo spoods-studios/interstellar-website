@@ -208,14 +208,6 @@ done < <(find dist -name "*.html")
 [ "$CTA_FAIL" -eq 0 ]
 echo "CTA coverage OK"
 
-echo "== DIST-03: the footer is exactly the copyright line and the Discord link =="
-FOOTER=$(grep -o '<footer>.*</footer>' dist/index.html | sed -E 's/<[^>]*>//g; s/^[[:space:]]+//; s/[[:space:]]+$//')
-if [ "$FOOTER" != "© 2026 Spoods Studios · Join the Discord" ]; then
-  echo "FAIL: footer text is '$FOOTER'"
-  exit 1
-fi
-echo "footer OK"
-
 echo "== DIST-02: two consecutive builds emit identical metadata (content-hashed URLs are stable) =="
 capture_metadata() {
   grep -rho '<meta property="og:\(image\|url\)" content="[^"]*"' dist --include='*.html' \

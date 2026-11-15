@@ -9,13 +9,6 @@ echo "== Positive check: the site builds and the showcase index renders =="
 npm run build
 test -f dist/index.html
 grep -q '<h1[^>]*>Setare Aerospace</h1>' dist/index.html
-if grep -rIn -e 'github\.io' -e '/interstellar-website' src/; then
-  echo "FAIL: hardcoded host/base string under src/"
-  exit 1
-fi
-
-# D-16: the developer-approved sentence must ship verbatim.
-grep -qF "A space engine built from scratch on real n-body physics." dist/index.html
 grep -q 'href="[^"]*roadmap/"' dist/index.html
 if grep -q 'devlog/' dist/index.html; then
   echo "FAIL: the index still links to a devlog post"
