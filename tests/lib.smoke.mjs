@@ -13,6 +13,8 @@ import { titleFromH1 } from '../src/lib/title-from-h1.ts';
 import { assertNonEmpty, isVisible } from '../src/lib/content-guards.ts';
 import { buildToc } from '../src/lib/toc.ts';
 import { firstProseBlock, stripInline, truncate, describeBody } from '../src/lib/describe-entry.ts';
+import { codePointCount, buildPayload, retryMinutes, sendReport } from '../src/lib/feedback.ts';
+import { assertFeedbackConfigured } from '../src/lib/site.mjs';
 
 console.log('== milestone-key ==');
 assert.equal(normalizeMilestone('M0.1'), 'm0.1');
@@ -147,6 +149,59 @@ assert.equal(
   'Setare Aerospace is built solo, and I use AI heavily.'
 );
 console.log('describe-entry OK');
+
+console.log('== feedback ==');
+assert.equal(assertFeedbackConfigured(''), null);
+assert.equal(
+  assertFeedbackConfigured(' https://reports.example.workers.dev/v1/reports '),
+  'https://reports.example.workers.dev/v1/reports'
+);
+assert.throws(() => assertFeedbackConfigured('http://reports.example.workers.dev/v1/reports'), /FEEDBACK_URL/);
+assert.throws(() => assertFeedbackConfigured('reports.example.workers.dev'), /FEEDBACK_URL/);
+
+assert.equal(codePointCount('orbit \u{1F680}'), 7);
+assert.equal(codePointCount('\u{1F680}'.repeat(4000)), 4000);
+
+{
+  const result = buildPayload('bug', 'Orbit line flickers', '');
+  assert.deepEqual(result, {
+    payload: { kind: 'bug', source: 'website', text: 'Orbit line flickers', homepage: '' },
+  });
+}
+assert.ok(buildPayload('suggestion', '\u{1F680}'.repeat(4000), '').payload);
+assert.equal(buildPayload('bug', '\u{1F680}'.repeat(4001), '').payload, undefined);
+assert.equal(buildPayload('bug', '', '').payload, undefined);
+assert.equal(buildPayload('bug', '  \n\t', '').payload, undefined);
+
+assert.equal(retryMinutes('1380'), 23);
+assert.equal(retryMinutes('61'), 2);
+assert.equal(retryMinutes('Wed, 21 Oct 2026 07:28:00 GMT'), null);
+
+{
+  const text = 'Secret marker text 7f3a';
+  const { payload } = buildPayload('bug', text, '');
+  const url = 'https://reports.example.workers.dev/v1/reports';
+  const replying = (res) => async () => res;
+  const cases = [
+    [new Response(null, { status: 202 }), { state: 'sent' }],
+    [Response.json({ error: 'empty text' }, { status: 400 }), { state: 'rejected', reason: 'empty text' }],
+    [
+      Response.json({ error: 'rate limited' }, { status: 429, headers: { 'Retry-After': '1380' } }),
+      { state: 'rate-limited', minutes: 23 },
+    ],
+    [Response.json({ error: 'backlog full' }, { status: 503 }), { state: 'network-error' }],
+  ];
+  for (const [res, want] of cases) {
+    const got = await sendReport(url, payload, replying(res));
+    assert.deepEqual(got, want, `status ${res.status}`);
+    assert.ok(!JSON.stringify(got).includes(text), `status ${res.status} state carries the report text`);
+  }
+  const thrown = await sendReport(url, payload, async () => {
+    throw new TypeError(`Failed to fetch ${text}`);
+  });
+  assert.deepEqual(thrown, { state: 'network-error' });
+}
+console.log('feedback OK');
 
 console.log('== content-expectations ==');
 {
