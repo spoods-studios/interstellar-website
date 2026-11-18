@@ -9,6 +9,10 @@ Tests that bind ports add `FORGE_PORT_OFFSET` to their base port and tests that 
 - `tests/lib.smoke.mjs`: committed assertion script for pure `src/lib/*.ts` helpers, run directly with `node`.
 - `tests/*.smoke.sh`: shell smoke scripts, each doing a clean `npm run build` and asserting against `dist/` output, one per area (e.g. build, media, showcase, takedown).
   `showcase.smoke.sh` checks the single JS module on `dist/index.html`, the reduced-motion gate through `initShowcaseMotion` and the `<video>` attributes.
+- `feedback.smoke.sh` builds twice by rewriting `FEEDBACK_URL` in `src/lib/site.mjs`, restored on exit.
+  A fixture https URL checks the form, honeypot, noscript fallback, no cookies, no Worker host in built JS and the nav link on every page.
+  An empty URL checks the Discord fallback replaces the form.
+- `lib.smoke.mjs` covers `src/lib/feedback.ts` (payload building, code-point cap, `Retry-After` minutes, response-to-state mapping) and `assertFeedbackConfigured`.
 - `media.smoke.sh` pins media size caps; `takedown.smoke.sh` checks the root redirects in the built stubs and the absent feed.
 - `tests/run-all.sh`: runs `node tests/lib.smoke.mjs` then every `tests/*.smoke.sh` in sorted order; adding a new smoke script needs no harness edit.
   Given script paths, it runs only those.

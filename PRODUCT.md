@@ -28,13 +28,13 @@ integrated knowledge base that teaches real orbital mechanics.
 
 - Solo developer, Spoods Studios. PC (Steam) Early Access planned at $15 with
   free content updates; no Steam page or Patreon is live yet.
-- The Discord invite is the only live call to action.
+- The Discord invite is the only live call to action; `/feedback/` also takes bug reports and suggestions without an account.
 - Progress ships milestone by milestone (Era 0 done, Era 1 in progress); the
   roadmap pages track the arc.
 
 ## Capabilities and Constraints
 
-- Astro 7 static site on GitHub Pages under `/interstellar-website`; no backend.
+- Astro 7 static site on GitHub Pages under `/interstellar-website`; no backend of its own, only the feedback form posting to an external Worker.
 - No cookies; analytics stay cookieless (GoatCounter) or absent.
 - A deployed URL is permanent: removed pages redirect.
 - Screenshots and footage are engine gameplay captures only (D-CF); no mocked

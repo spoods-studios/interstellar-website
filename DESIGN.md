@@ -152,7 +152,8 @@ Only two sizes exist: `--s` (1.0625rem) and `--l` (`clamp(2.6rem, 6.2vw, 5.6rem)
 - **Hero:** the H1 spans columns 1–9 and the lede 1–7. The action row (CTA plus a Roadmap link, 28 px gap) spans all 12 columns. Fig. 1 spans 1–9, with the vis-viva margin note in 10–12, both 48 px below the action row.
 - **Chapters:** 140 px top padding (180 px for the Discord close). The chapter header is a subgrid row with the number in columns 1–2 and the H2 in 3–12, over a hairline. The body copy spans 3–8. Content rows start 40 px below it with a 24 px gap: four up for the buildup row and the ghosts, two up for the launch-site clips, and a 7fr/5fr split for still plus diagram or diagram plus margin note.
 - **Breakpoint 860 px:** below it every column span collapses to 1–12. Four-up rows become two-up, and the two-up launch-site row and the splits become one column. The roadmap's sticky era headings become static.
-- **Running head:** sticky at top, z-index 5, 14 px by `--gut` padding. The wordmark sits left; Roadmap and the CTA sit right.
+- **Running head:** sticky at top, z-index 5, 14 px by `--gut` padding. The wordmark sits left; Roadmap, Feedback and the CTA sit right.
+- **Feedback page:** the intro spans columns 1–8, the form 1–7 and the margin note 9–12. Below 900 px every part spans 1–12.
 
 ## Elevation & Depth
 
@@ -174,7 +175,7 @@ strokes.
 ## Components
 
 ### Running head
-The site name on the left, then Roadmap and the CTA on the right. It is
+The site name on the left, then Roadmap, Feedback and the CTA on the right. It is
 sticky with a hairline under it. Nav links are underlined on hover. The
 current page carries a 2 px vermilion underline and `aria-current`. It comes
 from `BaseLayout.astro` and is the same on every page.
@@ -227,6 +228,9 @@ type and one line of soft-ink text. The four ghosts are The Moon and Mars,
 Flight plans, Gas giants and Living ground, followed by a Roadmap link to
 `${BASE_URL}roadmap/`.
 
+### Feedback form
+Lives on `/feedback/` (`src/pages/feedback.astro`, styles `.fb-*` in `global.css`). A two-option Bug/Suggestion choice sits in a 1 px ink frame, and the chosen option fills ink with a vermilion dot. A 260 px textarea with a 1 px ink border and a code-point counter follows, then the primary CTA button, disabled in soft ink while sending. The status box is a 1 px ink frame; errors switch it to inked vermilion. An off-screen honeypot input is hidden from sight and tab order. Without JS or a configured Worker, a dashed soft-ink box points to the Discord `/bug` and `/suggest` commands. A margin note in the right columns covers Discord and the in-game report.
+
 ### Footer
 A 1 px ink rule on top, on its own 12-column grid with 28 px by `--gut`
 padding. It holds one meta line: © 2026 Spoods Studios and a Join the Discord
@@ -247,7 +251,7 @@ Motion runs only on `/`. Two modules are bundled into the one processed
 `<script>` in `src/pages/index.astro`. `setupClipPlay` runs first, then
 `initShowcaseMotion`, so an error in the motion module cannot stop clip
 playback. `BaseLayout.astro` imports neither, so `/roadmap/` and `/404` ship
-no script besides GoatCounter. The site has no client router and the module
+no script besides GoatCounter, and `/feedback/` ships only its form script. The site has no client router and the module
 initialises once on load.
 
 **Libraries:** `motion@14.9.0` and `lenis@1.3.27`, both pinned exactly in
