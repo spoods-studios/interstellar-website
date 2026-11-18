@@ -86,11 +86,14 @@ done < <(find dist -name "*.html")
 [ "$FAVICON_FAIL" -eq 0 ]
 echo "favicon coverage OK"
 
-echo "== Every script tag in dist/ is the analytics tag, plus the showcase module on / (D-60/D-61) =="
+echo "== Every script tag in dist/ is the analytics tag, plus the showcase module on / and the form module on /feedback/ (D-60/D-61) =="
 # State-free: while GOATCOUNTER_CODE is unset the analytics total is zero; once
-# it is set it is one per page. The one allowed exception is the showcase's
-# hashed motion module on dist/index.html. A stray script breaks it in either state.
-test "$(grep -ro '<script' dist/ | wc -l)" -eq "$(( $(grep -ro 'gc\.zgo\.at' dist/ | wc -l) + 1 ))"
+# it is set it is one per page. The allowed exceptions are the showcase's
+# hashed motion module on dist/index.html and the feedback form's module on
+# dist/feedback/index.html. A stray script breaks it in either state.
+test "$(grep -ro '<script' dist/ | wc -l)" -eq "$(( $(grep -ro 'gc\.zgo\.at' dist/ | wc -l) + 2 ))"
+test "$(grep -o '<script' dist/feedback/index.html | wc -l)" -eq "$(( $(grep -o 'gc\.zgo\.at' dist/feedback/index.html | wc -l) + 1 ))"
+test "$(grep -o '<script type="module"' dist/feedback/index.html | wc -l)" -eq 1
 test "$(grep -o '<script' dist/index.html | wc -l)" -eq "$(( $(grep -o 'gc\.zgo\.at' dist/index.html | wc -l) + 1 ))"
 test "$(grep -oE "<script type=\"module\" src=\"${NORMALIZED_BASE}_astro/[^\"/]+\\.js\"></script>" dist/index.html | wc -l)" -eq 1
 echo "no-extra-JS OK"
@@ -133,7 +136,7 @@ echo "dead-link sweep OK (zero dead internal targets)"
 echo "== Expected total page count sanity check (content trees + indexes + standalone + error pages) =="
 # Composed by tests/helpers/content-expectations.mjs from the roadmap tree
 # plus the route-shaped structural singletons (roadmap overview, homepage,
-# 404) -- see its site_page_count derivation for the exact arithmetic. The
+# 404, feedback) -- see its site_page_count derivation for the exact arithmetic. The
 # devlog and How It's Made were taken down (SSC-07); their paths build only
 # redirect stubs, which the count excludes. The two Plan 02-03 diagnostic routes (collection-counts.json.ts,
 # markdown-render-check.astro) are already deleted, so they're not counted.

@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { DISCORD_INVITE_URL, assertFeedbackConfigured } from '../lib/site.mjs';
+import { MAX_TEXT_CODE_POINTS } from '../lib/feedback';
+
+const feedbackUrl = assertFeedbackConfigured();
+const description = 'Report a bug or suggest a change to Interstellar Engine. No email, no account, no cookies.';
+---
+
+<BaseLayout title="Feedback" description={description}>
+  <div class="fb-intro">
+    <h1>Report a bug or suggest a change</h1>
+    <p class="fb-lede">Every report becomes an issue on the studio tracker, where the solo developer reads it. Nothing here asks who you are: no email, no account, no cookies.</p>
+  </div>
+  {feedbackUrl ? (
+    <>
+      <form class="fb-form" data-endpoint={feedbackUrl} novalidate hidden>
+        <fieldset>
+          <legend class="label">Kind</legend>
+          <div class="fb-kinds">
+            <label><input type="radio" name="kind" value="bug" checked /><span class="fb-k">Bug</span><span class="fb-d">Something broke or behaved wrong</span></label>
+            <label><input type="radio" name="kind" value="suggestion" /><span class="fb-k">Suggestion</span><span class="fb-d">An idea or a change you want</span></label>
+          </div>
+        </fieldset>
+        <label class="label fb-prompt" for="fb-text" data-prompt>What happened, and what did you expect?</label>
+        <textarea id="fb-text" name="text" placeholder="Steps, what you saw, what you expected. Include the build version if you know it."></textarea>
+        <div class="fb-meta"><span>The first line becomes the title.</span><span data-count>0 / {MAX_TEXT_CODE_POINTS}</span></div>
+        <div class="fb-hp" aria-hidden="true"><label for="fb-homepage">Leave this empty</label><input id="fb-homepage" name="homepage" type="text" tabindex="-1" autocomplete="off" /></div>
+        <div class="fb-row">
+          <button class="cta" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12h14M13 6l6 6-6 6" /></svg>Send report</button>
+          <p class="fb-fine">Five reports an hour from one connection.</p>
+        </div>
+        <div class="fb-status" role="status" aria-live="polite" hidden><span class="label" data-status-title></span><p data-status-detail></p></div>
+      </form>
+      <noscript>
+        <p class="fb-fallback">This form needs JavaScript to send. You can file the same report in Discord with <strong>/bug</strong> or <strong>/suggest</strong> in #bug-reports. <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer">Join the Discord</a></p>
+      </noscript>
+    </>
+  ) : (
+    <p class="fb-fallback">The report form is not open yet. You can file the same report in Discord with <strong>/bug</strong> or <strong>/suggest</strong> in #bug-reports. <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer">Join the Discord</a></p>
+  )}
+  <aside class="fb-note">
+    <div class="label">Already on Discord?</div>
+    <p>Type <code>/bug</code> or <code>/suggest</code> in <strong>#bug-reports</strong>. The same form opens there and lands on the same tracker, with your Discord name on it.</p>
+    <p><a href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer">Join the Discord</a></p>
+    <div class="label fb-note-gap">In the game</div>
+    <p>Pause, then choose <strong>Report a bug or idea</strong>. The game adds its build version and, if you tick the box, its log.</p>
+  </aside>
+
+  <script>
+    import { initFeedbackForm } from '../scripts/feedback-form';
+    const form = document.querySelector<HTMLFormElement>('form[data-endpoint]');
+    if (form) initFeedbackForm(form);
+  </script>
+</BaseLayout>
