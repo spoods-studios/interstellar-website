@@ -105,6 +105,22 @@ fi
 FORM_MAIN_INVITES=$(main_invites "$PAGE")
 echo "fixture page OK"
 
+echo "== Every page's header nav links /feedback/ under the base =="
+NAV_FAIL=0
+NAV_PAGES=0
+while IFS= read -r f; do
+  if grep -q 'http-equiv="refresh"' "$f"; then continue; fi
+  NAV_PAGES=$((NAV_PAGES + 1))
+  NAV_HTML=$(tr '\n' ' ' < "$f" | grep -oP '<header\b.*?</header>' | grep -oP '<nav>.*?</nav>' || true)
+  if ! grep -qP "<a href=\"${NORMALIZED_BASE}feedback/\"[^>]*>Feedback</a>" <<<"$NAV_HTML"; then
+    echo "FAIL: $f header nav does not link ${NORMALIZED_BASE}feedback/"
+    NAV_FAIL=1
+  fi
+done < <(find dist -name '*.html')
+[ "$NAV_PAGES" -gt 0 ]
+[ "$NAV_FAIL" -eq 0 ]
+echo "feedback nav link OK across $NAV_PAGES pages"
+
 echo "== Build with an empty FEEDBACK_URL: the Discord fallback replaces the form =="
 set_feedback_url ""
 npm run build
