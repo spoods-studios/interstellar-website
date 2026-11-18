@@ -83,6 +83,19 @@ export function assertGoatcounterConfigured() {
   return code;
 }
 
+export const FEEDBACK_URL = '';
+
+export function assertFeedbackConfigured(url = FEEDBACK_URL) {
+  const trimmed = typeof url === 'string' ? url.trim() : '';
+  if (trimmed === '') return null;
+  if (!URL.canParse(trimmed) || new URL(trimmed).protocol !== 'https:') {
+    throw new Error(
+      `FEEDBACK_URL: "${trimmed}" is not an https URL — set it to the Worker's https reports URL in src/lib/site.mjs, or leave it empty`
+    );
+  }
+  return trimmed;
+}
+
 // D-54: an unset or placeholder invite must fail the build loudly rather than
 // render a CTA with an empty href. Called bare at astro.config.mjs top level.
 export function assertInviteConfigured() {
