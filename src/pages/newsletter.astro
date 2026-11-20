@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import NewsletterForm from '../components/NewsletterForm.astro';
+import { DISCORD_INVITE_URL } from '../lib/site.mjs';
+
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+const description = 'Get the Steam page, the Early Access date and launch day for Interstellar Engine by email. Confirm first, unsubscribe in one click.';
+---
+
+<BaseLayout title="Launch news by email" description={description}>
+  <div class="fb-intro">
+    <h1>Launch news by email</h1>
+    <p class="fb-lede">A few emails: the Steam page when it opens for wishlists, the Early Access date once it is set, and launch day. Nothing else, and no dates promised here before they exist.</p>
+  </div>
+  <div class="ml-page">
+    <NewsletterForm variant="page" />
+  </div>
+  <aside class="fb-note">
+    <div class="label">What is stored</div>
+    <p>Buttondown stores your email address, when you signed up and confirmed, and that you ticked the age box, for launch news only. It is never sold, shared or used for anything else. This site sets no cookies; Buttondown's own pages follow its privacy policy. Full details in the <a href={`${base}legal/privacy/`}>privacy policy</a>.</p>
+    <div class="label fb-note-gap">Confirm first</div>
+    <p>After you sign up, Buttondown emails you a link. Nothing arrives until you click it, so nobody can sign you up without your say.</p>
+    <div class="label fb-note-gap">Leaving</div>
+    <p>Every email has a one-click unsubscribe, and unsubscribing deletes your address from the list.</p>
+    <div class="label fb-note-gap">Rather use Discord?</div>
+    <p>Launch news lands in the Discord first, along with milestone posts and the chance to talk to the developer.</p>
+    <p><a href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer">Join the Discord</a></p>
+  </aside>
+</BaseLayout>

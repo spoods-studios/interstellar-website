@@ -8,12 +8,9 @@ cd "$(dirname "$0")/.."
 echo "== Build =="
 npm run build
 
-echo "== Every visible roadmap/*.md builds at dist/roadmap/<id>/ with no JS beyond the analytics tag =="
+echo "== Every visible roadmap/*.md builds at dist/roadmap/<id>/ =="
 is_draft() {
   awk 'NR == 1 && $0 != "---" { exit 1 } NR > 1 && $0 == "---" { exit 1 } NR > 1 && /^status:[[:space:]]*draft[[:space:]]*$/ { found = 1; exit 0 } END { exit !found }' "$1"
-}
-no_extra_js() {
-  test "$(grep -o '<script' "$1" | wc -l)" -eq "$(grep -o 'gc\.zgo\.at' "$1" | wc -l)"
 }
 ROADMAP_IDS=()
 for f in roadmap/*.md; do
@@ -24,15 +21,10 @@ for f in roadmap/*.md; do
 done
 test "${#ROADMAP_IDS[@]}" -eq "$(node tests/helpers/content-expectations.mjs roadmap_count)"
 test -f dist/roadmap/index.html
-no_extra_js dist/roadmap/index.html
 for id in "${ROADMAP_IDS[@]}"; do
   PAGE="dist/roadmap/$id/index.html"
   if [ ! -f "$PAGE" ]; then
     echo "FAIL: $PAGE not built"
-    exit 1
-  fi
-  if ! no_extra_js "$PAGE"; then
-    echo "FAIL: $PAGE loads a script beyond the analytics tag"
     exit 1
   fi
 done

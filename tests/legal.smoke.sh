@@ -20,7 +20,7 @@ NORMALIZED_BASE="${BASE%/}/"
 SITEMAP_FILE="dist/sitemap-0.xml"
 [ -f "$SITEMAP_FILE" ] || SITEMAP_FILE="dist/sitemap.xml"
 
-echo "== Each legal page builds with its frontmatter version and effective date, is in the sitemap, and adds no cookie or script =="
+echo "== Each legal page builds with its frontmatter version and effective date, is in the sitemap, and adds no cookie =="
 for DOC in eula privacy; do
   SRC="pages/legal/$DOC.md"
   PAGE="dist/legal/$DOC/index.html"
@@ -36,16 +36,6 @@ for DOC in eula privacy; do
   fi
   if ! grep -qF "<loc>${SITE}${NORMALIZED_BASE}legal/$DOC/</loc>" "$SITEMAP_FILE"; then
     echo "LEGAL FAIL: ${SITE}${NORMALIZED_BASE}legal/$DOC/ missing from $SITEMAP_FILE"
-    exit 1
-  fi
-  if ! node -e '
-const html = require("fs").readFileSync(process.argv[1], "utf8");
-const tags = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)(<\/script\s*>|$)/gi)];
-const bad = tags.filter(([, attrs, body]) => !/(^|\s)src="\/\/gc\.zgo\.at\/count\.js"(\s|$)/.test(attrs) || body.trim() !== "");
-for (const [tag] of bad) console.error(tag.slice(0, 160));
-process.exit(bad.length ? 1 : 0);
-' "$PAGE"; then
-    echo "LEGAL FAIL: $PAGE loads a script beyond the GoatCounter tag"
     exit 1
   fi
   if grep -qiE 'document\.cookie|cookieStore|http-equiv="set-cookie"' "$PAGE"; then

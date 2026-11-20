@@ -92,6 +92,7 @@ function deriveAll() {
   const HOMEPAGE_SINGLETON = 1; // dist/index.html
   const NOT_FOUND_SINGLETON = 1; // dist/404.html
   const FEEDBACK_SINGLETON = 1; // dist/feedback/index.html
+  const NEWSLETTER_SINGLETON = 1; // dist/newsletter/index.html
 
   const sitePageCount =
     roadmapCount +
@@ -99,7 +100,8 @@ function deriveAll() {
     ROADMAP_OVERVIEW_SINGLETON +
     HOMEPAGE_SINGLETON +
     NOT_FOUND_SINGLETON +
-    FEEDBACK_SINGLETON;
+    FEEDBACK_SINGLETON +
+    NEWSLETTER_SINGLETON;
 
   return {
     roadmap_count: roadmapCount,

@@ -243,7 +243,7 @@ if (fails.length) {
 ' "$PAGE" "$NORMALIZED_BASE" src/assets/showcase/captures.json "$EAGER"
 echo "showcase OK"
 
-echo "== Motion module: one hashed script on /, none elsewhere, gzip budget, reduced-motion CSS gate =="
+echo "== Motion module: one hashed script on / beyond those every page carries, none on roadmap or 404, gzip budget, reduced-motion CSS gate =="
 node -e '
 const fs = require("fs");
 const path = require("path");
@@ -255,19 +255,23 @@ const fail = (m) => fails.push(m);
 const scriptsBesidesAnalytics = (file) =>
   [...fs.readFileSync(file, "utf8").matchAll(/<script\b[^>]*>[\s\S]*?<\/script>/g)].map((m) => m[0]).filter((s) => !s.includes("gc.zgo.at"));
 
-const home = scriptsBesidesAnalytics("dist/index.html");
+const pages = fs.readdirSync("dist", { recursive: true }).filter((p) => p.endsWith(".html")).map((p) => `dist/${p}`).filter((p) => !fs.readFileSync(p, "utf8").includes(`http-equiv="refresh"`));
+const shared = scriptsBesidesAnalytics("dist/index.html").filter((s) => pages.every((p) => scriptsBesidesAnalytics(p).includes(s)));
+const pageOwnScripts = (file) => scriptsBesidesAnalytics(file).filter((s) => !shared.includes(s));
+
+const home = pageOwnScripts("dist/index.html");
 const escapedBase = base.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const moduleSrc = new RegExp("^" + escapedBase + "_astro/[^\"/]+\\.[A-Za-z0-9_-]{6,}\\.js$");
 let entry = null;
-if (home.length !== 1) fail(`dist/index.html carries ${home.length} scripts besides GoatCounter, expected 1`);
+if (home.length !== 1) fail(`dist/index.html carries ${home.length} scripts besides GoatCounter and those every page carries, expected 1`);
 else {
   const m = home[0].match(/^<script type="module" src="([^"]+)"><\/script>$/);
   if (!m || !moduleSrc.test(m[1])) fail(`the script on dist/index.html is ${home[0].slice(0, 160)}, expected a hashed module under ${base}_astro/`);
   else entry = "dist/" + m[1].slice(base.length);
 }
 for (const page of ["dist/roadmap/index.html", "dist/404.html"]) {
-  const extra = scriptsBesidesAnalytics(page);
-  if (extra.length) fail(`${page} carries ${extra.length} scripts besides GoatCounter`);
+  const extra = pageOwnScripts(page);
+  if (extra.length) fail(`${page} carries ${extra.length} scripts besides GoatCounter and those every page carries`);
 }
 
 if (entry) {

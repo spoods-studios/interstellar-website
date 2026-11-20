@@ -1,0 +1,57 @@
+---
+import { DISCORD_INVITE_URL, assertNewsletterConfigured } from '../lib/site.mjs';
+
+export interface Props {
+  variant: 'footer' | 'page';
+}
+
+const { variant } = Astro.props;
+const newsletterUrl = assertNewsletterConfigured();
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+const emailId = `ml-email-${variant}`;
+---
+
+{variant === 'footer' ? (
+  <section class="ml-foot" aria-labelledby="ml-foot-h">
+    <div class="ml-foot-intro">
+      <h2 id="ml-foot-h">Launch news by email</h2>
+      <p>A few emails: the Steam page, the Early Access date, launch day.</p>
+    </div>
+    <div class="ml-foot-body">
+      {newsletterUrl ? (
+        <form class="ml-form ml-v-footer" method="post" action={newsletterUrl} data-newsletter>
+          <label class="label ml-email-label" for={emailId}>Email address</label>
+          <div class="ml-row">
+            <input class="ml-input" id={emailId} type="email" name="email" required autocomplete="email" placeholder="you@example.com" spellcheck="false" />
+            <button class="cta-line" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12h14M13 6l6 6-6 6" /></svg>Sign up</button>
+          </div>
+          <input type="hidden" name="embed" value="1" />
+          <label class="ml-age"><input type="checkbox" name="metadata__age_confirmed" required /><span>I am 16 or older (EU/EEA), or 13 or older anywhere else.</span></label>
+          <p class="ml-fine ml-next">Sign up opens Buttondown's page to finish, then a confirmation email arrives.</p>
+        </form>
+      ) : (
+        <p class="ml-fallback">The launch-news list is not open yet. The same news goes to the Discord first. <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer">Join the Discord</a></p>
+      )}
+      <p class="ml-fine">Buttondown stores your address, when you confirmed it and that you ticked the age box, for launch news only. You confirm by email first, and every email has a one-click unsubscribe. <a href={`${base}legal/privacy/`}>Privacy policy</a> · <a href={`${base}newsletter/`}>More about the list</a></p>
+    </div>
+  </section>
+) : newsletterUrl ? (
+  <form class="ml-form ml-v-page" method="post" action={newsletterUrl} data-newsletter>
+    <label class="label ml-email-label" for={emailId}>Email address</label>
+    <div class="ml-row">
+      <input class="ml-input" id={emailId} type="email" name="email" required autocomplete="email" placeholder="you@example.com" spellcheck="false" />
+    </div>
+    <input type="hidden" name="embed" value="1" />
+    <label class="ml-age"><input type="checkbox" name="metadata__age_confirmed" required /><span>I am 16 or older (EU/EEA), or 13 or older anywhere else.</span></label>
+    <button class="cta" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12h14M13 6l6 6-6 6" /></svg>Sign up for launch news</button>
+    <p class="ml-fine ml-next">Sign up opens Buttondown's page to finish, then a confirmation email arrives.</p>
+  </form>
+) : (
+  <p class="ml-fallback">The launch-news list is not open yet. The same news goes to the Discord first. <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer">Join the Discord</a></p>
+)}
+
+<script>
+  import { initNewsletterForm } from '../scripts/newsletter-form';
+  document.querySelectorAll<HTMLFormElement>('form[data-newsletter]').forEach((form) => initNewsletterForm(form));
+</script>

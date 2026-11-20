@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import NewsletterForm from '../components/NewsletterForm.astro';
 import { DISCORD_INVITE_URL, SITE_NAME, SITE_TAGLINE, OG_DEFAULT, assertGoatcounterConfigured } from '../lib/site.mjs';
 
 export interface Props {
@@ -107,6 +108,7 @@ const onFeedback = pathname.startsWith(feedbackHref);
       <slot />
     </main>
     <footer>
+      <NewsletterForm variant="footer" />
       <p class="meta">© 2026 Spoods Studios · <a href={`${base}legal/eula/`}>Licence agreement</a> · <a href={`${base}legal/privacy/`}>Privacy policy</a> · <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer">Join the Discord</a></p>
     </footer>
   </body>
