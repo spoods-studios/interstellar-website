@@ -57,23 +57,30 @@ while IFS= read -r f; do
   fi
   NAV_HTML=$(grep -oP '<nav>.*?</nav>' <<<"$HEAD_HTML" || true)
   NAV_LINKS=$(grep -oP '<a [^>]*>.*?</a>' <<<"$NAV_HTML" || true)
-  if [ "$(grep -c . <<<"$NAV_LINKS")" -ne 2 ]; then
-    echo "FAIL: $f header nav does not hold exactly two links"
+  if [ "$(grep -c . <<<"$NAV_LINKS")" -ne 3 ]; then
+    echo "FAIL: $f header nav does not hold exactly three links"
     SHELL_FAIL=1
     continue
   fi
   ROADMAP_LINK=$(sed -n 1p <<<"$NAV_LINKS")
-  CTA_LINK=$(sed -n 2p <<<"$NAV_LINKS")
+  FEEDBACK_LINK=$(sed -n 2p <<<"$NAV_LINKS")
+  CTA_LINK=$(sed -n 3p <<<"$NAV_LINKS")
+  WANT_ROADMAP="<a href=\"${NORMALIZED_BASE}roadmap/\">Roadmap</a>"
+  WANT_FEEDBACK="<a href=\"${NORMALIZED_BASE}feedback/\">Feedback</a>"
   case "$f" in
     dist/roadmap/*) WANT_ROADMAP="<a href=\"${NORMALIZED_BASE}roadmap/\" aria-current=\"page\">Roadmap</a>" ;;
-    *) WANT_ROADMAP="<a href=\"${NORMALIZED_BASE}roadmap/\">Roadmap</a>" ;;
+    dist/feedback/*) WANT_FEEDBACK="<a href=\"${NORMALIZED_BASE}feedback/\" aria-current=\"page\">Feedback</a>" ;;
   esac
   if [ "$ROADMAP_LINK" != "$WANT_ROADMAP" ]; then
     echo "FAIL: $f first nav link is '$ROADMAP_LINK' (expected '$WANT_ROADMAP')"
     SHELL_FAIL=1
   fi
-  if [ "$(count_occurrences 'aria-current' "$HEAD_HTML")" -ne "$(count_occurrences 'aria-current' "$ROADMAP_LINK")" ]; then
-    echo "FAIL: $f running head carries aria-current outside the Roadmap link"
+  if [ "$FEEDBACK_LINK" != "$WANT_FEEDBACK" ]; then
+    echo "FAIL: $f second nav link is '$FEEDBACK_LINK' (expected '$WANT_FEEDBACK')"
+    SHELL_FAIL=1
+  fi
+  if [ "$(count_occurrences 'aria-current' "$HEAD_HTML")" -ne "$(count_occurrences 'aria-current' "$ROADMAP_LINK$FEEDBACK_LINK")" ]; then
+    echo "FAIL: $f running head carries aria-current outside the Roadmap and Feedback links"
     SHELL_FAIL=1
   fi
   for want in "href=\"${INVITE}\"" 'target="_blank"' 'rel="noopener noreferrer"' 'Join the Discord</a>'; do

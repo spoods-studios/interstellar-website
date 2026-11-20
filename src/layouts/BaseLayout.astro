@@ -41,6 +41,8 @@ const goatcounterCode = assertGoatcounterConfigured();
 const roadmapHref = `${base}roadmap/`;
 const pathname = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
 const onRoadmap = pathname.startsWith(roadmapHref);
+const feedbackHref = `${base}feedback/`;
+const onFeedback = pathname.startsWith(feedbackHref);
 ---
 
 <html lang="en">
@@ -97,6 +99,7 @@ const onRoadmap = pathname.startsWith(roadmapHref);
       <a class="mark" href={base}>Interstellar Engine <span>/ Setare Aerospace</span></a>
       <nav>
         <a href={roadmapHref} aria-current={onRoadmap ? 'page' : undefined}>Roadmap</a>
+        <a href={feedbackHref} aria-current={onFeedback ? 'page' : undefined}>Feedback</a>
         <a class="cta" href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12h14M13 6l6 6-6 6" /></svg>Join the Discord</a>
       </nav>
     </header>

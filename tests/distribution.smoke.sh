@@ -188,12 +188,14 @@ echo "description variety OK ($DISTINCT_DESCRIPTIONS distinct values across $TOT
 
 echo "== DIST-03: CTA placements on every built page =="
 # Every page carries the header-nav and footer invites; the showcase homepage
-# (src/pages/index.astro) adds two more, in its hero and its Discord close.
+# (src/pages/index.astro) adds two more, in its hero and its Discord close,
+# and the feedback page (src/pages/feedback.astro) adds two, in its margin
+# note and its Discord fallback (noscript, or in place of the form).
 CTA_FAIL=0
 while IFS= read -r f; do
   if is_redirect_stub "$f"; then continue; fi
   EXPECTED_INVITES=2
-  if [ "$f" = "dist/index.html" ]; then EXPECTED_INVITES=4; fi
+  if [ "$f" = "dist/index.html" ] || [ "$f" = "dist/feedback/index.html" ]; then EXPECTED_INVITES=4; fi
   INVITE_COUNT=$(count_occurrences "$INVITE" "$f")
   if [ "$INVITE_COUNT" -ne "$EXPECTED_INVITES" ]; then
     echo "FAIL: $f carries $INVITE_COUNT invite links (expected exactly $EXPECTED_INVITES)"

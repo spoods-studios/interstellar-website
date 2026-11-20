@@ -85,12 +85,14 @@ function deriveAll() {
   const ROADMAP_OVERVIEW_SINGLETON = 1; // dist/roadmap/index.html
   const HOMEPAGE_SINGLETON = 1; // dist/index.html
   const NOT_FOUND_SINGLETON = 1; // dist/404.html
+  const FEEDBACK_SINGLETON = 1; // dist/feedback/index.html
 
   const sitePageCount =
     roadmapCount +
     ROADMAP_OVERVIEW_SINGLETON +
     HOMEPAGE_SINGLETON +
-    NOT_FOUND_SINGLETON;
+    NOT_FOUND_SINGLETON +
+    FEEDBACK_SINGLETON;
 
   return {
     roadmap_count: roadmapCount,
