@@ -15,6 +15,8 @@
 - `src/scripts/showcase-motion.ts` drives Lenis smooth scroll and the scroll-drawn trajectory SVG through Motion; it returns before building anything when `prefers-reduced-motion: reduce` matches.
 - `src/pages/roadmap/index.astro` renders `pages/roadmap.md` plus a generated list of links to closed-milestone detail pages.
 - `src/pages/roadmap/[milestone].astro` renders one static page per visible `roadmap` entry.
+- `src/pages/legal/[doc].astro` renders one `/legal/<doc>/` page per `pages/legal/*.md` entry through `PostLayout`, with a meta line from the entry's `version` and `effective` frontmatter.
+  The `pages` loader in `src/content.config.ts` fails the build when a legal file lacks either field.
 - `src/pages/404.astro` renders a static not-found page through `BaseLayout`.
 - `src/pages/feedback.astro` renders the `/feedback/` report page through `BaseLayout`: a Bug/Suggestion choice, a textarea capped at 4000 code points, an off-screen honeypot and a noscript Discord fallback; with an empty `FEEDBACK_URL` it renders the Discord fallback in place of the form.
   Its bundled `<script>` is the only importer of `src/scripts/feedback-form.ts`, which reads the Worker URL from the form's `data-endpoint`, posts the report through the pure helpers in `src/lib/feedback.ts` and writes the outcome state inline.
@@ -29,6 +31,8 @@
 - `FEEDBACK_URL` is the site's only Worker reference; `assertFeedbackConfigured` returns null while it is empty and fails the build on a non-https value.
 - Markdown rendering runs through Sätteri (`@astrojs/markdown-satteri`), configured once in `astro.config.mjs` (`mdastPlugins`, Shiki theme).
   `validateContentLoudFail` over `CONTENT_TREES` re-runs every `roadmap/` and `pages/` file at config-load time so a markdown error fails the build.
+- `pages/legal/` is a subdirectory of the `pages` tree; its `CONTENT_TREES` entry is `recursive` so the loud-fail validation covers it.
+- The `BaseLayout.astro` footer links `/legal/eula/` and `/legal/privacy/` on every page.
 - `isVisible` (`src/lib/content-guards.ts`) is the one draft-filter every route and generated cross-link must call — no route re-implements visibility.
 - Motion and Lenis load only through `src/pages/index.astro`; roadmap, feedback and 404 ship no animation JS.
   Hidden initial states exist only in CSS under `prefers-reduced-motion: no-preference` and a `.js` class.
@@ -41,7 +45,7 @@
 
 - `roadmap/`, `pages/` — markdown content trees at repo root, one per content collection.
 - `src/content.config.ts` — collection schemas and loaders.
-- `src/pages/` — file-based routes: `index.astro` (showcase), `roadmap/index.astro`, `roadmap/[milestone].astro`, `feedback.astro`, `404.astro`.
+- `src/pages/` — file-based routes: `index.astro` (showcase), `roadmap/index.astro`, `roadmap/[milestone].astro`, `feedback.astro`, `legal/[doc].astro`, `404.astro`.
 - `src/layouts/` — `BaseLayout.astro` (shell) and `PostLayout.astro` (content-page chrome).
 - `src/components/` — `TableOfContents.astro`, `ShowcaseClip.astro`.
 - `src/scripts/` — `clip-play.ts`, `showcase-motion.ts`, `feedback-form.ts`.

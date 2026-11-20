@@ -233,8 +233,11 @@ Lives on `/feedback/` (`src/pages/feedback.astro`, styles `.fb-*` in `global.css
 
 ### Footer
 A 1 px ink rule on top, on its own 12-column grid with 28 px by `--gut`
-padding. It holds one meta line: © 2026 Spoods Studios and a Join the Discord
-link.
+padding. It holds one meta line: © 2026 Spoods Studios, Licence agreement and Privacy policy links
+and a Join the Discord link.
+
+### Legal pages
+Live at `/legal/eula/` and `/legal/privacy/` (`src/pages/legal/[doc].astro`, styles `.legal` in `global.css`). The meta line reads version and effective date. The "In short" summary is lifted above the table of contents, which omits it. Body text sits in columns 1 to 8 with 62 ch lists and tables, and everything spans full width under 860 px. A draft notice is a dashed soft-ink box with an uppercase vermilion label. H2s take 56 px above, and the summary has a 2 px ink top rule.
 
 ### Trajectory
 See Motion. The static version is one `.traj` SVG per section. The hero draws

@@ -13,6 +13,8 @@ Tests that bind ports add `FORGE_PORT_OFFSET` to their base port and tests that 
   A fixture https URL checks the form, honeypot, noscript fallback, no cookies, no Worker host in built JS and the nav link on every page.
   An empty URL checks the Discord fallback replaces the form.
 - `lib.smoke.mjs` covers `src/lib/feedback.ts` (payload building, code-point cap, `Retry-After` minutes, response-to-state mapping) and `assertFeedbackConfigured`.
+- `legal.smoke.sh` checks each legal page shows its version and date, is in the sitemap, loads only the GoatCounter script and sets no cookie.
+  It also checks every footer links both pages and a missing `version` or `effective` fails the build naming the file.
 - `media.smoke.sh` pins media size caps; `takedown.smoke.sh` checks the root redirects in the built stubs and the absent feed.
 - `tests/run-all.sh`: runs `node tests/lib.smoke.mjs` then every `tests/*.smoke.sh` in sorted order; adding a new smoke script needs no harness edit.
   Given script paths, it runs only those.
