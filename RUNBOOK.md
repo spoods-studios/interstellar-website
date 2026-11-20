@@ -25,13 +25,12 @@ archived at `~/.local/state/forge/spoods-studios/archive/Roadmap.md`).
 | forge (`/forge-new`, `/forge-quick`, `/forge-fast`) | Planned and ad-hoc work in this repo. `CLAUDE.md` routes to the `.forge/` docs. |
 | `/forge-discuss` → `/forge-phase` → `/forge-verify` → `/forge-ship` | Feature loop for site build-out work a workspace track carries for this repo. Content promotion never runs through it. (v1.0 was built on the now-retired GSD loop, bootstrapped 2026-07-13; history in `~/.local/state/forge/interstellar-website/archive/gsd/`.) |
 
-## Lifecycle & gate tier
+## Lifecycle
 
-**Tier t3 — Standard Review** (`gate-tiers.md`). Milestone close needs a
-standard forge review (the `/forge-phase` review step and `/forge-ship` final review), or a plain checklist review for non-code
-content (copy, broken links, press-kit accuracy). No mandatory multi-vendor
-grid, no mandatory playtest. Bugs/broken pages still block; cosmetic nits
-don't.
+**No review gate (studio D-CG, 2026-10-30).** Forge's phase review and verify
+cover this repo: the `/forge-phase` review step, the operator's manual test at
+`/forge-verify` and the `/forge-ship` final review. Bugs/broken pages still
+block; cosmetic nits don't.
 
 **Content commits don't trigger milestones or review** — promoted roadmap and
 page `.md` files deploy on push and need no ceremony (the devlog and
@@ -64,7 +63,7 @@ feature work is only for real site work (Era 2 press kit, feature changes).
 
 | State | Action |
 |---|---|
-| Broken page / red smoke job | Fix now — this is the only t3 state that blocks everything else. |
+| Broken page / red smoke job | Fix now — this is the only state that blocks everything else. |
 | Era 2 opens (press kit) | `/forge-new` at the workspace root opens the track and adds the website feature; then `/forge-discuss` here, `/forge-phase` per phase, `/forge-verify`, `/forge-ship`. |
 | Small site fix | `/forge-quick` or `/forge-fast`. |
 | Unsure | Read `../RUNBOOK.md`; live org state: `forge status` at the workspace root. |
@@ -83,6 +82,6 @@ is never needed. Issues live on the forge. Full rules:
 
 - `../RUNBOOK.md` — org-wide skill catalog + current state
 - `../.forge/docs/milestones/m1.x/manifest.md` — this repo's m1.x slice (closed; the org manifest machinery is retired, kept as history)
-- `../.forge/docs/gate-tiers.md` — full tier definitions (this repo is t3)
+- `../.forge/docs/gate-tiers.md` — the retired review-gate tiers (studio D-CG), kept for the record
 - `../vault/devlog/discord/POSTING.md` — Discord half of the retired dual-post flow (archive, studio D-CK)
 - No hook surfaces obligations: this repo's `.claude/settings.json` is `{}` and the user-level settings add no SessionStart hook. Obligation specs live in `../vault/obligations/`; read them there. (Auto-surfacing went with the retired `/studio-milestone open|status|close` machinery.)
