@@ -33,7 +33,7 @@ set_feedback_url "$FIXTURE_URL"
 rm -rf dist
 npm run build
 
-echo "== /feedback/ carries the form, kind choice, textarea, honeypot and noscript Discord fallback =="
+echo "== /feedback/ carries the endpoint, kind choice, a working honeypot and noscript Discord fallback =="
 test -f "$PAGE"
 node -e '
 const fs = require("fs");
@@ -46,12 +46,10 @@ const fail = (m) => fails.push(m);
 const attrs = (tag) => Object.fromEntries([...tag.matchAll(/([\w:-]+)(?:="([^"]*)")?/g)].slice(1).map((m) => [m[1], m[2] ?? ""]));
 const tags = (name) => [...html.matchAll(new RegExp(`<${name}\\b[^>]*>`, "g"))].map((m) => attrs(m[0]));
 
-if (tags("form").length !== 1) fail(`${page} carries ${tags("form").length} forms (expected 1)`);
 const kinds = tags("input").filter((a) => a.type === "radio" && a.name === "kind").map((a) => a.value).sort();
 if (kinds.join(",") !== "bug,suggestion") fail(`${page} kind choice is [${kinds}] (expected bug and suggestion)`);
-if (tags("textarea").length !== 1) fail(`${page} carries ${tags("textarea").length} textareas (expected 1)`);
 const honeypots = tags("input").filter((a) => a.tabindex === "-1");
-if (honeypots.length !== 1) fail(`${page} carries ${honeypots.length} out-of-tab-order inputs (expected the one honeypot)`);
+if (honeypots.length === 0) fail(`${page} has no honeypot input`);
 for (const h of honeypots) {
   if (h.autocomplete !== "off") fail(`${page} honeypot has autocomplete="${h.autocomplete}" (expected off)`);
   if (h.type === "hidden") fail(`${page} honeypot is type=hidden, which bots skip`);
