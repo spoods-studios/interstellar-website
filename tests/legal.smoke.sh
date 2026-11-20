@@ -38,7 +38,13 @@ for DOC in eula privacy; do
     echo "LEGAL FAIL: ${SITE}${NORMALIZED_BASE}legal/$DOC/ missing from $SITEMAP_FILE"
     exit 1
   fi
-  if [ "$(grep -o '<script' "$PAGE" | wc -l)" -ne "$(grep -o 'gc\.zgo\.at' "$PAGE" | wc -l)" ]; then
+  if ! node -e '
+const html = require("fs").readFileSync(process.argv[1], "utf8");
+const tags = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)(<\/script\s*>|$)/gi)];
+const bad = tags.filter(([, attrs, body]) => !/(^|\s)src="\/\/gc\.zgo\.at\/count\.js"(\s|$)/.test(attrs) || body.trim() !== "");
+for (const [tag] of bad) console.error(tag.slice(0, 160));
+process.exit(bad.length ? 1 : 0);
+' "$PAGE"; then
     echo "LEGAL FAIL: $PAGE loads a script beyond the GoatCounter tag"
     exit 1
   fi
