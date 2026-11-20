@@ -1,0 +1,50 @@
+---
+import { getCollection, render } from 'astro:content';
+import { assertNonEmpty, isVisible } from '../../lib/content-guards';
+import { describeBody } from '../../lib/describe-entry';
+import { titleFromH1 } from '../../lib/title-from-h1';
+import PostLayout from '../../layouts/PostLayout.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+
+export async function getStaticPaths() {
+  const entries = assertNonEmpty(await getCollection('pages'), 'pages').filter(isVisible);
+
+  return entries
+    .filter((entry) => entry.id.startsWith('legal/'))
+    .map((entry) => ({
+      params: { doc: entry.id.slice('legal/'.length) },
+      props: { entry },
+    }));
+}
+
+const { entry } = Astro.props;
+const { doc } = Astro.params;
+const { Content, headings } = await render(entry);
+
+const title = entry.data.title ?? titleFromH1(entry.body, entry.id);
+const meta = `Version ${entry.data.version} · Effective ${entry.data.effective!.toISOString().slice(0, 10)}`;
+
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+
+const breadcrumbs = [
+  { href: base, label: 'Home' },
+  { href: `${base}legal/${doc}/`, label: 'Legal' },
+];
+
+const description = describeBody(entry.body, entry.id);
+---
+
+<PostLayout
+  title={title}
+  meta={meta}
+  breadcrumbs={breadcrumbs}
+  description={description}
+  ogType="article"
+>
+  <article class="legal">
+    <h1>{title}</h1>
+    <TableOfContents headings={headings.filter((h) => h.slug !== 'in-short')} />
+    <Content />
+  </article>
+</PostLayout>

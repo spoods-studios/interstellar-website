@@ -20,8 +20,14 @@ const roadmap = defineCollection({
 
 const pages = defineCollection({
   loader: glob({
-    pattern: ['*.md'],
+    pattern: ['*.md', 'legal/*.md'],
     base: './pages',
+    generateId: ({ entry, data }) => {
+      if (entry.startsWith('legal/') && (typeof data.version !== 'string' || data.effective == null)) {
+        throw new Error(`pages/${entry}: legal pages must set version (a quoted string) and effective (a date) in frontmatter`);
+      }
+      return entry.replace(/\.md$/, '');
+    },
   }),
   // Permissive all-optional shape (D-20: standalone pages' meta line reads
   // from `updated`).
@@ -30,6 +36,8 @@ const pages = defineCollection({
     status: z.enum(['draft', 'published', 'final']).optional(),
     audience: z.string().optional(),
     updated: z.coerce.date().optional(),
+    version: z.string().optional(),
+    effective: z.coerce.date().optional(),
   }),
 });
 
