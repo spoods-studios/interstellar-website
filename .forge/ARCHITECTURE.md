@@ -51,4 +51,4 @@
 - `src/styles/global.css` — the site's one stylesheet.
 - `public/` — static passthrough files (favicon, default OG image, clips).
 - `tests/` — shell smoke tests driven by `run-all.sh`, a bare-Node `lib.smoke.mjs` and `live-probe.sh` for post-deploy checks.
-- `.forge/archive/gsd/` — historical planning/research documents from the original build, not current architecture.
+- `~/.local/state/forge/interstellar-website/archive/gsd/` — historical planning/research documents from the original build, not current architecture.

@@ -5,23 +5,25 @@ target for studio content. **Active — v1.0 shipped 2026-08-11**: Astro 7
 static site live at `spoods-studios.github.io/interstellar-website` (GitHub
 Pages, Actions deploy on every push to `main`). Full devblog archive
 (manifesto + milestone announcements), roadmap pages, How It's Made
-AI-transparency page, RSS + OpenGraph + Discord CTA.
+AI-transparency page, RSS + OpenGraph + Discord CTA. Since studio D-CK
+(2026-10-30) the devlog, How It's Made page and RSS feed are taken down; the
+root is a feature showcase, beside the roadmap pages and the feedback form.
 
 **Steady-state today (rest of Era 1):** the repo is a publish target, not a
-build site. Milestone announcements land in `devlog/`. Commit + push =
+build site. Commit + push =
 deploy. The per-phase technical deep-dive series (`technical/`) was
 retired and unpublished (studio Decision Log D-BN) — engine devlogs no
 longer dual-post here. Next build-out milestone is **Era 2** (press kit /
 Steam launch campaign — Roadmap §5.4); no site milestone is scheduled
 before then (Era 2 is parked in `../.forge/todo.md`; the old Roadmap is
-archived at `../.forge/archive/Roadmap.md`).
+archived at `~/.local/state/forge/spoods-studios/archive/Roadmap.md`).
 
 ## Skills available here
 
 | Skill | What it does |
 |---|---|
 | forge (`/forge-new`, `/forge-quick`, `/forge-fast`) | Planned and ad-hoc work in this repo. `CLAUDE.md` routes to the `.forge/` docs. |
-| `/forge-discuss` → `/forge-phase` → `/forge-verify` → `/forge-ship` | Feature loop for site build-out work a workspace track carries for this repo. Content promotion never runs through it. (v1.0 was built on the now-retired GSD loop, bootstrapped 2026-07-13; history in `.forge/archive/gsd/`.) |
+| `/forge-discuss` → `/forge-phase` → `/forge-verify` → `/forge-ship` | Feature loop for site build-out work a workspace track carries for this repo. Content promotion never runs through it. (v1.0 was built on the now-retired GSD loop, bootstrapped 2026-07-13; history in `~/.local/state/forge/interstellar-website/archive/gsd/`.) |
 
 ## Lifecycle & gate tier
 
@@ -31,9 +33,9 @@ content (copy, broken links, press-kit accuracy). No mandatory multi-vendor
 grid, no mandatory playtest. Bugs/broken pages still block; cosmetic nits
 don't.
 
-**Content commits don't trigger milestones or review** — devlog `.md` files
-landing here (announcements drafted by `/studio-milestone devlog` at the
-workspace root, then promoted) deploy on push and need no ceremony. Forge
+**Content commits don't trigger milestones or review** — promoted roadmap and
+page `.md` files deploy on push and need no ceremony (the devlog and
+`/studio-milestone devlog` retired under studio D-CK). Forge
 feature work is only for real site work (Era 2 press kit, feature changes).
 
 ## Publish rules (v1.0 invariants — violating these breaks live readers)
@@ -42,7 +44,7 @@ feature work is only for real site work (Era 2 press kit, feature changes).
   Discord embeds, RSS guids, and studio-vault references. Renaming a promoted
   file requires a `SLUG_REDIRECTS` entry in `astro.config.mjs` in the SAME
   commit (base-free key, base-composed destination) — see CLAUDE.md.
-- **Content renders as-is.** `devlog/`, `roadmap/`, `pages/` are drop
+- **Content renders as-is.** `roadmap/` and `pages/` are drop
   targets; never restyle or restructure their `.md` (VOICE.md is locked
   studio-side).
 - **Deploy is self-checking.** `deploy.yml` runs a post-deploy live-probe
@@ -56,17 +58,16 @@ feature work is only for real site work (Era 2 press kit, feature changes).
   live-certified — needs signup → `GOATCOUNTER_CODE` in `src/lib/site.mjs` →
   push → confirm dashboard records (incl. 404 traffic per D-62).
 - Nyquist VALIDATION.md for Phases 3–4 left `draft` — coverage TODO.
-- Full audit: `.forge/archive/gsd/MILESTONES.md` + `milestones/v1.0-MILESTONE-AUDIT.md`.
+- Full audit: `~/.local/state/forge/interstellar-website/archive/gsd/MILESTONES.md` + `milestones/v1.0-MILESTONE-AUDIT.md`.
 
 ## What do I do next?
 
 | State | Action |
 |---|---|
-| A devlog post needs publishing | Copy the accepted master in, commit, push — deploy is automatic. Verify the smoke job stays green. |
 | Broken page / red smoke job | Fix now — this is the only t3 state that blocks everything else. |
 | Era 2 opens (press kit) | `/forge-new` at the workspace root opens the track and adds the website feature; then `/forge-discuss` here, `/forge-phase` per phase, `/forge-verify`, `/forge-ship`. |
 | Small site fix | `/forge-quick` or `/forge-fast`. |
-| Unsure | Read `../RUNBOOK.md`; live org state: `../.forge/STATE.md`. |
+| Unsure | Read `../RUNBOOK.md`; live org state: `forge status` at the workspace root. |
 
 ## Git workflow (forge — D-BJ/D-BK)
 
@@ -83,5 +84,5 @@ is never needed. Issues live on the forge. Full rules:
 - `../RUNBOOK.md` — org-wide skill catalog + current state
 - `../.forge/docs/milestones/m1.x/manifest.md` — this repo's m1.x slice (closed; the org manifest machinery is retired, kept as history)
 - `../.forge/docs/gate-tiers.md` — full tier definitions (this repo is t3)
-- `../vault/devlog/discord/POSTING.md` — Discord half of the dual-post flow
+- `../vault/devlog/discord/POSTING.md` — Discord half of the retired dual-post flow (archive, studio D-CK)
 - No hook surfaces obligations: this repo's `.claude/settings.json` is `{}` and the user-level settings add no SessionStart hook. Obligation specs live in `../vault/obligations/`; read them there. (Auto-surfacing went with the retired `/studio-milestone open|status|close` machinery.)

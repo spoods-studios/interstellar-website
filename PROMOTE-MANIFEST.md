@@ -3,7 +3,7 @@
 Audit record for the manual, in-repo promote of every piece of locked studio
 content for closed milestones M0.1–M0.8 (Phase 2, Plan 01 — D-25, D-43). This
 repo hosts no promote automation; that remains a studio-side concern per
-`.forge/archive/gsd/REQUIREMENTS.md` ("Out of Scope"). This file is the record of what
+`~/.local/state/forge/interstellar-website/archive/gsd/milestones/v1.0-REQUIREMENTS.md` ("Out of Scope"). This file is the record of what
 was copied, from where, and why anything named here was excluded.
 
 ## technical/ — per-phase deep-dives
