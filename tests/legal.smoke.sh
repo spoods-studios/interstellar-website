@@ -49,6 +49,24 @@ for DOC in eula privacy; do
 done
 echo "Legal pages OK"
 
+echo "== Every page's footer links both legal pages under the base =="
+FOOTER_FAIL=0
+FOOTER_PAGES=0
+while IFS= read -r f; do
+  if grep -q 'http-equiv="refresh"' "$f"; then continue; fi
+  FOOTER_PAGES=$((FOOTER_PAGES + 1))
+  FOOTER_HTML=$(tr '\n' ' ' < "$f" | grep -oP '<footer\b.*?</footer>' || true)
+  for DOC in eula privacy; do
+    if ! grep -qF "href=\"${NORMALIZED_BASE}legal/$DOC/\"" <<<"$FOOTER_HTML"; then
+      echo "LEGAL FAIL: $f footer does not link ${NORMALIZED_BASE}legal/$DOC/"
+      FOOTER_FAIL=1
+    fi
+  done
+done < <(find dist -name '*.html')
+[ "$FOOTER_PAGES" -gt 0 ]
+[ "$FOOTER_FAIL" -eq 0 ]
+echo "Footer legal links OK across $FOOTER_PAGES pages"
+
 echo "== A legal file missing version, then effective, fails the build naming the file =="
 MUTATED=1
 for FIELD in version effective; do
