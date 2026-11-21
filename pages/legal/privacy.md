@@ -1,6 +1,6 @@
 ---
 title: Privacy policy
-version: "1.0"
+version: "1.1"
 effective: 2026-11-20
 ---
 
@@ -74,12 +74,14 @@ Telemetry is off until you switch it on in the game's settings, and you can swit
 
 ## The mailing list
 
-You can join our mailing list to hear about new versions and devblog posts. It uses double opt-in: you only join after you click the link in a confirmation email.
+You can join our mailing list to hear launch news: the Steam page, the Early Access date and launch day. It uses double opt-in: you only join after you click the link in a confirmation email, and nothing is sent to you before that.
 
-- **What we receive:** your email address and records of your sign-up and confirmation, so we can show you asked to join.
-- **Why:** to send you the news you asked for.
+- **What we receive:** your email address, records of when you signed up and confirmed, so we can show you asked to join, and that you ticked the box confirming your age.
+- **Why:** to send you the launch news you asked for, and nothing else.
 - **Lawful basis:** your consent. Every email has a one-click unsubscribe link, and you can also write to {{CONTACT_EMAIL}}.
-- **Who receives it:** our email provider, {{EMAIL_PROVIDER}}, which stores the list and sends the emails for us.
+- **Who receives it:** our email provider, Buttondown, a United States company, which stores the list and sends the emails for us. Buttondown keeps the data on Amazon Web Services servers in the US West (Oregon) region, us-west-2. The services Buttondown itself relies on are listed on its [subprocessors page](https://buttondown.com/legal/subprocessors).
+- **Transfers:** sending your data from the EU, the EEA or the UK to Buttondown in the United States is protected by the European Commission's Standard Contractual Clauses (Module 2, controller to processor) with the UK Addendum, under Buttondown's [data processing agreement](https://buttondown.com/legal/data-processing-agreement).
+- **Cookies:** this site sets no cookies, the sign-up form included. When you sign up, your browser goes on to Buttondown's own pages to finish, and those follow [Buttondown's privacy policy](https://buttondown.com/legal/privacy).
 - **How long:** until you unsubscribe. We keep the record of your consent and of your unsubscribing for up to 3 years after you leave, to show we acted on it, then delete it.
 - **Optional:** play and this website work the same without it.
 
@@ -115,7 +117,7 @@ Steam, Discord, Patreon and Bandcamp are independent services. When you use them
 
 ## Where your data goes
 
-Some of the services above are based in the United States or elsewhere outside the EU and the UK: Cloudflare, GitHub, Discord and possibly {{EMAIL_PROVIDER}}. When your data goes to one of them, it is protected by the European Commission's Standard Contractual Clauses (with the UK addendum), or by the EU-US Data Privacy Framework and its UK extension where the service is certified under it. Write to {{CONTACT_EMAIL}} for a copy of the safeguard that applies.
+Some of the services above are based in the United States or elsewhere outside the EU and the UK: Cloudflare, GitHub, Discord and Buttondown. When your data goes to one of them, it is protected by the European Commission's Standard Contractual Clauses (with the UK addendum), as it is for Buttondown under its data processing agreement, or by the EU-US Data Privacy Framework and its UK extension where the service is certified under it. Write to {{CONTACT_EMAIL}} for a copy of the safeguard that applies.
 
 Our issue tracker runs on our own computer in {{JURISDICTION}}.
 
