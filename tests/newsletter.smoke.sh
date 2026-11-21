@@ -87,6 +87,12 @@ const attrs = (tag) => Object.fromEntries([...tag.matchAll(/([\w:-]+)(?:="([^"]*
 const tags = (html, name) => [...html.matchAll(new RegExp(`<${name}\\b[^>]*>`, "g"))].map((m) => attrs(m[0]));
 const region = (html, name) => (html.match(new RegExp(`<${name}\\b[\\s\\S]*?</${name}>`)) || [""])[0];
 const forms = (html) => [...html.matchAll(/<form\b[^>]*>[\s\S]*?<\/form>/g)].map((m) => m[0]);
+const signupForms = (html) => forms(html).filter((form) => /buttondown\.com/i.test(attrs(form.match(/<form\b[^>]*>/)[0]).action || ""));
+const checkSignup = (where, html) => {
+  const found = signupForms(html);
+  if (found.length === 0) fail(`${where} has no form posting to the newsletter provider`);
+  for (const form of found) checkForm(where, form);
+};
 
 const checkForm = (where, form) => {
   const f = attrs(form.match(/<form\b[^>]*>/)[0]);
@@ -120,9 +126,7 @@ for (const f of files.filter((f) => f.endsWith(".html"))) {
   if (html.includes(`http-equiv="refresh"`)) continue;
   pages += 1;
   const footer = region(html, "footer");
-  const footerForms = forms(footer);
-  if (footerForms.length !== 1) fail(`${f} footer has ${footerForms.length} forms (expected 1)`);
-  else checkForm(`${f} footer`, footerForms[0]);
+  checkSignup(`${f} footer`, footer);
   for (const href of [`${base}legal/privacy/`, `${base}newsletter/`]) if (!footer.includes(`href="${href}"`)) fail(`${f} footer does not link ${href}`);
 }
 if (pages === 0) fail("no built pages found");
@@ -134,9 +138,7 @@ for (const f of files.filter((f) => f.endsWith(".js"))) {
 
 const page = "dist/newsletter/index.html";
 const main = region(fs.readFileSync(page, "utf8"), "main");
-const mainForms = forms(main);
-if (mainForms.length !== 1) fail(`${page} main has ${mainForms.length} forms (expected 1)`);
-else checkForm(`${page} main`, mainForms[0]);
+checkSignup(`${page} main`, main);
 if (!main.includes(`href="${base}legal/privacy/"`)) fail(`${page} main does not link ${base}legal/privacy/`);
 if (!main.includes(`href="${invite}"`)) fail(`${page} main does not link the Discord invite`);
 
