@@ -18,11 +18,11 @@
 - `src/pages/legal/[doc].astro` renders one `/legal/<doc>/` page per `pages/legal/*.md` entry through `PostLayout`, with a meta line from the entry's `version` and `effective` frontmatter.
   The `pages` loader in `src/content.config.ts` fails the build when a legal file lacks either field.
 - `src/pages/404.astro` renders a static not-found page through `BaseLayout`.
-- `src/pages/feedback.astro` renders `/feedback/` through `BaseLayout`: Bug/Suggestion choice, capped textarea, honeypot and a noscript Discord fallback that also replaces the form when `FEEDBACK_URL` is empty.
-  Its script is the only importer of `src/scripts/feedback-form.ts`, which posts through `src/lib/feedback.ts`.
+- `src/pages/feedback.astro` renders `/feedback/` through `BaseLayout`: Bug/Suggestion choice, capped textarea, honeypot and a Discord fallback when `FEEDBACK_URL` is empty.
+  Only its script imports `src/scripts/feedback-form.ts`, which posts through `src/lib/feedback.ts`.
 - `src/pages/newsletter.astro` renders `/newsletter/` with the `page` variant of `NewsletterForm`.
-- `src/components/NewsletterForm.astro` (`footer` or `page` variant, in every footer via `BaseLayout.astro`) is a native post form to `NEWSLETTER_URL`, or a Discord fallback when empty.
-  Its script calls `initNewsletterForm` from `src/scripts/newsletter-form.ts`, gating submit on a valid email and the age box.
+- `src/components/NewsletterForm.astro` (`footer` or `page` variant, in every footer) is a native post form to `NEWSLETTER_URL`, or a Discord fallback when empty.
+  Its script's `initNewsletterForm` (`src/scripts/newsletter-form.ts`) gates submit on a valid email and the age box.
 - `src/lib/*` holds cross-route shared logic: `content-guards.ts` (empty-collection assert, draft filter), `describe-entry.ts` (OG descriptions), `title-from-h1.ts`, `milestone-key.ts`, `toc.ts`.
 - `src/lib/feedback.ts` holds the code-point count, report payload and response-to-state mapping; `src/lib/site.mjs` holds site-wide constants and build-time config guards.
 - `tools/showcase-encode.sh` turns an engine capture directory into the committed clip (WebM and MP4) or still (PNG); `tools/perf-log.sh` prints the home page's eager byte count from `dist/`.
