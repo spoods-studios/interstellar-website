@@ -231,10 +231,16 @@ Flight plans, Gas giants and Living ground, followed by a Roadmap link to
 ### Feedback form
 Lives on `/feedback/` (`src/pages/feedback.astro`, styles `.fb-*` in `global.css`). A two-option Bug/Suggestion choice sits in a 1 px ink frame, and the chosen option fills ink with a vermilion dot. A 260 px textarea with a 1 px ink border and a code-point counter follows, then the primary CTA button, disabled in soft ink while sending. The status box is a 1 px ink frame; errors switch it to inked vermilion. An off-screen honeypot input is hidden from sight and tab order. Without JS or a configured Worker, a dashed soft-ink box points to the Discord `/bug` and `/suggest` commands. A margin note in the right columns covers Discord and the in-game report.
 
+### Newsletter form
+`src/components/NewsletterForm.astro`, styles `.ml-*` and `.cta-line` in `global.css`. A 1 px ink email input, a required age checkbox and a submit that stays disabled until both are valid. The footer variant is a heading and line in columns 1–4 and the form in 6–12, with the button as the outlined `.cta-line` (ink border, fills ink on hover); under 860 px it stacks. The page variant on `/newsletter/` uses the primary CTA. Fine print is soft ink. With no `NEWSLETTER_URL`, a dashed soft-ink box points to Discord.
+
 ### Footer
 A 1 px ink rule on top, on its own 12-column grid with 28 px by `--gut`
-padding. It holds one meta line: © 2026 Spoods Studios and a Join the Discord
-link.
+padding. It holds the newsletter form above one meta line: © 2026 Spoods Studios, Licence agreement and Privacy policy links
+and a Join the Discord link.
+
+### Legal pages
+Live at `/legal/eula/` and `/legal/privacy/` (`src/pages/legal/[doc].astro`, styles `.legal` in `global.css`). The meta line reads version and effective date. The "In short" summary is lifted above the table of contents, which omits it. Body text sits in columns 1 to 8 with 62 ch lists and tables, and everything spans full width under 860 px. A draft notice is a dashed soft-ink box with an uppercase vermilion label. H2s take 56 px above, and the summary has a 2 px ink top rule.
 
 ### Trajectory
 See Motion. The static version is one `.traj` SVG per section. The hero draws
@@ -251,7 +257,7 @@ Motion runs only on `/`. Two modules are bundled into the one processed
 `<script>` in `src/pages/index.astro`. `setupClipPlay` runs first, then
 `initShowcaseMotion`, so an error in the motion module cannot stop clip
 playback. `BaseLayout.astro` imports neither, so `/roadmap/` and `/404` ship
-no script besides GoatCounter, and `/feedback/` ships only its form script. The site has no client router and the module
+no script besides GoatCounter and the newsletter gate script that every page carries through the footer form, and `/feedback/` adds only its form script. The site has no client router and the module
 initialises once on load.
 
 **Libraries:** `motion@14.9.0` and `lenis@1.3.27`, both pinned exactly in

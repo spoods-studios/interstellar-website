@@ -75,9 +75,15 @@ function derivePagesCount() {
   return visible.length;
 }
 
+function deriveLegalCount() {
+  const dir = path.join(ROOT, 'pages', 'legal');
+  return listMarkdownFiles(dir).filter((name) => !isDraft(readFrontmatter(path.join(dir, name)))).length;
+}
+
 function deriveAll() {
   const roadmapCount = deriveRoadmapCount();
   const pagesCount = derivePagesCount();
+  const legalCount = deriveLegalCount();
 
   // Structural singletons: these routes exist once no matter how much
   // roadmap content lands -- they are route-shaped, not content-shaped, so
@@ -86,13 +92,16 @@ function deriveAll() {
   const HOMEPAGE_SINGLETON = 1; // dist/index.html
   const NOT_FOUND_SINGLETON = 1; // dist/404.html
   const FEEDBACK_SINGLETON = 1; // dist/feedback/index.html
+  const NEWSLETTER_SINGLETON = 1; // dist/newsletter/index.html
 
   const sitePageCount =
     roadmapCount +
+    legalCount +
     ROADMAP_OVERVIEW_SINGLETON +
     HOMEPAGE_SINGLETON +
     NOT_FOUND_SINGLETON +
-    FEEDBACK_SINGLETON;
+    FEEDBACK_SINGLETON +
+    NEWSLETTER_SINGLETON;
 
   return {
     roadmap_count: roadmapCount,

@@ -86,17 +86,33 @@ done < <(find dist -name "*.html")
 [ "$FAVICON_FAIL" -eq 0 ]
 echo "favicon coverage OK"
 
-echo "== Every script tag in dist/ is the analytics tag, plus the showcase module on / and the form module on /feedback/ (D-60/D-61) =="
-# State-free: while GOATCOUNTER_CODE is unset the analytics total is zero; once
-# it is set it is one per page. The allowed exceptions are the showcase's
-# hashed motion module on dist/index.html and the feedback form's module on
-# dist/feedback/index.html. A stray script breaks it in either state.
-test "$(grep -ro '<script' dist/ | wc -l)" -eq "$(( $(grep -ro 'gc\.zgo\.at' dist/ | wc -l) + 2 ))"
-test "$(grep -o '<script' dist/feedback/index.html | wc -l)" -eq "$(( $(grep -o 'gc\.zgo\.at' dist/feedback/index.html | wc -l) + 1 ))"
-test "$(grep -o '<script type="module"' dist/feedback/index.html | wc -l)" -eq 1
-test "$(grep -o '<script' dist/index.html | wc -l)" -eq "$(( $(grep -o 'gc\.zgo\.at' dist/index.html | wc -l) + 1 ))"
-test "$(grep -oE "<script type=\"module\" src=\"${NORMALIZED_BASE}_astro/[^\"/]+\\.js\"></script>" dist/index.html | wc -l)" -eq 1
-echo "no-extra-JS OK"
+echo "== Every script tag in dist/ is the GoatCounter tag or a same-origin module under the base _astro/, none from buttondown.com (D-60/D-61) =="
+node -e '
+const fs = require("fs");
+const [base, site] = process.argv.slice(1);
+const siteHost = new URL(site).host;
+const escapedBase = base.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const moduleSrc = new RegExp("^" + escapedBase + "_astro/[^\"/]+\\.[A-Za-z0-9_-]{6,}\\.js$");
+const sameOrigin = (body) =>
+  [...body.matchAll(/(?:https?:\/\/|["\x27`]\/\/)([a-z0-9-]+(?:\.[a-z0-9-]+)+)/gi)].every((m) => [siteHost, "www.w3.org"].includes(m[1].toLowerCase())) &&
+  [...body.matchAll(/(?:\bfrom|\bimport)\s*\(?\s*["\x27`]([^"\x27`]+)["\x27`]/g)].every((m) => m[1].startsWith(`${base}_astro/`));
+const fails = [];
+for (const rel of fs.readdirSync("dist", { recursive: true })) {
+  if (!rel.endsWith(".html")) continue;
+  const f = `dist/${rel}`;
+  for (const [tag, attrs, body] of fs.readFileSync(f, "utf8").matchAll(/<script\b([^>]*)>([\s\S]*?)(?:<\/script\s*>|$)/gi)) {
+    const src = (attrs.match(/\bsrc="([^"]*)"/) ?? [])[1];
+    const isModule = /\btype="module"/.test(attrs);
+    const analytics = src !== undefined && /^\/\/gc\.zgo\.at\/count\.js$/.test(src) && body.trim() === "";
+    const hashedModule = src !== undefined && isModule && moduleSrc.test(src) && body.trim() === "";
+    const inlineModule = src === undefined && isModule && !/buttondown\.com/i.test(body) && sameOrigin(body);
+    if (!analytics && !hashedModule && !inlineModule) fails.push(`${f} loads a script that is neither GoatCounter nor a same-origin module under ${base}_astro/: ${tag.slice(0, 160)}`);
+  }
+}
+for (const m of fails) console.log(`FAIL: ${m}`);
+process.exit(fails.length ? 1 : 0);
+' "$NORMALIZED_BASE" "$SITE"
+echo "script allow-list OK"
 
 echo "== Dead-link sweep: every internal href resolves to a real file in dist/ =="
 DEADLINKS_LOG=/tmp/gsd-site-deadlinks.log
@@ -109,7 +125,12 @@ while IFS= read -r f; do
     path="${href%%#*}"
     case "$path" in
       "$BASE"*) rel="${path#"$BASE"}" ;;
-      *) rel="$path" ;;
+      /*|*:*) rel="$path" ;;
+      *)
+        rel="$(realpath -m --relative-to=dist "$(dirname "$f")/$path")"
+        [ "$rel" = "." ] && rel=""
+        [ -n "$rel" ] && [[ "$path" == */ ]] && rel="$rel/"
+        ;;
     esac
     rel="${rel#/}"
     if [ -z "$rel" ]; then
