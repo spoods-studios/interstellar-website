@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Distribution smoke harness (OpenGraph, Discord CTA). Proves DIST-02 (every
 # built page carries a complete, absolute, resolvable OpenGraph block) and
-# DIST-03 (every page carries both CTA placements), including the D-54
+# DIST-03 (every page links the invite from its header nav and footer), including the D-54
 # loud-failure path for the invite constant. The RSS feed and the devlog were
 # taken down (SSC-07), so no feed or hero-image assertions remain.
 #
@@ -187,28 +187,40 @@ fi
 echo "description variety OK ($DISTINCT_DESCRIPTIONS distinct values across $TOTAL_PAGES pages)"
 
 echo "== DIST-03: CTA placements on every built page =="
-# Every page carries the header-nav and footer invites; the showcase homepage
-# (src/pages/index.astro) adds two more, in its hero and its Discord close,
-# and the feedback page (src/pages/feedback.astro) adds two, in its margin
-# note and its Discord fallback (noscript, or in place of the form).
+# Every page links the invite from its header nav and its footer, and every
+# link that opens a new tab or points at the invite carries target="_blank"
+# with rel="noopener noreferrer". Other placements may add invites freely.
 CTA_FAIL=0
+CTA_PAGES=0
 while IFS= read -r f; do
   if is_redirect_stub "$f"; then continue; fi
-  EXPECTED_INVITES=2
-  if [ "$f" = "dist/index.html" ] || [ "$f" = "dist/feedback/index.html" ]; then EXPECTED_INVITES=4; fi
-  INVITE_COUNT=$(count_occurrences "$INVITE" "$f")
-  if [ "$INVITE_COUNT" -ne "$EXPECTED_INVITES" ]; then
-    echo "FAIL: $f carries $INVITE_COUNT invite links (expected exactly $EXPECTED_INVITES)"
+  CTA_PAGES=$((CTA_PAGES + 1))
+  HTML=$(tr '\n' ' ' < "$f")
+  HEAD_HTML=$(grep -oP '<header\b.*?</header>' <<<"$HTML" || true)
+  NAV_HTML=$(grep -oP '<nav\b.*?</nav>' <<<"$HEAD_HTML" || true)
+  FOOTER_HTML=$(grep -oP '<footer\b.*?</footer>' <<<"$HTML" || true)
+  if ! grep -qF "href=\"${INVITE}\"" <<<"$NAV_HTML"; then
+    echo "FAIL: $f header nav does not link the Discord invite"
     CTA_FAIL=1
   fi
-  REL_COUNT=$(count_occurrences 'rel="noopener noreferrer"' "$f")
-  if [ "$REL_COUNT" -ne "$EXPECTED_INVITES" ]; then
-    echo "FAIL: $f carries $REL_COUNT external-link rel pairs (expected exactly $EXPECTED_INVITES)"
+  if ! grep -qF "href=\"${INVITE}\"" <<<"$FOOTER_HTML"; then
+    echo "FAIL: $f footer does not link the Discord invite"
     CTA_FAIL=1
   fi
+  while IFS= read -r a; do
+    [ -n "$a" ] || continue
+    if ! grep -qF 'target="_blank"' <<<"$a" && ! grep -qF "href=\"${INVITE}\"" <<<"$a"; then continue; fi
+    for want in 'target="_blank"' 'rel="noopener noreferrer"'; do
+      if ! grep -qF "$want" <<<"$a"; then
+        echo "FAIL: $f link lacks $want: $a"
+        CTA_FAIL=1
+      fi
+    done
+  done < <(grep -oP '<a\b[^>]*>' <<<"$HTML" || true)
 done < <(find dist -name "*.html")
+[ "$CTA_PAGES" -gt 0 ]
 [ "$CTA_FAIL" -eq 0 ]
-echo "CTA coverage OK"
+echo "CTA coverage OK across $CTA_PAGES pages"
 
 echo "== DIST-02: two consecutive builds emit identical metadata (content-hashed URLs are stable) =="
 capture_metadata() {

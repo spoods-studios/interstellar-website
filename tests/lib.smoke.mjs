@@ -14,7 +14,7 @@ import { assertNonEmpty, isVisible } from '../src/lib/content-guards.ts';
 import { buildToc } from '../src/lib/toc.ts';
 import { firstProseBlock, stripInline, truncate, describeBody } from '../src/lib/describe-entry.ts';
 import { codePointCount, buildPayload, retryMinutes, sendReport } from '../src/lib/feedback.ts';
-import { assertFeedbackConfigured } from '../src/lib/site.mjs';
+import { assertFeedbackConfigured, assertNewsletterConfigured } from '../src/lib/site.mjs';
 
 console.log('== milestone-key ==');
 assert.equal(normalizeMilestone('M0.1'), 'm0.1');
@@ -158,6 +158,18 @@ assert.equal(
 );
 assert.throws(() => assertFeedbackConfigured('http://reports.example.workers.dev/v1/reports'), /FEEDBACK_URL/);
 assert.throws(() => assertFeedbackConfigured('reports.example.workers.dev'), /FEEDBACK_URL/);
+
+console.log('== newsletter ==');
+assert.equal(assertNewsletterConfigured(''), null);
+assert.equal(
+  assertNewsletterConfigured(' https://buttondown.com/api/emails/embed-subscribe/fixture-user '),
+  'https://buttondown.com/api/emails/embed-subscribe/fixture-user'
+);
+assert.throws(
+  () => assertNewsletterConfigured('http://buttondown.com/api/emails/embed-subscribe/fixture-user'),
+  /NEWSLETTER_URL/
+);
+assert.throws(() => assertNewsletterConfigured('buttondown.com'), /NEWSLETTER_URL/);
 
 assert.equal(codePointCount('orbit \u{1F680}'), 7);
 assert.equal(codePointCount('\u{1F680}'.repeat(4000)), 4000);

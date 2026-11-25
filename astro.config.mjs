@@ -49,7 +49,7 @@ const mdastPlugins = [];
 // (which is exactly how pages/ was missed originally).
 const CONTENT_TREES = [
   { root: ROADMAP_ROOT },
-  { root: PAGES_ROOT },
+  { root: PAGES_ROOT, recursive: true },
 ];
 
 function collectMarkdownFiles(root, { recursive = false, exclude = [] } = {}) {

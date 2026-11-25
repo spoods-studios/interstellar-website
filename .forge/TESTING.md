@@ -7,12 +7,19 @@ Tests that bind ports add `FORGE_PORT_OFFSET` to their base port and tests that 
 ## Layout
 
 - `tests/lib.smoke.mjs`: committed assertion script for pure `src/lib/*.ts` helpers, run directly with `node`.
-- `tests/*.smoke.sh`: shell smoke scripts, each doing a clean `npm run build` and asserting against `dist/` output, one per area (e.g. build, media, showcase, takedown).
-  `showcase.smoke.sh` checks the single JS module on `dist/index.html`, the reduced-motion gate through `initShowcaseMotion` and the `<video>` attributes.
+- `tests/*.smoke.sh`: shell smoke scripts, each doing a clean `npm run build` and asserting against `dist/`, one per area (build, media, showcase, takedown).
+  `showcase.smoke.sh` checks the single JS module on `dist/index.html`, the reduced-motion gate and the `<video>` attributes.
 - `feedback.smoke.sh` builds twice by rewriting `FEEDBACK_URL` in `src/lib/site.mjs`, restored on exit.
   A fixture https URL checks the form, honeypot, noscript fallback, no cookies, no Worker host in built JS and the nav link on every page.
   An empty URL checks the Discord fallback replaces the form.
-- `lib.smoke.mjs` covers `src/lib/feedback.ts` (payload building, code-point cap, `Retry-After` minutes, response-to-state mapping) and `assertFeedbackConfigured`.
+- `newsletter.smoke.sh` runs the `initNewsletterForm` gate against stubs, then builds twice by rewriting `NEWSLETTER_URL` in `src/lib/site.mjs`, restored on exit.
+- `newsletter.smoke.sh` with a fixture https URL checks every footer and `/newsletter/` carry a native post form and the sitemap entry.
+  It also checks for no iframe and no Buttondown host in built JS.
+- `newsletter.smoke.sh` with an empty URL checks the Discord fallback replaces every form.
+- `lib.smoke.mjs` covers `src/lib/feedback.ts` (payload building, code-point cap, `Retry-After` minutes, response-to-state mapping), `assertFeedbackConfigured` and `assertNewsletterConfigured`.
+- `site.smoke.sh` allows only the GoatCounter tag and same-origin hashed modules as scripts.
+- `legal.smoke.sh` checks each legal page shows its version and date, is in the sitemap and sets no cookie.
+  It also checks every footer links both pages and a missing `version` or `effective` fails the build naming the file.
 - `media.smoke.sh` pins media size caps; `takedown.smoke.sh` checks the root redirects in the built stubs and the absent feed.
 - `tests/run-all.sh`: runs `node tests/lib.smoke.mjs` then every `tests/*.smoke.sh` in sorted order; adding a new smoke script needs no harness edit.
   Given script paths, it runs only those.
