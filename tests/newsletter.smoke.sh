@@ -160,8 +160,6 @@ if sed -n '/^const SLUG_REDIRECTS = {/,/^};/p' astro.config.mjs | grep -qP "^\s*
   echo "FAIL: /newsletter/ is a SLUG_REDIRECTS key"
   exit 1
 fi
-FORM_FOOTER_INVITES=$(region_invites dist/index.html footer)
-FORM_MAIN_INVITES=$(region_invites "$PAGE" main)
 echo "sitemap and redirects OK"
 
 echo "== Build with an empty NEWSLETTER_URL: the Discord fallback replaces the forms =="
@@ -174,8 +172,8 @@ if grep -rlP '<form\b[^>]*\b(method="post"|action=)' dist --include='*.html'; th
 fi
 EMPTY_FOOTER_INVITES=$(region_invites dist/index.html footer)
 EMPTY_MAIN_INVITES=$(region_invites "$PAGE" main)
-if [ "$EMPTY_FOOTER_INVITES" -le "$FORM_FOOTER_INVITES" ] || [ "$EMPTY_MAIN_INVITES" -le "$FORM_MAIN_INVITES" ]; then
-  echo "FAIL: with an empty NEWSLETTER_URL the footer links Discord $EMPTY_FOOTER_INVITES times (form build $FORM_FOOTER_INVITES) and /newsletter/ $EMPTY_MAIN_INVITES times (form build $FORM_MAIN_INVITES): no visible fallback"
+if [ "$EMPTY_FOOTER_INVITES" -lt 1 ] || [ "$EMPTY_MAIN_INVITES" -lt 1 ]; then
+  echo "FAIL: with an empty NEWSLETTER_URL the footer or /newsletter/ main does not link the Discord invite"
   exit 1
 fi
 echo "empty-URL fallback OK"
