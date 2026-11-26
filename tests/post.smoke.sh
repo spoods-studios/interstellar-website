@@ -4,9 +4,10 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+. tests/helpers/build.sh
 
 echo "== Build =="
-npm run build
+build_site
 
 BASE=$(grep -oP "^const BASE = '\K[^']+" astro.config.mjs)
 NORMALIZED_BASE="${BASE%/}/"

@@ -4,14 +4,14 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+. tests/helpers/build.sh
 
 echo "== Clean build =="
-rm -rf dist
-npm run build
+build_site
 
 BASE=$(grep -oP "^const BASE = '\K[^']+" astro.config.mjs)
 NORMALIZED_BASE="${BASE%/}/"
-INVITE=$(grep -oP "^export const DISCORD_INVITE_URL = '\K[^']+" src/lib/site.mjs)
+INVITE=$(site_value DISCORD_INVITE_URL)
 
 is_redirect_stub() {
   grep -q 'http-equiv="refresh"' "$1"

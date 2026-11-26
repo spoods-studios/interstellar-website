@@ -11,10 +11,10 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+. tests/helpers/build.sh
 
-echo "== Clean build =="
-rm -rf dist
-npm run build
+echo "== Build =="
+build_site
 
 # --- Derive the expected absolute-URL prefix from astro.config.mjs itself
 # (SITE-02: the site/base live in one config location, never a literal
@@ -23,7 +23,7 @@ SITE=$(grep -oP "site:\s*'\K[^']+" astro.config.mjs)
 BASE=$(grep -oP "^const BASE = '\K[^']+" astro.config.mjs)
 NORMALIZED_BASE="${BASE%/}/"
 PREFIX="${SITE}${NORMALIZED_BASE}"
-INVITE=$(grep -oP "^export const DISCORD_INVITE_URL = '\K[^']+" src/lib/site.mjs)
+INVITE=$(site_value DISCORD_INVITE_URL)
 echo "expected absolute-URL prefix: $PREFIX"
 
 # grep's count flag counts matching LINES, and Astro's build minifies each
@@ -224,12 +224,14 @@ echo "CTA coverage OK across $CTA_PAGES pages"
 
 echo "== DIST-02: two consecutive builds emit identical metadata (content-hashed URLs are stable) =="
 capture_metadata() {
-  grep -rho '<meta property="og:\(image\|url\)" content="[^"]*"' dist --include='*.html' \
+  grep -rho '<meta property="og:\(image\|url\)" content="[^"]*"' "$1" --include='*.html' \
     | sed -E 's/.*content="([^"]*)".*/\1/' | sort
 }
-METADATA_BEFORE=$(capture_metadata)
-npm run build
-METADATA_AFTER=$(capture_metadata)
+T=$(mktemp -d)
+trap 'rm -rf "$T"' EXIT
+build_variant "$T/again"
+METADATA_BEFORE=$(capture_metadata dist)
+METADATA_AFTER=$(capture_metadata "$T/again/dist")
 if [ "$METADATA_BEFORE" != "$METADATA_AFTER" ]; then
   echo "FAIL: a rebuild from unchanged inputs changed the emitted og:image/og:url set"
   diff <(printf '%s\n' "$METADATA_BEFORE") <(printf '%s\n' "$METADATA_AFTER") || true
@@ -238,47 +240,21 @@ fi
 echo "build determinism OK"
 
 echo "== D-54 fixture: an unset, blank or placeholder invite constant fails the build, naming the constant =="
-SITE_LIB="src/lib/site.mjs"
-# Snapshot, don't demand emptiness: the fixture must leave the trees exactly
-# as it found them, but a set-and-not-yet-committed GOATCOUNTER_CODE (the
-# D-61 post-signup state) is legitimate src/ dirt, not fixture damage.
-PRE_FIXTURE_STATUS=$(git status --porcelain roadmap/ pages/ src/)
-SITE_LIB_BACKUP=$(mktemp)
-cp "$SITE_LIB" "$SITE_LIB_BACKUP"
-INVITE_PLACEHOLDER=$(grep -oP "^export const INVITE_PLACEHOLDER = '\K[^']+" "$SITE_LIB")
-trap 'cp "$SITE_LIB_BACKUP" "$SITE_LIB" 2>/dev/null || true; rm -f "$SITE_LIB_BACKUP"' EXIT
+INVITE_PLACEHOLDER=$(grep -oP "^export const INVITE_PLACEHOLDER = '\K[^']+" src/lib/site.mjs)
 # A near-miss value must be rejected too -- the requirement is that no page can
 # ever ship a CTA with a blank or scaffold href, not merely that an empty
 # constant breaks something.
+scratch_tree "$T/site"
 for BAD_INVITE in "" "   " "$INVITE_PLACEHOLDER"; do
-  sed "s|^export const DISCORD_INVITE_URL = '.*';|export const DISCORD_INVITE_URL = '${BAD_INVITE}';|" \
-    "$SITE_LIB_BACKUP" > "$SITE_LIB"
-  if npm run build > /tmp/gsd-dist-d54.log 2>&1; then
-    cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+  if build_in "$T/site" DISCORD_INVITE_URL="$BAD_INVITE" > "$T/d54.log" 2>&1; then
     echo "D-54 FIXTURE FAIL: build succeeded with the invite constant set to '${BAD_INVITE}'"
     exit 1
   fi
-  if ! grep -q "DISCORD_INVITE_URL" /tmp/gsd-dist-d54.log; then
-    cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+  if ! grep -q "DISCORD_INVITE_URL" "$T/d54.log"; then
     echo "D-54 FIXTURE FAIL: the failure for '${BAD_INVITE}' did not name the constant"
     exit 1
   fi
 done
-cp "$SITE_LIB_BACKUP" "$SITE_LIB"
-if [ "$(git status --porcelain roadmap/ pages/ src/)" != "$PRE_FIXTURE_STATUS" ]; then
-  echo "D-54 FIXTURE FAIL: a tree was left in a different state than the fixture found it"
-  exit 1
-fi
-echo "D-54 fixture OK: unset, blank and placeholder invites all fail loudly naming the constant; trees restored"
-
-trap - EXIT
-rm -f "$SITE_LIB_BACKUP"
-
-echo "== Final clean rebuild after all fixtures restored =="
-npm run build
-if [ "$(git status --porcelain roadmap/ pages/ src/)" != "$PRE_FIXTURE_STATUS" ]; then
-  echo "FAIL: trees not restored to their pre-fixture state after the full fixture run"
-  exit 1
-fi
+echo "D-54 fixture OK: unset, blank and placeholder invites all fail loudly naming the constant"
 
 echo "ALL CHECKS PASSED"

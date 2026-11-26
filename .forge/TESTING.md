@@ -7,12 +7,14 @@ Tests that bind ports add `FORGE_PORT_OFFSET` to their base port and tests that 
 ## Layout
 
 - `tests/lib.smoke.mjs`: committed assertion script for pure `src/lib/*.ts` helpers, run directly with `node`.
-- `tests/*.smoke.sh`: shell smoke scripts, each doing a clean `npm run build` and asserting against `dist/`, one per area (build, media, showcase, takedown).
+- `tests/*.smoke.sh`: shell smoke scripts asserting against `dist/`, one per area (build, media, showcase, sitemap, takedown).
+  They source `tests/helpers/build.sh`: `build_site` builds `dist/` once per `tests/run-all.sh` run (a script run alone builds it itself), and every other build runs in a scratch copy of the site under `mktemp -d`, so no test edits a tracked file.
   `showcase.smoke.sh` checks the single JS module on `dist/index.html`, the reduced-motion gate and the `<video>` attributes.
-- `feedback.smoke.sh` builds twice by rewriting `FEEDBACK_URL` in `src/lib/site.mjs`, restored on exit.
+- `src/lib/site.mjs` reads `DISCORD_INVITE_URL`, `GOATCOUNTER_CODE`, `FEEDBACK_URL` and `NEWSLETTER_URL` from the environment before its committed values; the fixture builds set them there.
+- `feedback.smoke.sh` builds twice with `FEEDBACK_URL` set.
   A fixture https URL checks the form, honeypot, noscript fallback, no cookies, no Worker host in built JS and the nav link on every page.
   An empty URL checks the Discord fallback replaces the form.
-- `newsletter.smoke.sh` runs the `initNewsletterForm` gate against stubs, then builds twice by rewriting `NEWSLETTER_URL` in `src/lib/site.mjs`, restored on exit.
+- `newsletter.smoke.sh` runs the `initNewsletterForm` gate against stubs, then builds twice with `NEWSLETTER_URL` set.
 - `newsletter.smoke.sh` with a fixture https URL checks every footer and `/newsletter/` carry a native post form and the sitemap entry.
   It also checks for no iframe and no Buttondown host in built JS.
 - `newsletter.smoke.sh` with an empty URL checks the Discord fallback replaces every form.
@@ -26,7 +28,7 @@ Tests that bind ports add `FORGE_PORT_OFFSET` to their base port and tests that 
 - `tests/changed.sh`: maps changed paths to scripts: a changed script runs itself, a changed `src/lib` helper runs `lib.smoke.mjs`, and changed site source or content runs `site.smoke.sh` plus scripts naming the file's stem.
 - Build config, lockfiles, `tests/helpers/` and the runners run the full suite; paths outside the site run nothing.
 - `tests/live-probe.sh`: probes the deployed GitHub Pages site after deploy, not run locally as part of `npm test`.
-- `tests/hardening.smoke.sh` mutates the working tree with fixtures and does full rebuilds.
+- `tests/hardening.smoke.sh` builds its schema, `GITHUB_SHA` and `GOATCOUNTER_CODE` fixtures in scratch copies.
 
 ## Commands
 

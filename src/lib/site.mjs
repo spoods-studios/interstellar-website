@@ -13,7 +13,7 @@
 // Locked -- regenerating it dead-links every URL already shared, and Plan
 // 03-06 writes this same literal into the studio vault, so it must match
 // byte-for-byte.
-export const DISCORD_INVITE_URL = 'https://discord.gg/yeyyh6ycfw';
+export const DISCORD_INVITE_URL = process.env.DISCORD_INVITE_URL ?? 'https://discord.gg/yeyyh6ycfw';
 
 // The sentinel a scaffolded-but-unconfigured checkout would carry. Rejected
 // by assertInviteConfigured() so a near-miss value can never reach a page.
@@ -47,7 +47,7 @@ export const OG_DEFAULT = {
 // D-60: the GoatCounter site code, unset until the developer signs up
 // (post-phase). Set it to the account's code (lowercase letters, digits and
 // hyphens) after creating the account.
-export const GOATCOUNTER_CODE = '';
+export const GOATCOUNTER_CODE = process.env.GOATCOUNTER_CODE ?? '';
 
 // The sentinel a scaffolded-but-unconfigured checkout would carry. Rejected
 // by assertGoatcounterConfigured() so a near-miss value can never ship.
@@ -83,7 +83,7 @@ export function assertGoatcounterConfigured() {
   return code;
 }
 
-export const FEEDBACK_URL = '';
+export const FEEDBACK_URL = process.env.FEEDBACK_URL ?? '';
 
 export function assertFeedbackConfigured(url = FEEDBACK_URL) {
   const trimmed = typeof url === 'string' ? url.trim() : '';
@@ -96,7 +96,7 @@ export function assertFeedbackConfigured(url = FEEDBACK_URL) {
   return trimmed;
 }
 
-export const NEWSLETTER_URL = '';
+export const NEWSLETTER_URL = process.env.NEWSLETTER_URL ?? '';
 
 export function assertNewsletterConfigured(url = NEWSLETTER_URL) {
   const trimmed = typeof url === 'string' ? url.trim() : '';
