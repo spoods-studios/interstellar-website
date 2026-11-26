@@ -265,8 +265,8 @@ const moduleSrc = new RegExp("^" + escapedBase + "_astro/[^\"/]+\\.[A-Za-z0-9_-]
 let entry = null;
 if (home.length !== 1) fail(`dist/index.html carries ${home.length} scripts besides GoatCounter and those every page carries, expected 1`);
 else {
-  const m = home[0].match(/^<script type="module" src="([^"]+)"><\/script>$/);
-  if (!m || !moduleSrc.test(m[1])) fail(`the script on dist/index.html is ${home[0].slice(0, 160)}, expected a hashed module under ${base}_astro/`);
+  const m = home[0].match(/\bsrc="([^"]+)"/);
+  if (!m || !/\btype="module"/.test(home[0]) || !moduleSrc.test(m[1])) fail(`the script on dist/index.html is ${home[0].slice(0, 160)}, expected a hashed module under ${base}_astro/`);
   else entry = "dist/" + m[1].slice(base.length);
 }
 for (const page of ["dist/roadmap/index.html", "dist/404.html"]) {
