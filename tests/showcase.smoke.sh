@@ -6,6 +6,7 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+. tests/helpers/build.sh
 
 echo "== Clip playback: near the viewport, at most two, never under reduced motion =="
 node --input-type=module -e '
@@ -109,8 +110,7 @@ console.log("showcase-motion OK");
 ' "$PWD/src/scripts/showcase-motion.ts"
 
 echo "== Clean build =="
-rm -rf dist
-npm run build
+build_site
 
 BASE=$(grep -oP "^const BASE = '\K[^']+" astro.config.mjs)
 NORMALIZED_BASE="${BASE%/}/"

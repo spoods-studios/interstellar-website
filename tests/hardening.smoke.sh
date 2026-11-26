@@ -17,10 +17,12 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+. tests/helpers/build.sh
 
-echo "== Clean build =="
-rm -rf dist
-npm run build
+echo "== Build =="
+build_site
+T=$(mktemp -d)
+trap 'rm -rf "$T"' EXIT
 
 # --- Derive SITE/BASE from astro.config.mjs itself (SITE-02: the site/base
 # live in one config location, never repeated as literals in assertions). ---
@@ -77,7 +79,7 @@ echo "local fallback OK"
 
 echo "== D-68: the stamp tracks GITHUB_SHA when exported for the build =="
 SYNTHETIC_SHA="cafef00dcafef00dcafef00dcafef00dcafef00d"
-GITHUB_SHA="$SYNTHETIC_SHA" npm run build > /dev/null
+build_variant "$T/sha" GITHUB_SHA="$SYNTHETIC_SHA" > /dev/null
 TRACK_FAIL=0
 while IFS= read -r f; do
   if is_redirect_stub "$f"; then continue; fi
@@ -85,7 +87,7 @@ while IFS= read -r f; do
     echo "FAIL: $f does not carry the exported GITHUB_SHA value in its stamp"
     TRACK_FAIL=1
   fi
-done < <(find dist -name "*.html")
+done < <(find "$T/sha/dist" -name "*.html")
 [ "$TRACK_FAIL" -eq 0 ]
 echo "SHA tracking OK"
 
@@ -103,7 +105,7 @@ echo "SHA tracking OK"
 #   2. duplicate-collection-id overwrite (warn-only, last-write-wins) --
 #      structurally impossible here: every id derives from a unique path;
 #   3. this smoke harness itself does not run in CI -- deliberate: it performs
-#      several full rebuilds and mutates the working tree with fixtures, and
+#      several full rebuilds, and
 #      D-08 means every push deploys, so gating deploys on it would trade a
 #      small silent-failure class for a large flaky-deploy class. The CI build
 #      already fails loudly on every schema and content error class above,
@@ -114,52 +116,33 @@ echo "== SITE-03 fixture: an out-of-enum frontmatter status fails the build, nam
 # how-this-gets-built.md carries: the landmine this fixture retires
 # (04-CONTEXT).
 SCHEMA_FIXTURE="schema-audit-fixture.md"
-trap 'rm -f "pages/$SCHEMA_FIXTURE"' EXIT
-printf -- '---\nstatus: skeleton\n---\n\n# Schema Audit Fixture\n\nfixture body\n' > "pages/$SCHEMA_FIXTURE"
-if npm run build > /tmp/gsd-hardening-schema.log 2>&1; then
-  rm -f "pages/$SCHEMA_FIXTURE"
+scratch_tree "$T/schema"
+printf -- '---\nstatus: skeleton\n---\n\n# Schema Audit Fixture\n\nfixture body\n' > "$T/schema/pages/$SCHEMA_FIXTURE"
+if build_in "$T/schema" > "$T/schema.log" 2>&1; then
   echo "SITE-03 FIXTURE FAIL: build succeeded with an out-of-enum status value"
   exit 1
 fi
-if ! grep -q "schema-audit-fixture" /tmp/gsd-hardening-schema.log; then
-  rm -f "pages/$SCHEMA_FIXTURE"
+if ! grep -q "schema-audit-fixture" "$T/schema.log"; then
   echo "SITE-03 FIXTURE FAIL: the failure output did not name the offending file"
   exit 1
 fi
-rm -f "pages/$SCHEMA_FIXTURE"
-trap - EXIT
-if git status --porcelain pages/ | grep -q .; then
-  echo "SITE-03 FIXTURE FAIL: pages/ left dirty"
-  exit 1
-fi
-echo "SITE-03 fixture OK: schema violation failed the build loudly naming the file; pages/ clean"
+echo "SITE-03 fixture OK: schema violation failed the build loudly naming the file"
 
 echo "== D-61 fixture: an unset site code warns and builds; a placeholder or malformed one fails loudly =="
-SITE_LIB="src/lib/site.mjs"
-# Snapshot, don't demand emptiness: the fixtures must leave src/ exactly as
-# they found it, but a set-and-not-yet-committed GOATCOUNTER_CODE (the D-61
-# post-signup state) is legitimate dirt that must not read as fixture damage.
-PRE_SRC_STATUS=$(git status --porcelain src/)
-SITE_LIB_BACKUP=$(mktemp)
-cp "$SITE_LIB" "$SITE_LIB_BACKUP"
 # Derive the sentinel from the module itself (the D-54 idiom in
 # tests/distribution.smoke.sh) rather than repeating it as a literal the
 # module could silently drift away from.
-GC_PLACEHOLDER=$(grep -oP "^export const GOATCOUNTER_PLACEHOLDER = '\K[^']+" "$SITE_LIB")
-trap 'cp "$SITE_LIB_BACKUP" "$SITE_LIB" 2>/dev/null || true; rm -f "$SITE_LIB_BACKUP"' EXIT
+GC_PLACEHOLDER=$(grep -oP "^export const GOATCOUNTER_PLACEHOLDER = '\K[^']+" src/lib/site.mjs)
+scratch_tree "$T/gc"
 # D-61 legs 1-2: unset and whitespace-only are the same expected pre-signup
 # state -- the build must WARN naming the constant and still exit 0, because
 # D-08 means every push deploys and a hard block would freeze the pipeline.
 for SOFT_CODE in "" "   "; do
-  sed "s|^export const GOATCOUNTER_CODE = '.*';|export const GOATCOUNTER_CODE = '${SOFT_CODE}';|" \
-    "$SITE_LIB_BACKUP" > "$SITE_LIB"
-  if ! npm run build > /tmp/gsd-hardening-d61.log 2>&1; then
-    cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+  if ! build_in "$T/gc" GOATCOUNTER_CODE="$SOFT_CODE" > "$T/d61.log" 2>&1; then
     echo "D-61 FIXTURE FAIL: build failed with the site code set to '${SOFT_CODE}' (unset must warn, not throw)"
     exit 1
   fi
-  if ! grep -q "GOATCOUNTER_CODE" /tmp/gsd-hardening-d61.log; then
-    cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+  if ! grep -q "GOATCOUNTER_CODE" "$T/d61.log"; then
     echo "D-61 FIXTURE FAIL: the build for '${SOFT_CODE}' did not warn naming the constant"
     exit 1
   fi
@@ -168,49 +151,30 @@ done
 # the unset state -- both must fail the build loudly naming the constant, so
 # the two adjacent states can never collapse into each other.
 for BAD_CODE in "$GC_PLACEHOLDER" "Bad/Code" "not valid"; do
-  sed "s|^export const GOATCOUNTER_CODE = '.*';|export const GOATCOUNTER_CODE = '${BAD_CODE}';|" \
-    "$SITE_LIB_BACKUP" > "$SITE_LIB"
-  if npm run build > /tmp/gsd-hardening-d61.log 2>&1; then
-    cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+  if build_in "$T/gc" GOATCOUNTER_CODE="$BAD_CODE" > "$T/d61.log" 2>&1; then
     echo "D-61 FIXTURE FAIL: build succeeded with the site code set to '${BAD_CODE}'"
     exit 1
   fi
-  if ! grep -q "GOATCOUNTER_CODE" /tmp/gsd-hardening-d61.log; then
-    cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+  if ! grep -q "GOATCOUNTER_CODE" "$T/d61.log"; then
     echo "D-61 FIXTURE FAIL: the failure for '${BAD_CODE}' did not name the constant"
     exit 1
   fi
 done
 # D-61 leg 5: a well-formed code builds clean with no warning naming the
 # constant -- the post-signup push must not cry wolf.
-sed "s|^export const GOATCOUNTER_CODE = '.*';|export const GOATCOUNTER_CODE = 'interstellar-smoke';|" \
-  "$SITE_LIB_BACKUP" > "$SITE_LIB"
-if ! npm run build > /tmp/gsd-hardening-d61.log 2>&1; then
-  cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+TEST_CODE="interstellar-smoke"
+if ! build_in "$T/gc" GOATCOUNTER_CODE="$TEST_CODE" > "$T/d61.log" 2>&1; then
   echo "D-61 FIXTURE FAIL: build failed with a well-formed site code"
   exit 1
 fi
-if grep -q "GOATCOUNTER_CODE" /tmp/gsd-hardening-d61.log; then
-  cp "$SITE_LIB_BACKUP" "$SITE_LIB"
+if grep -q "GOATCOUNTER_CODE" "$T/d61.log"; then
   echo "D-61 FIXTURE FAIL: a well-formed site code still produced a warning naming the constant"
   exit 1
 fi
-cp "$SITE_LIB_BACKUP" "$SITE_LIB"
-rm -f "$SITE_LIB_BACKUP"
-trap - EXIT
-if [ "$(git status --porcelain src/)" != "$PRE_SRC_STATUS" ]; then
-  echo "D-61 FIXTURE FAIL: src/ left in a different state than the fixture found it"
-  exit 1
-fi
-echo "D-61 fixture OK: unset/blank warn and build; placeholder/malformed fail loudly; valid is silent; src/ restored"
+echo "D-61 fixture OK: unset/blank warn and build; placeholder/malformed fail loudly; valid is silent"
 
 echo "== ANLT-01/D-62: analytics emission matches the configured state on every page, the 404 included =="
-# Rebuild first: earlier fixtures leave dist/ from a mutated module, and this
-# section's whole point is that dist/ agrees with the module AS COMMITTED.
-npm run build > /dev/null 2>&1
-# sed, not grep -oP: the captured value is legitimately empty while the code
-# is unset, and a zero-length grep match is not a portable exit-0.
-GC_CODE=$(sed -n "s|^export const GOATCOUNTER_CODE = '\(.*\)';\$|\1|p" "$SITE_LIB" | tr -d '[:space:]')
+GC_CODE=$(site_value GOATCOUNTER_CODE | tr -d '[:space:]')
 if [ -n "$GC_CODE" ]; then EXPECTED=1; else EXPECTED=0; fi
 GATE_FAIL=0
 SAW_404=0
@@ -228,13 +192,6 @@ done < <(find dist -name "*.html")
 echo "analytics gating OK (expected $EXPECTED per page, 404 covered)"
 
 echo "== ANLT-01/D-62 fixture: a configured code puts exactly one tag on every page =="
-GC_BACKUP=$(mktemp)
-cp "$SITE_LIB" "$GC_BACKUP"
-trap 'cp "$GC_BACKUP" "$SITE_LIB" 2>/dev/null || true; rm -f "$GC_BACKUP"' EXIT
-TEST_CODE="interstellar-smoke"
-sed "s|^export const GOATCOUNTER_CODE = '.*';|export const GOATCOUNTER_CODE = '${TEST_CODE}';|" \
-  "$GC_BACKUP" > "$SITE_LIB"
-npm run build > /dev/null 2>&1
 SET_FAIL=0
 SET_SAW_404=0
 while IFS= read -r f; do
@@ -256,17 +213,10 @@ while IFS= read -r f; do
     SET_FAIL=1
   fi
   case "$f" in */404.html) SET_SAW_404=1 ;; esac
-done < <(find dist -name "*.html")
-cp "$GC_BACKUP" "$SITE_LIB"
-rm -f "$GC_BACKUP"
-trap - EXIT
+done < <(find "$T/gc/dist" -name "*.html")
 [ "$SET_FAIL" -eq 0 ]
 [ "$SET_SAW_404" -eq 1 ]
-if [ "$(git status --porcelain src/)" != "$PRE_SRC_STATUS" ]; then
-  echo "ANLT-01 FIXTURE FAIL: src/ left in a different state than the fixture found it"
-  exit 1
-fi
-echo "ANLT-01/D-62 fixture OK: one tag everywhere incl. 404, endpoint carries the code, async, empty body; src/ restored"
+echo "ANLT-01/D-62 fixture OK: one tag everywhere incl. 404, endpoint carries the code, async, empty body"
 
 echo "== CONT-06/D-65: redirect stub contract -- root target, noindex, canonical, resolvable destination =="
 # Derive the keys from astro.config.mjs itself (the SITE-02 idiom: no base or
@@ -312,8 +262,5 @@ for REDIRECT_KEY in "${REDIRECT_KEYS[@]}"; do
   fi
 done
 echo "redirect stub contract OK (${#REDIRECT_KEYS[@]} stubs -> $NORMALIZED_BASE)"
-
-echo "== Final clean rebuild: leave dist/ as a plain local build =="
-npm run build > /dev/null
 
 echo "ALL CHECKS PASSED"

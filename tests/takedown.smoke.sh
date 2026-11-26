@@ -5,6 +5,7 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+. tests/helpers/build.sh
 
 BASE=$(grep -oP "^const BASE = '\K[^']+" astro.config.mjs)
 NORMALIZED_BASE="${BASE%/}/"
@@ -27,7 +28,7 @@ REMOVED_PATHS=(
 )
 
 echo "== Build =="
-npm run build
+build_site
 
 echo "== Every removed path builds a stub refreshing to the site root =="
 for path in "${REMOVED_PATHS[@]}"; do

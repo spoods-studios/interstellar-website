@@ -4,13 +4,14 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+. tests/helpers/build.sh
 
 echo "== Positive check: all collections resolve at their exact expected counts =="
 # Counting built dist/ routes catches RESEARCH Pitfall 1 (glob()'s
 # silent-empty-collection landmine): a misconfigured loader base produces zero
 # getCollection() results, so getStaticPaths generates zero pages regardless
 # of how many source files exist on disk.
-npm run build
+build_site
 ROADMAP_COUNT=$(find dist/roadmap -mindepth 2 -maxdepth 2 -name index.html | wc -l)
 PAGES_COUNT=0
 test -f dist/roadmap/index.html && PAGES_COUNT=$((PAGES_COUNT + 1))

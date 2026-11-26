@@ -2,12 +2,12 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+. tests/helpers/build.sh
 
 SITE=$(grep -oP "site:\s*'\K[^']+" astro.config.mjs)
 BASE=$(grep -oP "^const BASE = '\K[^']+" astro.config.mjs)
 NORMALIZED_BASE="${BASE%/}/"
-INVITE=$(grep -oP "^export const DISCORD_INVITE_URL = '\K[^']+" src/lib/site.mjs)
-SITE_LIB="src/lib/site.mjs"
+INVITE=$(site_value DISCORD_INVITE_URL)
 PAGE="dist/feedback/index.html"
 FIXTURE_HOST="feedback-fixture.example.workers.dev"
 FIXTURE_URL="https://${FIXTURE_HOST}/reports"
@@ -18,20 +18,12 @@ main_invites() {
   printf '%s' "$n"
 }
 
-PRE_SRC_STATUS=$(git status --porcelain src/)
-SITE_LIB_BACKUP=$(mktemp)
-cp "$SITE_LIB" "$SITE_LIB_BACKUP"
-trap 'cp "$SITE_LIB_BACKUP" "$SITE_LIB" 2>/dev/null || true; rm -f "$SITE_LIB_BACKUP"' EXIT
-
-set_feedback_url() {
-  sed "s|^export const FEEDBACK_URL = '.*';|export const FEEDBACK_URL = '$1';|" "$SITE_LIB_BACKUP" > "$SITE_LIB"
-  grep -qF "export const FEEDBACK_URL = '$1';" "$SITE_LIB"
-}
+T=$(mktemp -d)
+trap 'rm -rf "$T"' EXIT
 
 echo "== Build with a fixture https FEEDBACK_URL =="
-set_feedback_url "$FIXTURE_URL"
-rm -rf dist
-npm run build
+build_variant "$T/fixture" FEEDBACK_URL="$FIXTURE_URL"
+cd "$T/fixture"
 
 echo "== /feedback/ carries the endpoint, kind choice, a working honeypot and noscript Discord fallback =="
 test -f "$PAGE"
@@ -120,8 +112,8 @@ done < <(find dist -name '*.html')
 echo "feedback nav link OK across $NAV_PAGES pages"
 
 echo "== Build with an empty FEEDBACK_URL: the Discord fallback replaces the form =="
-set_feedback_url ""
-npm run build
+build_variant "$T/empty" FEEDBACK_URL=
+cd "$T/empty"
 test -f "$PAGE"
 if grep -qE '<form\b|<textarea\b' "$PAGE"; then
   echo "FAIL: $PAGE renders the form while FEEDBACK_URL is empty"
@@ -133,13 +125,5 @@ if [ "$EMPTY_MAIN_INVITES" -le "$FORM_MAIN_INVITES" ]; then
   exit 1
 fi
 echo "empty-URL fallback OK"
-
-cp "$SITE_LIB_BACKUP" "$SITE_LIB"
-rm -f "$SITE_LIB_BACKUP"
-trap - EXIT
-if [ "$(git status --porcelain src/)" != "$PRE_SRC_STATUS" ]; then
-  echo "FAIL: src/ left in a different state than the test found it"
-  exit 1
-fi
 
 echo "ALL CHECKS PASSED"

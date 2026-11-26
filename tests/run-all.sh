@@ -9,6 +9,10 @@ cd "$(dirname "$0")/.."
 
 [ $# -gt 0 ] || set -- tests/lib.smoke.mjs tests/*.smoke.sh
 
+SMOKE_RUN_DIR=$(mktemp -d)
+export SMOKE_RUN_DIR
+trap 'rm -rf "$SMOKE_RUN_DIR"' EXIT
+
 for script in "$@"; do
   echo "== running $script =="
   case $script in

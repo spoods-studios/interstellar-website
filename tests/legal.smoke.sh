@@ -2,17 +2,14 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+. tests/helpers/build.sh
 
 LEGAL_FILE="pages/legal/eula.md"
-PRE_PAGES_STATUS=$(git status --porcelain pages/)
 WORK=$(mktemp -d)
-cp "$LEGAL_FILE" "$WORK/legal.md"
-MUTATED=
-trap 'if [ -n "$MUTATED" ]; then cp "$WORK/legal.md" "$LEGAL_FILE"; fi; rm -rf "$WORK"' EXIT
+trap 'rm -rf "$WORK"' EXIT
 
-echo "== Clean build =="
-rm -rf dist
-npm run build
+echo "== Build =="
+build_site
 
 SITE=$(grep -oP "site:\s*'\K[^']+" astro.config.mjs)
 BASE=$(grep -oP "^const BASE = '\K[^']+" astro.config.mjs)
@@ -64,14 +61,14 @@ done < <(find dist -name '*.html')
 echo "Footer legal links OK across $FOOTER_PAGES pages"
 
 echo "== A legal file missing version, then effective, fails the build naming the file =="
-MUTATED=1
+scratch_tree "$WORK/site"
 for FIELD in version effective; do
-  sed "/^${FIELD}:/d" "$WORK/legal.md" > "$LEGAL_FILE"
-  if grep -q "^${FIELD}:" "$LEGAL_FILE"; then
+  sed "/^${FIELD}:/d" "$LEGAL_FILE" > "$WORK/site/$LEGAL_FILE"
+  if grep -q "^${FIELD}:" "$WORK/site/$LEGAL_FILE"; then
     echo "LEGAL FAIL: fixture still sets ${FIELD} in $LEGAL_FILE"
     exit 1
   fi
-  if npm run build > "$WORK/build.log" 2>&1; then
+  if build_in "$WORK/site" > "$WORK/build.log" 2>&1; then
     echo "LEGAL FAIL: build succeeded with ${FIELD} removed from $LEGAL_FILE"
     exit 1
   fi
@@ -80,11 +77,5 @@ for FIELD in version effective; do
     echo "LEGAL FAIL: the build without ${FIELD} did not name $LEGAL_FILE"
     exit 1
   fi
-  cp "$WORK/legal.md" "$LEGAL_FILE"
 done
-
-if [ "$(git status --porcelain pages/)" != "$PRE_PAGES_STATUS" ]; then
-  echo "LEGAL FAIL: pages/ changed by the fixture"
-  exit 1
-fi
 echo "Legal schema fixture OK"

@@ -8,10 +8,10 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+. tests/helpers/build.sh
 
-echo "== Clean build =="
-rm -rf dist
-npm run build
+echo "== Build =="
+build_site
 
 # --- Derive the expected canonical/sitemap URL prefix from astro.config.mjs
 # itself (SITE-02: the site/base live in one config location, never a literal
@@ -115,8 +115,8 @@ process.exit(fails.length ? 1 : 0);
 echo "script allow-list OK"
 
 echo "== Dead-link sweep: every internal href resolves to a real file in dist/ =="
-DEADLINKS_LOG=/tmp/gsd-site-deadlinks.log
-: > "$DEADLINKS_LOG"
+DEADLINKS_LOG=$(mktemp)
+trap 'rm -f "$DEADLINKS_LOG"' EXIT
 while IFS= read -r f; do
   while IFS= read -r href; do
     case "$href" in
@@ -179,8 +179,7 @@ echo "== Diagnostic routes from Plan 02-03 are gone (orchestrator note) =="
 [ ! -d dist/markdown-render-check ]
 echo "diagnostic routes absent OK"
 
-echo "== Final clean rebuild =="
-npm run build
+echo "== The build left the content trees clean =="
 if git status --porcelain roadmap/ pages/ | grep -q .; then
   echo "FAIL: content trees not clean after the build"
   exit 1

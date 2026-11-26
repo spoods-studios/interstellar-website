@@ -4,9 +4,10 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+. tests/helpers/build.sh
 
 echo "== Build =="
-npm run build
+build_site
 
 echo "== Every visible roadmap/*.md builds at dist/roadmap/<id>/ =="
 is_draft() {

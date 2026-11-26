@@ -3,9 +3,10 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+. tests/helpers/build.sh
 
 echo "== Build over the whole corpus =="
-npm run build
+build_site
 
 echo "== Sitemap is emitted with base-prefixed URLs =="
 ls dist/sitemap*.xml >/dev/null

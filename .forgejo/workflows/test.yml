@@ -17,6 +17,6 @@ jobs:
       - uses: https://data.forgejo.org/actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5.1.0
         with:
           persist-credentials: false
-      - run: apt-get update && apt-get install -y --no-install-recommends libxml2-utils
+      - run: apt-get update && apt-get install -y --no-install-recommends libxml2-utils jq
       - run: npm ci --ignore-scripts
       - run: env -u GITHUB_SHA npm test

@@ -2,6 +2,7 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+. tests/helpers/build.sh
 
 echo "== Gate script: submit waits for a valid email and the age box =="
 node --input-type=module -e '
@@ -49,8 +50,7 @@ console.log("newsletter-form OK");
 SITE=$(grep -oP "site:\s*'\K[^']+" astro.config.mjs)
 BASE=$(grep -oP "^const BASE = '\K[^']+" astro.config.mjs)
 NORMALIZED_BASE="${BASE%/}/"
-INVITE=$(grep -oP "^export const DISCORD_INVITE_URL = '\K[^']+" src/lib/site.mjs)
-SITE_LIB="src/lib/site.mjs"
+INVITE=$(site_value DISCORD_INVITE_URL)
 PAGE="dist/newsletter/index.html"
 FIXTURE_URL="https://buttondown.com/api/emails/embed-subscribe/fixture-user"
 
@@ -60,20 +60,12 @@ region_invites() {
   printf '%s' "$n"
 }
 
-PRE_SRC_STATUS=$(git status --porcelain src/)
-SITE_LIB_BACKUP=$(mktemp)
-cp "$SITE_LIB" "$SITE_LIB_BACKUP"
-trap 'cp "$SITE_LIB_BACKUP" "$SITE_LIB" 2>/dev/null || true; rm -f "$SITE_LIB_BACKUP"' EXIT
-
-set_newsletter_url() {
-  sed "s|^export const NEWSLETTER_URL = '.*';|export const NEWSLETTER_URL = '$1';|" "$SITE_LIB_BACKUP" > "$SITE_LIB"
-  grep -qF "export const NEWSLETTER_URL = '$1';" "$SITE_LIB"
-}
+T=$(mktemp -d)
+trap 'rm -rf "$T"' EXIT
 
 echo "== Build with a fixture Buttondown NEWSLETTER_URL =="
-set_newsletter_url "$FIXTURE_URL"
-rm -rf dist
-npm run build
+build_variant "$T/fixture" NEWSLETTER_URL="$FIXTURE_URL"
+cd "$T/fixture"
 
 echo "== Every footer and /newsletter/ carry a native form posting to the fixture =="
 test -f "$PAGE"
@@ -163,8 +155,8 @@ fi
 echo "sitemap and redirects OK"
 
 echo "== Build with an empty NEWSLETTER_URL: the Discord fallback replaces the forms =="
-set_newsletter_url ""
-npm run build
+build_variant "$T/empty" NEWSLETTER_URL=
+cd "$T/empty"
 test -f "$PAGE"
 if grep -rlP '<form\b[^>]*\b(method="post"|action=)' dist --include='*.html'; then
   echo "FAIL: a page renders a posting form while NEWSLETTER_URL is empty"
@@ -177,13 +169,5 @@ if [ "$EMPTY_FOOTER_INVITES" -lt 1 ] || [ "$EMPTY_MAIN_INVITES" -lt 1 ]; then
   exit 1
 fi
 echo "empty-URL fallback OK"
-
-cp "$SITE_LIB_BACKUP" "$SITE_LIB"
-rm -f "$SITE_LIB_BACKUP"
-trap - EXIT
-if [ "$(git status --porcelain src/)" != "$PRE_SRC_STATUS" ]; then
-  echo "FAIL: src/ left in a different state than the test found it"
-  exit 1
-fi
 
 echo "ALL CHECKS PASSED"
