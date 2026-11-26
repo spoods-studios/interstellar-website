@@ -58,7 +58,7 @@ fail() {
 for i in $(seq 1 "$PROBE_ATTEMPTS"); do
   # A curl failure (DNS, 404, 5xx) is treated the same as stale content:
   # not fresh yet, keep probing -- never converted into a pass.
-  if curl -fsSL "${BASE_URL}${BUST}" | grep -q "$STAMP"; then
+  if body=$(curl -fsSL "${BASE_URL}${BUST}") && grep -qF "$STAMP" <<<"$body"; then
     echo "fresh after ${i} probe(s): ${BASE_URL} serves build-sha ${EXPECTED_SHA}"
     break
   fi
