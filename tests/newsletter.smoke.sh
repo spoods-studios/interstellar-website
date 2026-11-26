@@ -156,8 +156,8 @@ if ! grep -qF "<loc>${SITE}${NORMALIZED_BASE}newsletter/</loc>" "$SITEMAP_FILE";
   echo "FAIL: ${SITE}${NORMALIZED_BASE}newsletter/ missing from $SITEMAP_FILE"
   exit 1
 fi
-if sed -n '/^const SLUG_REDIRECTS = {/,/^};/p' astro.config.mjs | grep -qP "^\s*'/newsletter/?'"; then
-  echo "FAIL: /newsletter/ is a SLUG_REDIRECTS key"
+if grep -q 'http-equiv="refresh"' "$PAGE"; then
+  echo "FAIL: /newsletter/ is a redirect stub"
   exit 1
 fi
 echo "sitemap and redirects OK"

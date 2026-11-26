@@ -156,8 +156,7 @@ echo "dead-link sweep OK (zero dead internal targets)"
 
 echo "== Expected total page count sanity check (content trees + indexes + standalone + error pages) =="
 # Composed by tests/helpers/content-expectations.mjs from the roadmap tree
-# plus the route-shaped structural singletons (roadmap overview, homepage,
-# 404, feedback) -- see its site_page_count derivation for the exact arithmetic. The
+# plus the non-dynamic routes under src/pages/ -- see its site_page_count derivation for the exact arithmetic. The
 # devlog and How It's Made were taken down (SSC-07); their paths build only
 # redirect stubs, which the count excludes. The two Plan 02-03 diagnostic routes (collection-counts.json.ts,
 # markdown-render-check.astro) are already deleted, so they're not counted.
